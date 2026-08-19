@@ -4,7 +4,9 @@
 minimumReleaseAge: 4320
 
 # 빌드 스크립트(postinstall) 실행이 필요한 패키지는 여기 명시적으로 허용한다. 없는 패키지는 스크립트가 실행되지 않는다
-onlyBuiltDependencies: []
+onlyBuiltDependencies:
+  # Sentry CLI 바이너리 다운로드 — 배포 빌드의 소스맵 업로드에 필요
+  - '@sentry/cli'
 
 # 빌드 스크립트 경고를 내지 않을 패키지 (create-next-app 기본값)
 ignoredBuiltDependencies:
