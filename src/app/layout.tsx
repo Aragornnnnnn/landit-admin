@@ -3,6 +3,10 @@ import type { Metadata } from 'next';
 
 import './globals.css';
 
+// 모든 페이지를 요청 시 렌더한다 — CSP nonce가 요청마다 달라 정적 프리렌더와 양립하지 않는다 (src/proxy.ts).
+// 어드민은 공개 정적 페이지가 없어 잃는 것도 없다
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Landit 어드민',
   // 어드민은 검색에 안 잡히게 한다 (robots.txt와 함께 이중으로)
