@@ -38,7 +38,19 @@ export function decideRouteGuard({
  */
 export function safeNextPath(next: string | null | undefined): string {
   if (!next || !next.startsWith('/')) return '/';
-  if (next.startsWith('//') || next.includes('\\')) return '/';
-  if (next === LOGIN_PATH || next.startsWith(`${LOGIN_PATH}?`)) return '/';
-  return next;
+  // 문자열 검사만으로는 부족하다 — URL 파서는 탭·개행을 지우고(`/\t/evil` → `//evil`), `\`를 `/`로 읽는다.
+  // 제어 문자는 거부하고, 실제 해석 결과의 origin이 기준과 같은지로 판정한 뒤 해석된 경로를 돌려준다
+  if (/[\u0000-\u001F\u007F]/.test(next)) return '/';
+  let parsed: URL;
+  try {
+    parsed = new URL(next, 'http://n');
+  } catch {
+    return '/';
+  }
+  if (parsed.origin !== 'http://n') return '/';
+  const resolved = parsed.pathname + parsed.search + parsed.hash;
+  if (resolved === LOGIN_PATH || resolved.startsWith(`${LOGIN_PATH}?`)) {
+    return '/';
+  }
+  return resolved;
 }
