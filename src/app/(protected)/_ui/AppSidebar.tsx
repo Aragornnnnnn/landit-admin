@@ -27,16 +27,17 @@ import {
 } from '@/shared/ui/sidebar';
 
 import { isActiveNav, isDevelopServer, NAV_GROUPS } from '../_model/navigation';
+import { useAccountNickname } from '../_model/useAccountNickname';
 import { useLogout } from '../_model/useLogout';
 import { usePendingFeedbackCountQuery } from '../_model/usePendingFeedbackCountQuery';
 
 interface AppSidebarProps {
   apiHost: string;
-  nickname: string | null;
 }
 
-export function AppSidebar({ apiHost, nickname }: AppSidebarProps) {
+export function AppSidebar({ apiHost }: AppSidebarProps) {
   const pathname = usePathname();
+  const nickname = useAccountNickname();
   const { isMobile, setOpenMobile } = useSidebar();
   const developServer = isDevelopServer(apiHost);
   const pendingCount = usePendingFeedbackCountQuery();

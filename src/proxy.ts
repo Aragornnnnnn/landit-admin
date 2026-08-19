@@ -2,13 +2,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { decideRouteGuard } from '@/shared/auth/route-guard';
-import { sessionCookieNames } from '@/shared/auth/session-cookie';
+import { currentSessionCookieConfig } from '@/shared/auth/session-cookie';
 import { buildContentSecurityPolicy } from '@/shared/security/csp';
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  // 쿠키 존재만 본다 — 만료·위조는 첫 프록시 호출에서 BE가 401로 가른다
-  const names = sessionCookieNames(process.env.NODE_ENV === 'production');
+  // 쿠키 존재만 본다 — 만료·위조는 첫 프록시 호출에서 BE가 401로 가른다. 이름은 route handler와 같은 한 곳에서 계산한다
+  const { names } = currentSessionCookieConfig();
   const decision = decideRouteGuard({
     pathname,
     search,
