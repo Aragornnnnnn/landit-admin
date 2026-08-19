@@ -1,6 +1,6 @@
 'use client';
 
-// 전역 에러 바운더리 — 렌더 중 예외가 나면 흰 화면 대신 복구 화면을 보여주고 Sentry로 보낸다
+// 전역 에러 바운더리 — 렌더 중 예외가 나면 흰 화면 대신 복구 화면을 보여주고 보고한다
 import { useEffect } from 'react';
 
 import { reportError } from '@/shared/monitoring/report';

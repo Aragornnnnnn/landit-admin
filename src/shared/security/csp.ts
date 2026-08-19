@@ -2,7 +2,7 @@
 
 // 스크립트·연결·이미지·프레임을 허용할 외부 오리진. 로그인 SDK(카카오·구글)는 로그인 PR에서 여기 추가한다
 const SCRIPT_ORIGINS: string[] = [];
-const CONNECT_ORIGINS: string[] = ['https://*.ingest.sentry.io'];
+const CONNECT_ORIGINS: string[] = [];
 const IMG_ORIGINS: string[] = [];
 const FRAME_ORIGINS: string[] = [];
 

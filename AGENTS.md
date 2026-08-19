@@ -17,7 +17,7 @@ Landit 운영자용 내부 어드민. 사용자 웹(landit.im, 레포 landit-fe)
 
 ## 스택과 구조
 
-Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui, TanStack Query, Sentry, Vitest). 단일 앱 — 모노레포 아님.
+Next.js 16 (App Router, TypeScript, Tailwind v4, shadcn/ui, TanStack Query, Vitest). 단일 앱 — 모노레포 아님.
 
 `src`는 landit-fe(apps/web)와 **같은 3층**이다. `app`(라우트·화면) → `features`(도메인) → `shared`(전역 인프라). import는 위에서 아래로만 흐른다. 자세한 규칙은 [docs/structure.md](docs/structure.md).
 
@@ -77,7 +77,7 @@ pnpm api:types        # 스웨거 → src/shared/api/schema.d.ts 재생성 (BE �
 
 **세션·토큰**
 
-- access/refresh 토큰은 브라우저 JS에 절대 노출하지 않는다. `/api/auth/*` route handler가 `__Host-` 접두사 쿠키(`httpOnly; Secure; SameSite=Strict; Path=/`)로만 저장한다. localStorage·sessionStorage·zustand persist·`NEXT_PUBLIC_*`·URL·Sentry extra에 토큰 금지.
+- access/refresh 토큰은 브라우저 JS에 절대 노출하지 않는다. `/api/auth/*` route handler가 `__Host-` 접두사 쿠키(`httpOnly; Secure; SameSite=Strict; Path=/`)로만 저장한다. localStorage·sessionStorage·zustand persist·`NEXT_PUBLIC_*`·URL·로그에 토큰 금지.
 - 토큰 갱신은 서버(프록시 route handler)에서만 한다. 갱신 실패 = 쿠키 삭제 + 401 → 클라이언트는 `/login`으로.
 - 로그아웃은 BE `/auth/logout`(refresh 무효화) + 쿠키 삭제 + TanStack Query 캐시 clear를 **반드시 함께** 한다. 캐시만 남으면 다음 계정에 이전 데이터가 보인다.
 - "로그인 유지" 같은 장기 세션을 만들지 않는다. refresh 만료(BE 설정)가 세션 끝이다.
@@ -97,20 +97,20 @@ pnpm api:types        # 스웨거 → src/shared/api/schema.d.ts 재생성 (BE �
 **입력·출력**
 
 - 서버 데이터를 `dangerouslySetInnerHTML`로 넣지 않는다. 편지 contentBlocks는 블록 타입별 컴포넌트로만 렌더하고, 모르는 타입은 렌더하지 않는다.
-- 이미지 업로드는 클라이언트에서 MIME·확장자·크기(10 MiB)를 사전 검증하고 BE presigned URL로만 올린다. presigned URL은 로그·상태·Sentry에 남기지 않는다.
+- 이미지 업로드는 클라이언트에서 MIME·확장자·크기(10 MiB)를 사전 검증하고 BE presigned URL로만 올린다. presigned URL은 로그·상태에 남기지 않는다.
 - 되돌릴 수 없는 작업(일괄 답장·발행·숨기기·앱 버전 저장)은 AlertDialog로 확인받고, 대상 건수·내용을 확인창에 보여준다.
 - 오류 메시지는 BE `error.message`까지만 노출한다. 스택·내부 URL·요청 ID 외 상세는 UI에 안 보인다.
 
 **비밀·환경**
 
-- `NEXT_PUBLIC_` 접두사는 공개돼도 되는 값만(API host, 소셜 client id, Sentry DSN). client secret·Sentry auth token·기타 비밀은 서버 전용 env. `.env.local`은 gitignore, 실제 값은 Vercel 환경변수에만.
+- `NEXT_PUBLIC_` 접두사는 공개돼도 되는 값만(API host, 소셜 client id). client secret·기타 비밀은 서버 전용 env. `.env.local`은 gitignore, 실제 값은 Vercel 환경변수에만.
 - 환경별로 BE를 분리한다. 프로덕션 배포만 프로덕션 BE를 본다. Preview·로컬은 develop BE.
-- 로그(서버 console·Sentry)에 `Authorization` 헤더·쿠키·이메일·닉네임·피드백 원문을 남기지 않는다. Sentry는 `sendDefaultPii: false`, `maskAllText`.
+- 로그(서버 console)에 `Authorization` 헤더·쿠키·이메일·닉네임·피드백 원문을 남기지 않는다. 외부 에러 수집기는 두지 않는다(내부 도구) — 붙이게 되면 요청 헤더·쿠키가 이벤트에 실리지 않게 먼저 막는다.
 
 **헤더·외부 코드**
 
 - 보안 헤더(CSP·HSTS·`frame-ancestors 'none'`·`X-Content-Type-Options`·`Referrer-Policy`·`Permissions-Policy`)는 `next.config.ts` headers()에 있다. 외부 스크립트·도메인을 추가하면 CSP를 같이 갱신하고 `docs/security.md`에 적는다.
-- 외부 스크립트는 Sentry, 카카오·구글 로그인 SDK(로그인 페이지에서만)뿐이다. 분석·채팅 위젯·CDN 스크립트를 넣지 않는다.
+- 외부 스크립트는 카카오·구글 로그인 SDK(로그인 페이지에서만)뿐이다. 분석·채팅 위젯·CDN 스크립트를 넣지 않는다.
 - `robots.txt` Disallow all + metadata `noindex`. 어드민 URL은 검색에 안 잡힌다.
 
 **의존성**
@@ -118,9 +118,9 @@ pnpm api:types        # 스웨거 → src/shared/api/schema.d.ts 재생성 (BE �
 - 새 의존성은 PR에 이유를 적는다. `pnpm audit --prod`가 CI에서 돈다. `.npmrc`의 `minimum-release-age`(공개 후 며칠 지난 버전만 설치)를 끄지 않는다. lockfile은 `--frozen-lockfile`.
 - 빌드 스크립트(postinstall) 실행이 필요한 패키지는 `pnpm-workspace.yaml`의 `onlyBuiltDependencies`에 명시적으로 허용한다.
 
-**Sentry**
+**보고**
 
-- `shared/monitoring/report.ts`(`reportError`/`reportWarning`)로만 부른다. `@sentry/nextjs` 직접 import는 instrumentation·config 파일에만.
+- 실패 보고는 `shared/monitoring/report.ts`(`reportError`/`reportWarning`)로만 한다. 지금은 콘솔, 수집기를 붙이면 그 파일만 바꾼다.
 
 ## PR 쪼개기
 
@@ -134,7 +134,7 @@ PR = 노션 이슈 1개 = 한 문장으로 설명되는 변경. 코드 추가 50
 | 1   | 스펙 문서            | `docs/admin-spec.md` · `docs/screens/*.md` · `docs/security.md` · `docs/auth.md` · `docs/structure.md` · `docs/testing.md`. 코드 없음    |
 | 2   | API 타입 생성        | `pnpm api:types` 스크립트 · `schema.d.ts` · `schema-patch.ts`                                                                            |
 | 3   | 디자인 토큰 · shadcn | `globals.css` 토큰 · 폰트 · shadcn 초기화 + 컴포넌트                                                                                     |
-| 4   | 보안 기반            | `next.config.ts` 헤더 · `robots.txt`/noindex · Sentry · `monitoring/report.ts`                                                           |
+| 4   | 보안 기반            | `next.config.ts` 헤더 · CSP · `monitoring/report.ts`                                                                                     |
 | 5   | BFF 프록시           | `shared/api/{client,parse,api-error}` · `app/api/proxy/[...path]` (쿠키→Bearer · 화이트리스트 · CSRF 검사 · refresh · no-store) + 테스트 |
 | 6   | 로그인·세션          | `app/api/auth/*` · `shared/auth/*`(PKCE·카카오·구글) · `proxy.ts` 가드 · `/login` 화면 · 관리자 아님 화면                                |
 | 7   | 셸                   | 사이드바 · 모바일 드로어 · 상단바 · 공통 상태 UI(스켈레톤·빈 상태·인라인 오류·토스트·확인창)                                             |

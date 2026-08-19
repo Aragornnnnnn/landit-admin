@@ -8,7 +8,7 @@ Landit 운영자용 어드민. 피드백 답장, 공지·업데이트 편지 발
 
 ## 스택
 
-Next.js 16 (App Router) · TypeScript · Tailwind v4 · shadcn/ui · TanStack Query · Sentry · Vitest. 단일 앱(모노레포 아님).
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · shadcn/ui · TanStack Query · Vitest. 단일 앱(모노레포 아님).
 
 ## 요구사항
 
@@ -44,7 +44,7 @@ pnpm api:types    # 스웨거 → src/shared/api/schema.d.ts 재생성
 src/
 ├── app/            라우트·화면. (public)/login · (protected)/* · api/{auth,proxy}
 ├── features/       두 라우트 이상이 공유하는 도메인 코드
-├── shared/         api · auth · ui · monitoring · lib
+├── shared/         api · auth · ui · security · monitoring · lib
 └── proxy.ts        라우트 가드
 docs/               스펙·보안·인증·구조·테스트 문서 — 코드보다 문서가 기준
 ```
@@ -55,7 +55,7 @@ docs/               스펙·보안·인증·구조·테스트 문서 — 코드�
 
 - 토큰은 브라우저 JS에 노출되지 않는다 — `httpOnly` 쿠키에만 있고, BE 호출은 `/api/proxy/*` route handler가 쿠키를 Bearer로 바꿔 전달한다
 - 인가(관리자 여부)는 백엔드가 판정한다. 프론트 가드는 UX일 뿐이다
-- 보안 헤더(CSP·HSTS·frame-ancestors) · noindex · `Cache-Control: no-store` · Sentry PII 마스킹
+- 보안 헤더(CSP·HSTS·frame-ancestors) · noindex · `Cache-Control: no-store`
 - 되돌릴 수 없는 작업은 확인창을 거친다
 
 자세한 위협 모델과 규칙은 [docs/security.md](docs/security.md).

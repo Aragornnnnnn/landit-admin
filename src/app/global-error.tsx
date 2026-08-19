@@ -1,6 +1,6 @@
 'use client';
 
-// 루트 레이아웃까지 죽었을 때의 최후 방어선 — 스타일 시트 없이도 그려지도록 인라인 스타일만 쓴다
+// 루트 레이아웃까지 죽었을 때의 최후 방어선 — 스타일 시트 없이도 그려지도록 인라인 스타일만 쓴다. 보고는 report.ts로
 import { useEffect } from 'react';
 
 import { reportError } from '@/shared/monitoring/report';
