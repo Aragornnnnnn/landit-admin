@@ -9,7 +9,12 @@ interface ApiBody {
 
 // 호스트·쿼리를 떼고 경로만 — 같은 API 실패를 한 태그로 모은다
 function endpointOf(response: Response): string {
-  return new URL(response.url).pathname;
+  try {
+    return new URL(response.url).pathname;
+  } catch {
+    // url이 없는 Response(직접 만든 객체)면 빈 값 — 태그만 비고 파싱은 계속한다
+    return response.url || '';
+  }
 }
 
 /**

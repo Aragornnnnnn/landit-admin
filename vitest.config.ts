@@ -14,6 +14,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,
+      // server-only는 React 서버 조건 밖(테스트)에서 import하면 throw한다 — 빈 모듈로 대체
+      'server-only': new URL('./vitest.server-only.ts', import.meta.url)
+        .pathname,
     },
   },
 });
