@@ -50,7 +50,7 @@ export function LoginCard({
           loading={pending === 'kakao'}
           disabled={disabled}
           onClick={() => onLogin('kakao')}
-          className="bg-[#FEE500] text-[#191919] hover:bg-[#f5dc00]"
+          className="bg-kakao text-kakao-foreground hover:brightness-95"
         />
         <ProviderButton
           label="Google로 로그인"

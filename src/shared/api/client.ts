@@ -1,9 +1,10 @@
 // API 호출 진입점 — api.get/post/… 로 부르면 같은 오리진 프록시(/api/proxy)로 보낸다. 토큰은 쿠키에 있어 클라이언트는 모른다
+import { isPublicPath, loginRedirectPath } from '@/shared/auth/route-guard';
+
 import { ApiError } from './api-error';
 import { parseApiResponse } from './parse';
 
 const PROXY_PREFIX = '/api/proxy';
-const LOGIN_PATH = '/login';
 
 /**
  * API 호출 진입점. 경로는 BE 경로 그대로(`/api/v1/admin/users`) 쓰면 프록시가 붙여 보낸다.
@@ -44,15 +45,16 @@ async function request<T>(
     );
   }
 
-  return parseApiResponse<T>(response);
+  return parseApiResponse<T>(response, path.split('?')[0]);
 }
 
-// 전체 페이지 이동 — 메모리(React Query 캐시·상태)가 통째로 비워져 다음 계정에 이전 데이터가 남지 않는다
+// 전체 페이지 이동 — 메모리(React Query 캐시·상태)가 통째로 비워져 다음 계정에 이전 데이터가 남지 않는다.
+// 로그인·콜백(공개 경로)에서 난 401은 그 화면이 스스로 처리한다 — 여기서 이동하면 콜백 URL이 next에 담겨 되돌아온다
 function redirectToLogin() {
   if (typeof window === 'undefined') return;
-  if (window.location.pathname === LOGIN_PATH) return;
+  if (isPublicPath(window.location.pathname)) return;
   const next = window.location.pathname + window.location.search;
-  const url = new URL(LOGIN_PATH, window.location.origin);
-  url.searchParams.set('next', next);
-  window.location.assign(url.href);
+  window.location.assign(
+    new URL(loginRedirectPath(next), window.location.origin).href,
+  );
 }
