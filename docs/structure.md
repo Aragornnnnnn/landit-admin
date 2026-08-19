@@ -19,8 +19,8 @@ app/
 ├── layout.tsx                루트 — lang·metadata(noindex)·globals.css·QueryClientProvider·Toaster
 ├── robots.ts
 ├── (public)/
-│   └── login/                page.tsx · _ui/(로그인 카드·관리자 아님) · _model/(로그인 흐름 훅)
-│       └── auth/[provider]/callback/   소셜 로그인 콜백 (필요 시)
+│   ├── login/                page.tsx · _ui/(LoginCard·SocialIcons) · _model/(useSocialLogin·useForbiddenNotice)
+│   └── auth/[provider]/callback/   page.tsx(조립) · _model/complete-social-login.ts(흐름, 순수) · _model/login-gateway.ts(HTTP 배선)
 ├── (protected)/
 │   ├── layout.tsx            셸 — SidebarProvider·사이드바·상단바. 인증 판단은 proxy.ts가 이미 했다
 │   ├── _ui/                  셸 컴포넌트(AppSidebar·MobileDrawer·TopBar·AccountMenu·ServerCard)
@@ -32,9 +32,10 @@ app/
 │   ├── app-versions/         page.tsx · _ui/ · _model/
 │   └── scenario-test/        page.tsx · _ui/ · _model/
 └── api/
-    ├── auth/social-login/route.ts    BE 토큰 → 쿠키
-    ├── auth/logout/route.ts
-    └── proxy/[...path]/route.ts      쿠키 → Bearer, 화이트리스트, CSRF, refresh, no-store
+    ├── _model/                       route handler 공통 — backend.ts(BE 배선·타임아웃) · respond.ts(응답 봉투) · token-response.ts
+    ├── auth/_model/session-handlers.ts   로그인·로그아웃 본체
+    ├── auth/{social-login,logout,oauth-token}/route.ts   위임만
+    └── proxy/[...path]/{route.ts, _model/forward-to-backend.ts}   쿠키 → Bearer, 화이트리스트, CSRF, refresh, no-store
 ```
 
 - 라우트 그룹은 **접근 조건**으로 가른다 — `(public)` 비로그인 접근 가능, `(protected)` 세션 쿠키 필요(`proxy.ts`가 리다이렉트).
@@ -69,7 +70,7 @@ shared/
 ├── api/         client.ts(api.get/post/…) · parse.ts(BE 응답 봉투) · api-error.ts · schema.d.ts(생성) · schema-patch.ts · query-client.ts
 ├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · clear-session.ts
 ├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(EmptyState·InlineError·StatusChip·PageHeader)
-├── security/    csp.ts
+├── security/    csp.ts · same-origin.ts(CSRF 판정 — 프록시·auth 공용)
 ├── monitoring/  report.ts(reportError·reportWarning — 지금은 콘솔)
 └── lib/         이름 붙일 주제가 없는 범용 유틸·훅만
 ```

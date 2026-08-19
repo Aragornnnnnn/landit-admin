@@ -155,9 +155,16 @@ PR = 노션 이슈 1개 = 한 문장으로 설명되는 변경. 코드 추가 50
 
 ## 컨벤션
 
+코드 품질 기준은 [Frontend Fundamentals](https://frontend-fundamentals.com/code-quality/)(토스)를 따른다. 리뷰에서 "왜 이렇게 갈랐나"를 물을 때의 어휘다.
+
+- **가독성** — 같이 실행되지 않는 코드는 한 함수에 섞지 않는다(제공자별·상태별로 가른다). 복잡한 조건·매직 넘버엔 이름을 붙인다(`REFRESH_GRACE_MS`, `isPublicPath`). 위에서 아래로 읽히게 — 호출 순서대로 배치하고 시점 이동을 줄인다.
+- **예측 가능성** — 같은 이름엔 같은 동작(서버 `establishSocialSession` vs 콜백 `completeSocialLogin`처럼 다른 일은 다른 이름). 같은 종류의 함수는 같은 반환 형태(route handler 응답은 전부 `apiSuccess`/`apiFailure` 봉투). 숨은 부수효과를 만들지 않는다 — `api.get`이 401에 페이지를 이동시키는 건 문서화된 예외다.
+- **응집도** — 함께 바뀌는 것은 한 자리에(쿠키 이름·속성은 `session-cookie.ts`, CSRF 판정은 `security/same-origin.ts`, BE 배선은 `app/api/_model/backend.ts`). 라우트 전용 로직은 그 라우트의 `_model/`.
+- **결합도** — 책임은 하나씩(페이지는 조립만, 흐름은 `_model`, HTTP 배선은 gateway). 한두 번의 중복은 섣부른 추상화보다 낫다 — 세 번째가 생길 때 뽑는다. Props drilling은 훅을 쓰는 곳으로 내려 끊는다.
+
 - 포맷·import 순서는 Prettier가 처리한다(`.prettierrc`). 수동 정렬 금지.
 - **수동 메모이제이션(useCallback/useMemo/React.memo) 금지** — React Compiler가 켜져 있다.
-- 색·간격은 `globals.css` 토큰만 쓴다(사용자 웹과 동일, 페이지 배경만 `#F9FAFB`). 임의 hex 금지. 색은 회색·검정 + 오렌지(주 행동·선택·처리중), 빨강은 파괴적 행동·오류에만.
+- 색·간격은 `globals.css` 토큰만 쓴다(사용자 웹과 동일, 페이지 배경만 `#F9FAFB`). 임의 hex 금지. 예외 둘 — 소셜 브랜드 색은 토큰으로 등록해 쓴다(`--kakao`, `SocialIcons`의 규정 색), `global-error.tsx`는 스타일시트 없이 그려져야 해서 토큰 값을 인라인으로 베낀다(값을 바꾸면 같이 바꾼다). 색은 회색·검정 + 오렌지(주 행동·선택·처리중), 빨강은 파괴적 행동·오류에만.
 - 반응형은 라우트 분기 없이 같은 데이터 컴포넌트가 breakpoint로 테이블/카드만 바꾼다. 목록 필터·페이지·열린 상세는 쿼리스트링에 둔다.
 - 공통 상태(로딩 스켈레톤·빈 상태·인라인 오류·토스트·확인창)는 `docs/admin-spec.md`의 규칙을 따른다.
 

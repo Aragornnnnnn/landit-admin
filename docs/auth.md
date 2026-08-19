@@ -8,15 +8,15 @@
 
 ## 등장인물
 
-| 이름                          | 위치                              | 역할                                                                                               |
-| ----------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| 로그인 화면                   | `app/(public)/login` (클라이언트) | 카카오·구글 웹 로그인 시작·콜백 처리 → `id_token`·`nonce` 획득                                     |
-| `POST /api/auth/social-login` | route handler (서버)              | `id_token`을 BE `/api/v1/auth/social-login`에 전달 → 토큰 응답을 쿠키로 저장. 응답 body엔 `user`만 |
-| `POST /api/auth/logout`       | route handler (서버)              | BE `/api/v1/auth/logout` 호출 + 쿠키 삭제                                                          |
-| `/api/proxy/[...path]`        | route handler (서버)              | 쿠키 → Bearer, 화이트리스트, CSRF 검사, 401 시 refresh 1회, `no-store`                             |
-| `src/proxy.ts`                | Next 16 Proxy(구 middleware)      | 세션 쿠키 없이 `(protected)` 경로 접근 → `/login?next=` 리다이렉트. UX 가드                        |
-| `shared/api/client.ts`        | 클라이언트                        | `api.get/post/…` → `/api/proxy/…` 호출. 401 → `/login`, 403 → 관리자 아님 화면                     |
-| BE `AdminAuthorizationFilter` | landit-be                         | `/api/v1/admin/**`에서 role=ADMIN 아니면 403. **유일한 인가**                                      |
+| 이름                          | 위치                              | 역할                                                                                                                      |
+| ----------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 로그인 화면                   | `app/(public)/login` (클라이언트) | 카카오·구글 웹 로그인 시작·콜백 처리 → `id_token`·`nonce` 획득                                                            |
+| `POST /api/auth/social-login` | route handler (서버)              | `id_token`을 BE `/api/v1/auth/social-login`에 전달 → 토큰 응답을 쿠키로 저장. 응답 body엔 `{ success, data: { user } }`만 |
+| `POST /api/auth/logout`       | route handler (서버)              | BE `/api/v1/auth/logout` 호출 + 쿠키 삭제                                                                                 |
+| `/api/proxy/[...path]`        | route handler (서버)              | 쿠키 → Bearer, 화이트리스트, CSRF 검사, 401 시 refresh 1회, `no-store`                                                    |
+| `src/proxy.ts`                | Next 16 Proxy(구 middleware)      | 세션 쿠키 없이 `(protected)` 경로 접근 → `/login?next=` 리다이렉트. UX 가드                                               |
+| `shared/api/client.ts`        | 클라이언트                        | `api.get/post/…` → `/api/proxy/…` 호출. 401 → `/login`, 403 → 관리자 아님 화면                                            |
+| BE `AdminAuthorizationFilter` | landit-be                         | `/api/v1/admin/**`에서 role=ADMIN 아니면 403. **유일한 인가**                                                             |
 
 ## 시퀀스
 
@@ -29,7 +29,7 @@ route handler ── POST {API_BASE_URL}/api/v1/auth/social-login ──▶ BE
 BE ──▶ {accessToken, accessTokenExpiresIn, refreshToken, refreshTokenExpiresIn, user}
 route handler ──▶ Set-Cookie: __Host-landit-admin-access (Max-Age=accessTokenExpiresIn)
                ──▶ Set-Cookie: __Host-landit-admin-refresh (Max-Age=refreshTokenExpiresIn)
-               ──▶ body: {user}   (토큰 없음)
+               ──▶ body: { success: true, data: { user } }   (토큰 없음)
 브라우저 ── router.replace(next ?? '/')
 (protected) 첫 화면 ── GET /api/proxy/api/v1/admin/… ──▶ 200 → 관리자 / 403 → "관리자 아님" 화면
 ```
@@ -45,12 +45,12 @@ proxy ── 경로 화이트리스트 확인 · (변경 요청이면) Sec-Fetch
 proxy ── Authorization: Bearer <access 쿠키> ──▶ BE
 BE ──▶ 200 → proxy ──▶ 200 + Cache-Control: no-store (body 그대로)
 BE ──▶ 401 → proxy ── POST /auth/token/refresh {refreshToken 쿠키} ──▶ BE
-        ├ 성공 → 새 쿠키 Set-Cookie + 원 요청 재시도 1회 → 그 결과 전달
-        └ 실패 → 두 쿠키 삭제 + 401 → 클라이언트 clearSession() + /login
+        ├ 성공 → 새 쿠키 Set-Cookie + 원 요청 재시도 1회 → 그 결과 전달 (재시도도 401이면 쿠키 삭제 + 401 — 루프 방지)
+        └ 실패 → 두 쿠키 삭제 + 401 → 클라이언트 /login
 BE ──▶ 403 → proxy ──▶ 403 → 클라이언트 "관리자 아님" 화면
 ```
 
-- 동시에 여러 요청이 401을 받으면 refresh가 여러 번 나갈 수 있다 — BE refresh가 회전(rotation)형이면 뒤의 것이 실패한다. 프록시 인스턴스 안에서는 진행 중인 refresh Promise를 공유하고, 인스턴스 간 경합은 "실패 → 재로그인"으로 감내한다(어드민 트래픽 규모에서 충분). BE 회전 여부는 구현 PR에서 확인.
+- BE refresh는 회전(rotation)형이다 — 같은 refresh 토큰으로 두 번 갱신하면 두 번째는 실패한다. 프록시는 옛 토큰을 키로 갱신 결과를 30초 기억해(`REFRESH_GRACE_MS`), 브라우저가 새 쿠키를 받기 전에 옛 토큰으로 들어온 형제 요청도 같은 새 토큰을 쓴다. 인스턴스 간(서버리스 여러 대) 경합은 "실패 → 재로그인"으로 감내한다(어드민 트래픽 규모에서 충분).
 
 ### 로그아웃
 
@@ -70,7 +70,7 @@ route handler ── POST BE /auth/logout {refreshToken 쿠키} (실패해도 �
 ```
 
 - 쿠키 **존재**만 본다. 유효성은 BE가 판정한다(만료 쿠키로 들어와도 첫 프록시 호출이 401 → refresh 또는 /login).
-- `next`는 `/`로 시작하고 `//`·`\`·스킴이 없는 상대 경로만 허용. 아니면 `/`.
+- `next`는 `new URL`로 해석해 같은 오리진이고 공개 경로(`/login`·`/auth/*`)가 아닐 때만 허용. 아니면 `/`. 제어 문자(탭·개행)는 거부 — URL 파서가 지워 `//evil`로 읽힌다.
 
 ## 쿠키 속성
 
@@ -84,11 +84,11 @@ route handler ── POST BE /auth/logout {refreshToken 쿠키} (실패해도 �
 ## 클라이언트가 아는 것
 
 - 로그인 여부: 몰라도 된다. `(protected)`에 들어왔다는 것 자체가 `proxy.ts`를 통과했다는 뜻이고, 첫 쿼리 401이 세션 만료 신호다.
-- 내 계정 표시(사이드바 이름·아바타): `social-login` 응답의 `user`를 메모리(React state 또는 Query 캐시)에 둔다. 새로고침하면 사라지므로 `/auth/me` API가 생기기 전까진 프록시 첫 응답에서 다시 못 채운다 — 이름 없이 "ADMIN"만 표시하거나, `user`를 **비민감 정보만**(닉네임) `sessionStorage`에 둔다. 구현 PR에서 결정.
+- 내 계정 표시(사이드바 이름): 콜백이 `user.nickname`(비민감)만 `sessionStorage`에 남기고(`account-display.ts`) 사이드바가 읽는다. `/auth/me` API가 생기면 서버에서 읽고 이 저장소는 지운다.
 
 ## 테스트로 고정할 것
 
-- 프록시: 화이트리스트 밖 경로 404 · 변경 요청에 `Sec-Fetch-Site: cross-site` 403 · 401→refresh→재시도 1회 · refresh 실패 시 쿠키 삭제 · 응답에 `no-store` · `Authorization`을 BE에만 붙이고 응답엔 없음
+- 프록시: 화이트리스트 밖 경로 404(`..%2F` 같은 세그먼트 안 구분자 포함) · 변경 요청에 `Sec-Fetch-Site: cross-site` 403 · 401→refresh→재시도 1회 · 재시도도 401이면 쿠키 삭제 · refresh 실패 시 쿠키 삭제 · 옛 토큰 재요청은 캐시된 새 토큰 사용 · 응답에 `no-store` · `Authorization`을 BE에만 붙이고 응답엔 없음 · `API_BASE_URL` 경로 prefix 유지
 - social-login: 쿠키 속성(HttpOnly·Secure·SameSite·Path·Max-Age) · body에 토큰 없음 · 로컬 분기
-- proxy.ts: 쿠키 없음 → `/login?next=` · `next` 오픈 리다이렉트 거부
+- proxy.ts: 쿠키 없음 → `/login?next=` · `next` 오픈 리다이렉트·제어 문자·공개 경로 거부
 - logout: BE 실패해도 쿠키는 지운다
