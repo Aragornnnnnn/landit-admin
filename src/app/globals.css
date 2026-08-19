@@ -1,1 +1,168 @@
+/* landit-admin 디자인 토큰 — 사용자 웹(landit-fe apps/web globals.css)과 같은 팔레트, 페이지 배경만 어드민 값.
+ *
+ * 3레이어 구조 (landit-fe와 동일).
+ *   Layer 1  Primitive — 원시 팔레트. 컴포넌트에서 직접 쓰지 않는다.
+ *   Layer 2  Semantic  — 역할 토큰. shadcn/ui가 읽는 이름(--background, --primary, --sidebar…)을 그대로 쓴다.
+ *   Layer 3  컴포넌트  — 오직 시맨틱 토큰(bg-primary, text-muted-foreground 등)만 참조한다.
+ *
+ * 다크모드는 미지원(라이트 단일). 도입 시 시맨틱만 재정의한다 — 값을 지어내지 말 것.
+ */
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+/* Pretendard 자체 호스팅 (다이나믹 서브셋) — 화면에 나온 글자가 포함된 조각만 다운로드된다. 사용자 웹과 같은 폰트 */
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind 유틸리티(bg-primary 등)와 시맨틱 토큰 연결 — shadcn init이 만든 목록에 어드민 토큰을 더한 것 */
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans:
+    'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+    sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* 어드민 전용 — 칩(유형·상태)은 전부 중립 회색, 셸 텍스트 단계 */
+  --color-chip: var(--chip);
+  --color-chip-foreground: var(--chip-foreground);
+  --color-hairline: var(--hairline);
+  --color-strong: var(--strong);
+  --color-body: var(--body);
+  --color-subtle: var(--subtle);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* ── Layer 1: Primitive — 사용자 웹 globals.css와 같은 값. 어드민에서 실제로 쓰는 색만 가져온다 ── */
+  --white: #ffffff;
+  /* 웜 그레이 램프 (사용자 웹) */
+  --gray-50: #fbfbfa;
+  --gray-100: #f5f5f3;
+  --gray-200: #e5e5e0;
+  --gray-300: #d4d8df;
+  --gray-500: #6b7280;
+  --gray-950: #111111;
+  /* 앱인토스 콘솔 톤의 쿨 그레이 — Figma 셸·칩·텍스트 단계에서 그대로 쓰는 값 */
+  --console-50: #f9fafb;
+  --console-100: #f2f4f6;
+  --console-150: #eef0f3;
+  --console-500: #8b95a1;
+  --console-700: #4e5968;
+  --console-800: #333d4b;
+  --console-900: #191f28;
+  /* 브랜드 테라코타 램프 */
+  --orange-50: #fdf1e8;
+  --orange-300: #e8935a;
+  --orange-500: #e07a3a;
+  --orange-600: #c4601f;
+  /* 시맨틱 액센트 원색 */
+  --red-400: #e3574a;
+  --red-500: #ff3b30;
+  --green-500: #2f7d54;
+
+  /* ── Layer 2: Semantic — shadcn 이름 그대로 ── */
+  /* 페이지 배경만 어드민 값(#F9FAFB). 사용자 웹은 gray-50 */
+  --background: var(--console-50);
+  --foreground: var(--gray-950);
+  --card: var(--white);
+  --card-foreground: var(--gray-950);
+  --popover: var(--white);
+  --popover-foreground: var(--gray-950);
+  --primary: var(--orange-500);
+  --primary-foreground: var(--white);
+  --primary-light: var(--orange-300);
+  --secondary: var(--console-100);
+  --secondary-foreground: var(--console-900);
+  --muted: var(--console-100);
+  --muted-foreground: var(--gray-500);
+  --accent: var(--console-100);
+  --accent-foreground: var(--console-900);
+  --destructive: var(--red-500);
+  --destructive-foreground: var(--white);
+  --success: var(--green-500);
+  --success-foreground: var(--white);
+  --border: var(--gray-200);
+  --input: var(--console-100);
+  --ring: var(--orange-500);
+  /* 차트는 회색 단계 + 오렌지 하나 (색은 회색·검정 + 오렌지만) */
+  --chart-1: var(--orange-500);
+  --chart-2: var(--console-500);
+  --chart-3: var(--gray-300);
+  --chart-4: var(--console-800);
+  --chart-5: var(--orange-300);
+  /* 사이드바 — 흰 배경 + 헤어라인, 선택 항목은 옅은 회색 채움 */
+  --sidebar: var(--white);
+  --sidebar-foreground: var(--console-800);
+  --sidebar-primary: var(--orange-500);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--console-100);
+  --sidebar-accent-foreground: var(--console-900);
+  --sidebar-border: var(--console-150);
+  --sidebar-ring: var(--orange-500);
+  /* 어드민 전용 */
+  --chip: var(--console-100);
+  --chip-foreground: var(--console-700);
+  --hairline: var(--console-150);
+  --strong: var(--console-900);
+  --body: var(--console-800);
+  --subtle: var(--console-500);
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+}
