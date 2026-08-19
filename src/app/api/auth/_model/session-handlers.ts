@@ -4,45 +4,35 @@ import 'server-only';
 import {
   clearSessionCookieHeaders,
   readSessionCookies,
-  serializeSessionCookie,
-  type SessionCookieNames,
+  sessionCookieHeaders,
 } from '@/shared/auth/session-cookie';
+import { isSameOriginRequest } from '@/shared/security/same-origin';
 
-export interface SessionHandlerDeps {
-  fetch: (url: string, init: RequestInit) => Promise<Response>;
-  apiBaseUrl: string;
-  cookieNames: SessionCookieNames;
-  cookieSecurity: { secure: boolean };
-}
+import type { BackendDeps } from '../../_model/backend';
+import { apiFailure, apiSuccess } from '../../_model/respond';
+import { readIssuedTokens } from '../../_model/token-response';
+
+export type SessionHandlerDeps = BackendDeps;
 
 const PROVIDERS = new Set(['kakao', 'google']);
 const SOCIAL_LOGIN_PATH = '/api/v1/auth/social-login';
 const LOGOUT_PATH = '/api/v1/auth/logout';
 
-// BE AuthTokenResponse — 쿠키로 갈 것과 body로 갈 것(user)을 여기서 가른다
-interface AuthTokenResponse {
-  accessToken: string;
-  accessTokenExpiresIn: number;
-  refreshToken: string;
-  refreshTokenExpiresIn: number;
-  user: unknown;
-}
-
-interface ApiEnvelope<T> {
+interface ApiEnvelope {
   success?: boolean;
-  data?: T;
+  data?: { user?: unknown } & Record<string, unknown>;
   error?: { code?: string; message?: string };
 }
 
 /**
  * `POST /api/auth/social-login` — 소셜 로그인으로 받은 id_token을 BE에 넘기고, 발급된 토큰을 쿠키로 심는다.
- * 응답 body는 `{ user }`뿐이다.
+ * 응답 body는 `{ success, data: { user } }`뿐이다.
  */
-export async function completeSocialLogin(
+export async function establishSocialSession(
   request: Request,
   deps: SessionHandlerDeps,
 ): Promise<Response> {
-  if (!isSameOrigin(request)) return fail(403, 'CSRF_REJECTED');
+  if (!isSameOriginRequest(request)) return apiFailure(403, 'CSRF_REJECTED');
 
   const body = (await request.json().catch(() => null)) as {
     provider?: unknown;
@@ -51,69 +41,35 @@ export async function completeSocialLogin(
   } | null;
   const provider =
     typeof body?.provider === 'string' ? body.provider.toLowerCase() : '';
-  if (
-    !PROVIDERS.has(provider) ||
-    typeof body?.idToken !== 'string' ||
-    !body.idToken ||
-    typeof body.nonce !== 'string' ||
-    !body.nonce
-  ) {
-    return fail(400, 'INVALID_REQUEST', '요청 값이 올바르지 않아요.');
+  const idToken = typeof body?.idToken === 'string' ? body.idToken : '';
+  const nonce = typeof body?.nonce === 'string' ? body.nonce : '';
+  if (!PROVIDERS.has(provider) || !idToken || !nonce) {
+    return apiFailure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않아요.');
   }
 
   const upstream = await deps.fetch(`${deps.apiBaseUrl}${SOCIAL_LOGIN_PATH}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      provider,
-      idToken: body.idToken,
-      nonce: body.nonce,
-    }),
+    body: JSON.stringify({ provider, idToken, nonce }),
   });
   const envelope = (await upstream
     .json()
-    .catch(() => null)) as ApiEnvelope<AuthTokenResponse> | null;
-  const data = envelope?.data;
-
-  if (
-    !upstream.ok ||
-    !envelope?.success ||
-    !data?.accessToken ||
-    !data.refreshToken
-  ) {
-    return fail(
+    .catch(() => null)) as ApiEnvelope | null;
+  const tokens = envelope?.success ? readIssuedTokens(envelope.data) : null;
+  if (!upstream.ok || !tokens) {
+    return apiFailure(
       upstream.ok ? 502 : upstream.status,
       envelope?.error?.code ?? 'LOGIN_FAILED',
       envelope?.error?.message ?? '로그인하지 못했어요. 다시 시도해 주세요.',
     );
   }
 
-  const headers = new Headers({
-    'content-type': 'application/json',
-    'cache-control': 'no-store',
-  });
-  headers.append(
-    'set-cookie',
-    serializeSessionCookie(
-      deps.cookieNames.access,
-      data.accessToken,
-      data.accessTokenExpiresIn,
-      deps.cookieSecurity,
+  return apiSuccess(
+    { user: envelope?.data?.user ?? null },
+    sessionCookieHeaders(deps.cookieNames, tokens, deps.cookieSecurity).map(
+      (cookie) => ['set-cookie', cookie],
     ),
   );
-  headers.append(
-    'set-cookie',
-    serializeSessionCookie(
-      deps.cookieNames.refresh,
-      data.refreshToken,
-      data.refreshTokenExpiresIn,
-      deps.cookieSecurity,
-    ),
-  );
-  return new Response(JSON.stringify({ user: data.user }), {
-    status: 200,
-    headers,
-  });
 }
 
 /**
@@ -123,7 +79,7 @@ export async function logoutSession(
   request: Request,
   deps: SessionHandlerDeps,
 ): Promise<Response> {
-  if (!isSameOrigin(request)) return fail(403, 'CSRF_REJECTED');
+  if (!isSameOriginRequest(request)) return apiFailure(403, 'CSRF_REJECTED');
 
   const session = readSessionCookies(
     request.headers.get('cookie'),
@@ -152,34 +108,4 @@ export async function logoutSession(
     headers.append('set-cookie', cookie);
   }
   return new Response(null, { status: 204, headers });
-}
-
-// 프록시와 같은 CSRF 판정 — 로그인 CSRF(공격자 계정으로 세션을 심는 공격)도 막는다
-function isSameOrigin(request: Request): boolean {
-  const site = request.headers.get('sec-fetch-site');
-  if (site) return site === 'same-origin';
-  const origin = request.headers.get('origin');
-  if (!origin) return false;
-  const ourHost =
-    request.headers.get('x-forwarded-host') ??
-    request.headers.get('host') ??
-    new URL(request.url).host;
-  try {
-    return new URL(origin).host === ourHost;
-  } catch {
-    return false;
-  }
-}
-
-function fail(status: number, code: string, message?: string): Response {
-  return new Response(
-    JSON.stringify({ success: false, error: { code, message } }),
-    {
-      status,
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'no-store',
-      },
-    },
-  );
 }

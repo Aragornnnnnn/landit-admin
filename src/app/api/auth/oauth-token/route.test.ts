@@ -4,10 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { POST } from './route';
 
-const makeRequest = (body: unknown) =>
+const makeRequest = (body: unknown, site = 'same-origin') =>
   new Request('http://localhost/api/auth/oauth-token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'sec-fetch-site': site },
     body: JSON.stringify(body),
   });
 
@@ -15,6 +15,17 @@ describe('POST /api/auth/oauth-token', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
+  });
+
+  it('교차 사이트에서 온 요청은 403 — 서버 client secret을 외부 호출에 쓰지 않는다', async () => {
+    const res = await POST(
+      makeRequest(
+        { provider: 'kakao', code: 'c', redirectUri: 'http://x' },
+        'cross-site',
+      ),
+    );
+
+    expect(res.status).toBe(403);
   });
 
   it('provider·code·redirectUri 중 하나라도 없으면 400을 돌려준다', async () => {
@@ -66,7 +77,7 @@ describe('POST /api/auth/oauth-token', () => {
     );
     const body = await res.json();
 
-    expect(body).toEqual({ idToken: 'the-id-token' });
+    expect(body).toEqual({ success: true, data: { idToken: 'the-id-token' } });
   });
 
   it('제공자가 error를 내려주면 그 사유로 400을 돌려준다', async () => {
@@ -85,6 +96,6 @@ describe('POST /api/auth/oauth-token', () => {
     const body = await res.json();
 
     expect(res.status).toBe(400);
-    expect(body.error).toBe('invalid grant');
+    expect(body.error.message).toBe('invalid grant');
   });
 });
