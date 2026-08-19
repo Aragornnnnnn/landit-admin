@@ -86,6 +86,30 @@ describe('화이트리스트', () => {
     expect(res.status).toBe(404);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [
+      ['api', 'v1', 'admin', '../../../auth/token/refresh'],
+      '%2F 인코딩된 점 세그먼트',
+    ],
+    [['api', 'v1', 'admin', 'users?x=1'], '세그먼트 안 ?'],
+    [['api', 'v1', 'admin', 'users#x'], '세그먼트 안 #'],
+    [['api', 'v1', 'admin', 'a\\b'], '세그먼트 안 역슬래시'],
+  ])(
+    'Next가 세그먼트를 디코드해 %j(%s)로 들어와도 BE를 부르지 않고 404를 준다',
+    async (segments) => {
+      const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
+
+      const res = await forwardToBackend(
+        incoming(segments.map(encodeURIComponent).join('/')),
+        segments,
+        deps(fetchMock),
+      );
+
+      expect(res.status).toBe(404);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('CSRF', () => {

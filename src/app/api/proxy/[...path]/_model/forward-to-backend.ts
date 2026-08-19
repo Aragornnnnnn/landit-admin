@@ -50,7 +50,8 @@ export async function forwardToBackend(
   if (!ALLOWED_METHODS.has(method)) return plain(405, 'METHOD_NOT_ALLOWED');
 
   const path = pathSegments.join('/');
-  if (!isAllowedPath(pathSegments, path)) return plain(404, 'NOT_FOUND');
+  const target = resolveAllowedTarget(pathSegments, path, request, deps);
+  if (!target) return plain(404, 'NOT_FOUND');
 
   if (MUTATING_METHODS.has(method) && !isSameOrigin(request)) {
     return plain(403, 'CSRF_REJECTED');
@@ -62,8 +63,6 @@ export async function forwardToBackend(
   );
   if (!session.access && !session.refresh) return sessionEnded(deps);
 
-  const search = new URL(request.url).search;
-  const target = `${deps.apiBaseUrl}/${path}${search}`;
   // 재시도할 수 있게 body는 미리 버퍼에 담는다
   const body = MUTATING_METHODS.has(method)
     ? await request.arrayBuffer()
@@ -96,13 +95,28 @@ export async function forwardToBackend(
   return passThrough(upstream, refreshedNow, deps);
 }
 
-// 경로 이탈(.., 빈 세그먼트)을 막고 화이트리스트와 대조한다
-function isAllowedPath(segments: string[], path: string): boolean {
-  if (segments.some((s) => s === '' || s === '.' || s === '..')) return false;
-  return (
-    ALLOWED_EXACT.has(path) ||
-    ALLOWED_PREFIXES.some((prefix) => path.startsWith(prefix))
-  );
+// 화이트리스트를 통과한 BE URL을 만든다. 통과 못 하면 null.
+// Next는 세그먼트를 각각 디코드하므로 `..%2F`가 한 세그먼트 안에 `../`로 들어올 수 있다 — 구분자·점 세그먼트를 거부하고,
+// 최종 URL을 파싱해 정규화된 pathname이 여전히 허용 범위 안인지 한 번 더 확인한다(문자열 검사와 URL 해석이 어긋나지 않게)
+function resolveAllowedTarget(
+  segments: string[],
+  path: string,
+  request: Request,
+  deps: ForwardDeps,
+): string | null {
+  const unsafeSegment = (s: string) =>
+    s === '' || s === '.' || s === '..' || /[/\\?#]/.test(s);
+  if (segments.some(unsafeSegment)) return null;
+  const allowed = (p: string) =>
+    ALLOWED_EXACT.has(p) ||
+    ALLOWED_PREFIXES.some((prefix) => p.startsWith(prefix));
+  if (!allowed(path)) return null;
+
+  const base = new URL(deps.apiBaseUrl);
+  const target = new URL(`/${path}${new URL(request.url).search}`, base);
+  if (target.origin !== base.origin) return null;
+  if (!allowed(target.pathname.replace(/^\//, ''))) return null;
+  return target.href;
 }
 
 // 변경 요청의 CSRF 방어 — Sec-Fetch-Site가 있으면 same-origin이어야 하고, 없으면(구형 브라우저) Origin이 우리 호스트여야 한다
