@@ -1,6 +1,8 @@
 // 루트 레이아웃 — 언어·메타데이터·전역 스타일. 셸(사이드바)은 (protected) 그룹 레이아웃이 담당한다
 import type { Metadata } from 'next';
 
+import { Toaster } from '@/shared/ui/sonner';
+
 import './globals.css';
 
 // 모든 페이지를 요청 시 렌더한다 — CSP nonce가 요청마다 달라 정적 프리렌더와 양립하지 않는다 (src/proxy.ts).
@@ -16,7 +18,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* 결과 토스트 — 사용자 웹과 같은 알약(성공 초록 ✓ / 오류 빨강 !) */}
+        <Toaster position="bottom-center" richColors />
+      </body>
     </html>
   );
 }
