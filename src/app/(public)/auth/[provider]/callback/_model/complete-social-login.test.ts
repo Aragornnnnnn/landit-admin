@@ -131,3 +131,18 @@ describe('completeSocialLogin', () => {
     });
   });
 });
+
+describe('completeSocialLogin — 실패 사유', () => {
+  it('교환이 일반 Error로 실패해도 그 메시지를 살린다 — 설정 오류를 운영자가 볼 수 있게', async () => {
+    const d = deps({
+      exchangeCode: vi.fn(async () => {
+        throw new Error('kakao client ID가 설정되지 않았어요.');
+      }),
+    });
+
+    await expect(completeSocialLogin(input(), d)).resolves.toEqual({
+      kind: 'failed',
+      message: 'kakao client ID가 설정되지 않았어요.',
+    });
+  });
+});

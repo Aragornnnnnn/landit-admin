@@ -32,10 +32,10 @@
 ## 프록시 (`/api/proxy/[...path]`)
 
 - 허용 경로: `/api/v1/admin/**`, `/api/v1/auth/logout`. 그 외 404. 토큰 갱신(`/auth/token/refresh`)은 프록시가 서버 안에서만 부르고 브라우저 경로로는 열지 않는다.
-- 허용 메서드: GET · POST · PUT · PATCH · DELETE. 변경 메서드는 `Sec-Fetch-Site: same-origin`이어야 한다. 헤더가 없는(구형) 브라우저는 `Origin`이 자기 오리진과 같아야 한다. 둘 다 아니면 403.
+- 허용 메서드: GET · POST · PUT · PATCH · DELETE. 변경 메서드는 `Sec-Fetch-Site: same-origin`이어야 한다. 헤더가 없는(구형) 브라우저는 `Origin`이 자기 오리진과 같아야 한다. 둘 다 아니면 403. 판정은 `shared/security/same-origin.ts` 하나 — `/api/auth/*` 세 route handler도 같은 함수를 쓴다.
 - 전달 헤더: `Authorization: Bearer <access>`, `Content-Type`, `Accept`. 쿠키·기타 헤더는 BE로 보내지 않는다.
 - 응답 헤더: `Cache-Control: no-store`, `Content-Type` 그대로. `Set-Cookie`는 refresh 갱신 때만 우리가 붙인다.
-- 응답 body는 BE 것을 그대로 전달한다(성공·실패 봉투 모두). 토큰은 어떤 응답 body에도 넣지 않는다.
+- 응답 body는 BE 것을 그대로 전달한다(성공·실패 봉투 모두). 토큰은 어떤 응답 body에도 넣지 않는다. 경로는 세그먼트 안 `/ \\ ? #`를 거부하고 최종 URL을 정규화해 다시 확인한다(`..%2F` 우회 방지). BE fetch는 15초 타임아웃.
 - 로그: 메서드·경로·상태·소요시간만. `Authorization`·쿠키·body 금지. 미처리 예외 로그에도 요청 헤더를 붙이지 않는다.
 
 ## 헤더 (`next.config.ts` headers)

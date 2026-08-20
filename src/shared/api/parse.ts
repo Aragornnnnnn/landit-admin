@@ -23,7 +23,11 @@ function endpointOf(response: Response): string {
  * @typeParam T 성공 시 `data`의 타입 — 호출부가 기대하는 타입을 그대로 신뢰한다 (런타임 검증 없음)
  * @throws ApiError 실패 응답이거나 공통 봉투가 아닌 응답(스프링 기본 에러 페이지 등)이면
  */
-export async function parseApiResponse<T>(response: Response): Promise<T> {
+export async function parseApiResponse<T>(
+  response: Response,
+  // 프록시를 거친 응답은 url이 /api/proxy/…라 태그가 갈린다 — 호출자가 BE 경로를 알면 그걸 쓴다
+  endpoint: string = endpointOf(response),
+): Promise<T> {
   let body: ApiBody | null = null;
   try {
     body = (await response.json()) as ApiBody;
@@ -37,7 +41,7 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
     // 공통 봉투 없이 온 실패(스프링 기본 에러 페이지 등)는 상태코드를 붙인 기본 문구로
     body?.error?.message ?? `서버 오류가 발생했어요. (${response.status})`,
     response.status,
-    endpointOf(response),
+    endpoint,
     body?.error?.code,
   );
 }

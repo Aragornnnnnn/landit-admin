@@ -1,10 +1,21 @@
 // 라우트 가드·next 파라미터 규칙 검증 — 세션 없는 보호 경로는 /login으로, 오픈 리다이렉트는 거부
 import { describe, expect, it } from 'vitest';
 
-import { decideRouteGuard, safeNextPath } from './route-guard';
+import {
+  decideRouteGuard,
+  isPublicPath,
+  loginRedirectPath,
+  safeNextPath,
+} from './route-guard';
 
 describe('decideRouteGuard', () => {
-  it.each(['/', '/feedbacks', '/letters/3', '/users?page=2'])(
+  it('세션이 없으면 /는 next 없이 /login으로 보낸다', () => {
+    expect(
+      decideRouteGuard({ pathname: '/', search: '', hasSession: false }),
+    ).toEqual({ action: 'redirect', to: '/login' });
+  });
+
+  it.each(['/feedbacks', '/letters/3', '/users?page=2'])(
     '세션이 없으면 %s는 /login?next=로 보낸다',
     (path) => {
       const decision = decideRouteGuard({
@@ -77,7 +88,34 @@ describe('safeNextPath', () => {
     expect(safeNextPath(next)).toBe('/');
   });
 
-  it('/login 자체로 돌아가는 next는 /로 바꾼다 — 로그인 루프 방지', () => {
-    expect(safeNextPath('/login?next=%2F')).toBe('/');
+  it.each(['/login?next=%2F', '/auth/kakao/callback?code=x&state=y'])(
+    '공개 경로 %s로 돌아가는 next는 /로 바꾼다 — 로그인 루프·소모된 콜백 재진입 방지',
+    (next) => {
+      expect(safeNextPath(next)).toBe('/');
+    },
+  );
+});
+
+describe('loginRedirectPath', () => {
+  it('돌아올 곳이 있으면 next를 붙이고, /이거나 없으면 /login만', () => {
+    expect(loginRedirectPath('/feedbacks?page=2')).toBe(
+      '/login?next=%2Ffeedbacks%3Fpage%3D2',
+    );
+    expect(loginRedirectPath('/')).toBe('/login');
+    expect(loginRedirectPath(null)).toBe('/login');
+  });
+
+  it('공개 경로·외부 URL은 next로 붙이지 않는다', () => {
+    expect(loginRedirectPath('/auth/kakao/callback?code=1')).toBe('/login');
+    expect(loginRedirectPath('https://evil.test')).toBe('/login');
+  });
+});
+
+describe('isPublicPath', () => {
+  it.each(['/login', '/auth/google/callback'])('%s는 공개', (p) => {
+    expect(isPublicPath(p)).toBe(true);
+  });
+  it.each(['/', '/feedbacks', '/authors'])('%s는 보호', (p) => {
+    expect(isPublicPath(p)).toBe(false);
   });
 });

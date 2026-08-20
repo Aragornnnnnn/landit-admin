@@ -65,16 +65,15 @@ export function isActiveNav(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** 상단바 제목 — 가장 구체적인(긴) href가 이긴다. 모르는 경로는 빈 문자열 */
+/** 상단바 제목 — 활성 메뉴의 라벨. 모르는 경로는 빈 문자열 (메뉴 href끼리 중첩되지 않으므로 첫 일치가 답이다) */
 export function pageTitleFor(pathname: string): string {
-  const all = NAV_GROUPS.flatMap((g) => g.items);
-  const match = all
-    .filter((item) => isActiveNav(item.href, pathname))
-    .sort((a, b) => b.href.length - a.href.length)[0];
+  const match = NAV_GROUPS.flatMap((g) => g.items).find((item) =>
+    isActiveNav(item.href, pathname),
+  );
   return match?.label ?? '';
 }
 
 /** 현재 BE 호스트가 develop인지 — 시나리오 테스트 메뉴 노출 기준 */
 export function isDevelopServer(apiHost: string | undefined): boolean {
-  return Boolean(apiHost && /develop/.test(apiHost));
+  return apiHost?.includes('develop') ?? false;
 }

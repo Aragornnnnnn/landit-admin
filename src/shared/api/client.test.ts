@@ -76,3 +76,29 @@ describe('api', () => {
     expect(assign).not.toHaveBeenCalled();
   });
 });
+
+describe('api — 공개 경로에서의 401', () => {
+  const fetchMock = vi.fn();
+  const assign = vi.fn();
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('location', {
+      ...window.location,
+      origin: window.location.origin,
+      pathname: '/auth/kakao/callback',
+      search: '?code=1&state=2',
+      assign,
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('콜백 화면에서 난 401은 리다이렉트하지 않는다 — 콜백이 스스로 처리한다', async () => {
+    fetchMock.mockResolvedValueOnce(json({ success: false }, 401));
+
+    await expect(api.get('/api/v1/admin/app-versions')).rejects.toBeInstanceOf(
+      ApiError,
+    );
+    expect(assign).not.toHaveBeenCalled();
+  });
+});

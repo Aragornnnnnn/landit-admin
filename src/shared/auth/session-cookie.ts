@@ -57,6 +57,33 @@ export function serializeSessionCookie(
   return parts.join('; ');
 }
 
+/** 발급받은 토큰 쌍을 심는 Set-Cookie 값들 — access·refresh 각각 BE가 준 만료(초)로 */
+export function sessionCookieHeaders(
+  names: SessionCookieNames,
+  tokens: {
+    accessToken: string;
+    accessTokenExpiresIn: number;
+    refreshToken: string;
+    refreshTokenExpiresIn: number;
+  },
+  security: CookieSecurity,
+): string[] {
+  return [
+    serializeSessionCookie(
+      names.access,
+      tokens.accessToken,
+      tokens.accessTokenExpiresIn,
+      security,
+    ),
+    serializeSessionCookie(
+      names.refresh,
+      tokens.refreshToken,
+      tokens.refreshTokenExpiresIn,
+      security,
+    ),
+  ];
+}
+
 /** 두 세션 쿠키를 지우는 Set-Cookie 값들 (Max-Age=0) */
 export function clearSessionCookieHeaders(
   names: SessionCookieNames,

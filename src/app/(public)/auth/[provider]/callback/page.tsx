@@ -4,8 +4,6 @@
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { api } from '@/shared/api/client';
-import { parseApiResponse } from '@/shared/api/parse';
 import { writeAccountDisplay } from '@/shared/auth/account-display';
 import { writeForbiddenNotice } from '@/shared/auth/forbidden-notice';
 import { LOGIN_PATH, safeNextPath } from '@/shared/auth/route-guard';
@@ -17,9 +15,7 @@ import { reportWarning } from '@/shared/monitoring/report';
 import { Button } from '@/shared/ui/button';
 
 import { completeSocialLogin } from './_model/complete-social-login';
-
-// 가장 가벼운 admin 조회 — 403이면 관리자가 아니다. BE에 판정 API(/auth/me)가 생기면 그걸로 바꾼다
-const ADMIN_PROBE_PATH = '/api/v1/admin/app-versions';
+import { loginGateway } from './_model/login-gateway';
 
 export default function SocialLoginCallbackPage({
   params,
@@ -48,43 +44,7 @@ export default function SocialLoginCallbackPage({
           error: error ?? null,
           pending: readPendingSocialLogin(),
         },
-        {
-          exchangeCode: async (input) => {
-            const res = await fetch('/api/auth/oauth-token', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify(input),
-            });
-            const json = (await res.json()) as {
-              idToken?: string;
-              error?: string;
-            };
-            if (!res.ok || !json.idToken)
-              throw new Error(json.error ?? '토큰 교환에 실패했어요.');
-            return json.idToken;
-          },
-          establishSession: async (input) => {
-            const res = await fetch('/api/auth/social-login', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify(input),
-            });
-            if (!res.ok) {
-              // 실패 봉투는 parseApiResponse가 ApiError(메시지 포함)로 던진다
-              await parseApiResponse(res);
-            }
-            const json = (await res.json()) as {
-              user?: { email?: string | null };
-            };
-            return json.user ?? {};
-          },
-          probeAdmin: async () => {
-            await api.get(ADMIN_PROBE_PATH);
-          },
-          endSession: async () => {
-            await fetch('/api/auth/logout', { method: 'POST' });
-          },
-        },
+        loginGateway,
       );
       clearPendingSocialLogin();
 

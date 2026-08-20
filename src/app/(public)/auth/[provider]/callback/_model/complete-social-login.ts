@@ -80,13 +80,12 @@ export async function completeSocialLogin(
       nonce: pending.nonce,
     });
   } catch (error) {
-    return {
-      kind: 'failed',
-      message:
-        error instanceof ApiError && error.message
-          ? error.message
-          : '로그인하지 못했어요. 다시 시도해 주세요.',
-    };
+    // 교환·BE 로그인의 사유(invalid_grant·키 미설정 등)는 운영자가 원인을 짚는 데 필요하다 — 메시지가 있으면 그대로 쓴다
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : '로그인하지 못했어요. 다시 시도해 주세요.';
+    return { kind: 'failed', message };
   }
 
   try {

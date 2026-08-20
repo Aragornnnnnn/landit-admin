@@ -1,13 +1,19 @@
 // @vitest-environment node
 // BFF 프록시 규칙 검증 — 화이트리스트·CSRF·Bearer 부착·401 갱신 1회·no-store·토큰 비노출 (docs/auth.md "테스트로 고정할 것")
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { sessionCookieNames } from '@/shared/auth/session-cookie';
 
-import { forwardToBackend, type ForwardDeps } from './forward-to-backend';
+import {
+  forwardToBackend,
+  resetRefreshCacheForTests,
+  type ForwardDeps,
+} from './forward-to-backend';
 
 const names = sessionCookieNames(false);
 const API = 'https://api.test';
+
+beforeEach(() => resetRefreshCacheForTests());
 
 // 우리 오리진에서 온 요청처럼 만든다. 기본은 access 쿠키 있음 + same-origin
 function incoming(
@@ -344,6 +350,81 @@ describe('401 갱신', () => {
     expect(a.status).toBe(200);
     expect(b.status).toBe(200);
     expect(refreshCalls).toBe(1);
+  });
+});
+
+describe('갱신 뒤 규칙', () => {
+  const refreshed = () =>
+    ok({
+      success: true,
+      data: {
+        accessToken: 'acc2',
+        accessTokenExpiresIn: 1800,
+        refreshToken: 'ref2',
+        refreshTokenExpiresIn: 1209600,
+      },
+    });
+
+  it('새 토큰으로 재시도해도 401이면 쿠키를 지우고 세션을 끝낸다 — 로그인↔보호 경로 루프 방지', async () => {
+    const fetchMock = vi
+      .fn<ForwardDeps['fetch']>()
+      .mockResolvedValueOnce(unauthorized())
+      .mockResolvedValueOnce(refreshed())
+      .mockResolvedValueOnce(unauthorized());
+
+    const res = await forwardToBackend(
+      incoming('api/v1/admin/users'),
+      ['api', 'v1', 'admin', 'users'],
+      deps(fetchMock),
+    );
+
+    expect(res.status).toBe(401);
+    const setCookies = res.headers.getSetCookie();
+    expect(setCookies.every((c) => c.includes('Max-Age=0'))).toBe(true);
+  });
+
+  it('갱신 직후 옛 refresh 토큰으로 온 다음 요청은 다시 갱신하지 않고 같은 새 토큰을 쓴다 — 회전형 BE에서 세션이 끊기지 않게', async () => {
+    const fetchMock = vi
+      .fn<ForwardDeps['fetch']>()
+      .mockResolvedValueOnce(unauthorized()) // A 원 요청
+      .mockResolvedValueOnce(refreshed()) // A refresh
+      .mockResolvedValueOnce(ok()) // A 재시도
+      .mockResolvedValueOnce(unauthorized()) // B 원 요청 (옛 access)
+      .mockResolvedValueOnce(ok()); // B 재시도 — refresh 없이 캐시된 acc2
+
+    const a = await forwardToBackend(
+      incoming('api/v1/admin/users'),
+      ['api', 'v1', 'admin', 'users'],
+      deps(fetchMock),
+    );
+    const b = await forwardToBackend(
+      incoming('api/v1/admin/app-versions'),
+      ['api', 'v1', 'admin', 'app-versions'],
+      deps(fetchMock),
+    );
+
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    const refreshCalls = fetchMock.mock.calls.filter(([url]) =>
+      url.endsWith('/auth/token/refresh'),
+    );
+    expect(refreshCalls).toHaveLength(1);
+    const bRetry = new Headers(fetchMock.mock.calls[4][1].headers);
+    expect(bRetry.get('authorization')).toBe('Bearer acc2');
+  });
+
+  it('API_BASE_URL에 경로 prefix가 있어도 그 아래로 전달한다', async () => {
+    const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
+
+    await forwardToBackend(
+      incoming('api/v1/admin/users'),
+      ['api', 'v1', 'admin', 'users'],
+      deps(fetchMock, { apiBaseUrl: 'https://gw.test/landit' }),
+    );
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://gw.test/landit/api/v1/admin/users',
+    );
   });
 });
 

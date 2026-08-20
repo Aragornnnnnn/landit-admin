@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { sessionCookieNames } from '@/shared/auth/session-cookie';
 
 import {
-  completeSocialLogin,
+  establishSocialSession,
   logoutSession,
   type SessionHandlerDeps,
 } from './session-handlers';
@@ -51,20 +51,42 @@ const tokenResponse = {
   },
 };
 
-describe('completeSocialLogin', () => {
+describe('establishSocialSession', () => {
+  it('BE가 만료 시간을 숫자로 안 주면 쿠키를 심지 않고 502 — Max-Age=NaN 방지', async () => {
+    const fetchMock = vi
+      .fn<SessionHandlerDeps['fetch']>()
+      .mockResolvedValueOnce(
+        json({
+          success: true,
+          data: { ...tokenResponse.data, accessTokenExpiresIn: undefined },
+        }),
+      );
+
+    const res = await establishSocialSession(
+      loginRequest({ provider: 'kakao', idToken: 'id', nonce: 'n' }),
+      deps(fetchMock),
+    );
+
+    expect(res.status).toBe(502);
+    expect(res.headers.getSetCookie()).toHaveLength(0);
+  });
+
   it('BE 로그인 성공이면 토큰을 httpOnly 쿠키로 심고 body엔 user만 준다', async () => {
     const fetchMock = vi
       .fn<SessionHandlerDeps['fetch']>()
       .mockResolvedValueOnce(json(tokenResponse));
 
-    const res = await completeSocialLogin(
+    const res = await establishSocialSession(
       loginRequest({ provider: 'kakao', idToken: 'id', nonce: 'n' }),
       deps(fetchMock),
     );
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ user: tokenResponse.data.user });
+    expect(body).toEqual({
+      success: true,
+      data: { user: tokenResponse.data.user },
+    });
     expect(JSON.stringify(body)).not.toMatch(/acc|ref/);
     const cookies = res.headers.getSetCookie();
     expect(cookies.some((c) => c.startsWith(`${names.access}=acc;`))).toBe(
@@ -90,7 +112,7 @@ describe('completeSocialLogin', () => {
       .fn<SessionHandlerDeps['fetch']>()
       .mockResolvedValueOnce(json(tokenResponse));
 
-    await completeSocialLogin(
+    await establishSocialSession(
       loginRequest({ provider: 'google', idToken: 'id', nonce: 'n' }),
       deps(fetchMock),
     );
@@ -120,7 +142,7 @@ describe('completeSocialLogin', () => {
         ),
       );
 
-    const res = await completeSocialLogin(
+    const res = await establishSocialSession(
       loginRequest({ provider: 'google', idToken: 'id', nonce: 'n' }),
       deps(fetchMock),
     );
@@ -142,7 +164,10 @@ describe('completeSocialLogin', () => {
   ])('요청이 %o(%s)이면 BE를 부르지 않고 400', async (body) => {
     const fetchMock = vi.fn<SessionHandlerDeps['fetch']>();
 
-    const res = await completeSocialLogin(loginRequest(body), deps(fetchMock));
+    const res = await establishSocialSession(
+      loginRequest(body),
+      deps(fetchMock),
+    );
 
     expect(res.status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -151,7 +176,7 @@ describe('completeSocialLogin', () => {
   it('교차 사이트에서 온 요청은 403 — 로그인 CSRF(공격자 계정으로 세션 심기) 방지', async () => {
     const fetchMock = vi.fn<SessionHandlerDeps['fetch']>();
 
-    const res = await completeSocialLogin(
+    const res = await establishSocialSession(
       loginRequest(
         { provider: 'kakao', idToken: 'id', nonce: 'n' },
         'cross-site',
