@@ -1,0 +1,94 @@
+# 인증·세션·프록시
+
+로그인부터 로그아웃까지 토큰이 어디를 지나가는지. 규칙의 근거는 [security.md](security.md), 화면은 [screens/login.md](screens/login.md).
+
+## 한 줄 요약
+
+브라우저는 토큰을 절대 보지 못한다. 카카오·구글 로그인으로 받은 `id_token`을 우리 route handler에 주면, route handler가 BE에서 access/refresh 토큰을 받아 `httpOnly` 쿠키로 심고, 이후 모든 BE 호출은 `/api/proxy/*`가 쿠키를 `Authorization: Bearer`로 바꿔 대신 보낸다.
+
+## 등장인물
+
+| 이름                          | 위치                              | 역할                                                                                               |
+| ----------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 로그인 화면                   | `app/(public)/login` (클라이언트) | 카카오·구글 웹 로그인 시작·콜백 처리 → `id_token`·`nonce` 획득                                     |
+| `POST /api/auth/social-login` | route handler (서버)              | `id_token`을 BE `/api/v1/auth/social-login`에 전달 → 토큰 응답을 쿠키로 저장. 응답 body엔 `user`만 |
+| `POST /api/auth/logout`       | route handler (서버)              | BE `/api/v1/auth/logout` 호출 + 쿠키 삭제                                                          |
+| `/api/proxy/[...path]`        | route handler (서버)              | 쿠키 → Bearer, 화이트리스트, CSRF 검사, 401 시 refresh 1회, `no-store`                             |
+| `src/proxy.ts`                | Next 16 Proxy(구 middleware)      | 세션 쿠키 없이 `(protected)` 경로 접근 → `/login?next=` 리다이렉트. UX 가드                        |
+| `shared/api/client.ts`        | 클라이언트                        | `api.get/post/…` → `/api/proxy/…` 호출. 401 → `/login`, 403 → 관리자 아님 화면                     |
+| BE `AdminAuthorizationFilter` | landit-be                         | `/api/v1/admin/**`에서 role=ADMIN 아니면 403. **유일한 인가**                                      |
+
+## 시퀀스
+
+### 로그인
+
+```
+브라우저(/login) ── 카카오/구글 웹 로그인(PKCE·nonce) ──▶ id_token
+브라우저 ── POST /api/auth/social-login {provider, idToken, nonce} ──▶ route handler
+route handler ── POST {API_BASE_URL}/api/v1/auth/social-login ──▶ BE
+BE ──▶ {accessToken, accessTokenExpiresIn, refreshToken, refreshTokenExpiresIn, user}
+route handler ──▶ Set-Cookie: __Host-landit-admin-access (Max-Age=accessTokenExpiresIn)
+               ──▶ Set-Cookie: __Host-landit-admin-refresh (Max-Age=refreshTokenExpiresIn)
+               ──▶ body: {user}   (토큰 없음)
+브라우저 ── router.replace(next ?? '/')
+(protected) 첫 화면 ── GET /api/proxy/api/v1/admin/… ──▶ 200 → 관리자 / 403 → "관리자 아님" 화면
+```
+
+- 카카오·구글 로그인 코드는 landit-fe `shared/auth/web-social-login.ts`·`crypto.ts`를 옮긴다(PKCE·nonce·state 검증 포함). redirect URI는 `/auth/{provider}/callback`으로 고정하고 각 콘솔에 등록한다.
+- 관리자 판정 API가 없어 로그인 성공 = 관리자가 아니다. 첫 admin 호출의 403으로 판정하고, "관리자 아님" 화면에서 로그아웃(쿠키 삭제)을 제공한다. BE에 `/auth/me`가 생기면 social-login 직후 판정으로 바꾼다.
+
+### 요청
+
+```
+클라이언트 ── api.get('/api/v1/admin/mailbox/feedbacks?…') ──▶ GET /api/proxy/api/v1/admin/mailbox/feedbacks?…
+proxy ── 경로 화이트리스트 확인 · (변경 요청이면) Sec-Fetch-Site same-origin 확인
+proxy ── Authorization: Bearer <access 쿠키> ──▶ BE
+BE ──▶ 200 → proxy ──▶ 200 + Cache-Control: no-store (body 그대로)
+BE ──▶ 401 → proxy ── POST /auth/token/refresh {refreshToken 쿠키} ──▶ BE
+        ├ 성공 → 새 쿠키 Set-Cookie + 원 요청 재시도 1회 → 그 결과 전달
+        └ 실패 → 두 쿠키 삭제 + 401 → 클라이언트 clearSession() + /login
+BE ──▶ 403 → proxy ──▶ 403 → 클라이언트 "관리자 아님" 화면
+```
+
+- 동시에 여러 요청이 401을 받으면 refresh가 여러 번 나갈 수 있다 — BE refresh가 회전(rotation)형이면 뒤의 것이 실패한다. 프록시 인스턴스 안에서는 진행 중인 refresh Promise를 공유하고, 인스턴스 간 경합은 "실패 → 재로그인"으로 감내한다(어드민 트래픽 규모에서 충분). BE 회전 여부는 구현 PR에서 확인.
+
+### 로그아웃
+
+```
+클라이언트 ── POST /api/auth/logout ──▶ route handler
+route handler ── POST BE /auth/logout {refreshToken 쿠키} (실패해도 계속)
+              ──▶ 두 쿠키 삭제(Max-Age=0)
+클라이언트 ── queryClient.clear() ── router.replace('/login')
+```
+
+### 라우트 가드 (`proxy.ts`)
+
+```
+요청 ── (protected) 경로 && refresh 쿠키 없음 → 302 /login?next=<pathname>
+요청 ── /login && refresh 쿠키 있음 → 302 /
+그 외 → 통과 (+ CSP nonce 헤더)
+```
+
+- 쿠키 **존재**만 본다. 유효성은 BE가 판정한다(만료 쿠키로 들어와도 첫 프록시 호출이 401 → refresh 또는 /login).
+- `next`는 `/`로 시작하고 `//`·`\`·스킴이 없는 상대 경로만 허용. 아니면 `/`.
+
+## 쿠키 속성
+
+|           | 값                                                                                                                                                              |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 이름      | `__Host-landit-admin-access`, `__Host-landit-admin-refresh`                                                                                                     |
+| 속성      | `HttpOnly; Secure; SameSite=Strict; Path=/` (`Domain` 없음 — `__Host-` 요구)                                                                                    |
+| Max-Age   | BE 응답의 `*ExpiresIn` 초                                                                                                                                       |
+| 로컬 개발 | `http://localhost`는 `Secure` 쿠키를 못 심는다 → `NODE_ENV !== 'production'`이면 접두사 없이 `landit-admin-access` + `Secure` 생략. 이 분기는 테스트로 고정한다 |
+
+## 클라이언트가 아는 것
+
+- 로그인 여부: 몰라도 된다. `(protected)`에 들어왔다는 것 자체가 `proxy.ts`를 통과했다는 뜻이고, 첫 쿼리 401이 세션 만료 신호다.
+- 내 계정 표시(사이드바 이름·아바타): `social-login` 응답의 `user`를 메모리(React state 또는 Query 캐시)에 둔다. 새로고침하면 사라지므로 `/auth/me` API가 생기기 전까진 프록시 첫 응답에서 다시 못 채운다 — 이름 없이 "ADMIN"만 표시하거나, `user`를 **비민감 정보만**(닉네임) `sessionStorage`에 둔다. 구현 PR에서 결정.
+
+## 테스트로 고정할 것
+
+- 프록시: 화이트리스트 밖 경로 404 · 변경 요청에 `Sec-Fetch-Site: cross-site` 403 · 401→refresh→재시도 1회 · refresh 실패 시 쿠키 삭제 · 응답에 `no-store` · `Authorization`을 BE에만 붙이고 응답엔 없음
+- social-login: 쿠키 속성(HttpOnly·Secure·SameSite·Path·Max-Age) · body에 토큰 없음 · 로컬 분기
+- proxy.ts: 쿠키 없음 → `/login?next=` · `next` 오픈 리다이렉트 거부
+- logout: BE 실패해도 쿠키는 지운다
