@@ -69,7 +69,8 @@ shared/
 ├── api/         client.ts(api.get/post/…) · parse.ts(BE 응답 봉투) · api-error.ts · schema.d.ts(생성) · schema-patch.ts · query-client.ts
 ├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · clear-session.ts
 ├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(EmptyState·InlineError·StatusChip·PageHeader)
-├── monitoring/  report.ts(reportError·reportWarning)
+├── security/    csp.ts
+├── monitoring/  report.ts(reportError·reportWarning — 지금은 콘솔)
 └── lib/         이름 붙일 주제가 없는 범용 유틸·훅만
 ```
 
