@@ -74,7 +74,7 @@ shared/
 ```
 
 - 파일이 3개 이상 모이는 주제는 형제 폴더로 독립시킨다(`auth`·`monitoring`처럼). `shared/lib`은 최후의 자리.
-- `shared/ui`의 shadcn 생성물은 리뷰 대상이 아니다(CodeRabbit path_filters 제외). 손대면 커밋 메시지에 이유를 적는다.
+- `shared/ui`의 shadcn 생성물은 리뷰 대상이 아니다(CodeRabbit path_filters 제외). 손대면 커밋 메시지에 이유를 적는다. shadcn 별칭(`components.json`)은 `ui`·`components`→`@/shared/ui`, `utils`→`@/shared/lib/cn`, `lib`·`hooks`→`@/shared/lib`. `shared/lib/use-mobile.ts`는 shadcn이 정한 이름이라 훅 파일명 규칙(`useCamel.ts`)의 예외다.
 - 서버 전용 모듈(쿠키·프록시 헬퍼)은 `import 'server-only'`를 첫 줄에 둔다 — 클라이언트 번들에 섞이면 빌드가 깨지게.
 
 ## 파일 이름
