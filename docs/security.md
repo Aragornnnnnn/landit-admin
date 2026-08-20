@@ -31,7 +31,7 @@
 
 ## 프록시 (`/api/proxy/[...path]`)
 
-- 허용 경로: `/api/v1/admin/**`, `/api/v1/auth/logout`, `/api/v1/auth/token/refresh`(내부 사용). 그 외 404.
+- 허용 경로: `/api/v1/admin/**`, `/api/v1/auth/logout`. 그 외 404. 토큰 갱신(`/auth/token/refresh`)은 프록시가 서버 안에서만 부르고 브라우저 경로로는 열지 않는다.
 - 허용 메서드: GET · POST · PUT · PATCH · DELETE. 변경 메서드는 `Sec-Fetch-Site: same-origin`이어야 한다. 헤더가 없는(구형) 브라우저는 `Origin`이 자기 오리진과 같아야 한다. 둘 다 아니면 403.
 - 전달 헤더: `Authorization: Bearer <access>`, `Content-Type`, `Accept`. 쿠키·기타 헤더는 BE로 보내지 않는다.
 - 응답 헤더: `Cache-Control: no-store`, `Content-Type` 그대로. `Set-Cookie`는 refresh 갱신 때만 우리가 붙인다.
