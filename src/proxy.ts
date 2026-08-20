@@ -36,11 +36,11 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // API 라우트·정적 파일·메타데이터 파일(아이콘·robots)·프리페치는 가드도 CSP도 필요 없다.
-    // 아이콘을 빼먹으면 가드가 /icon.png까지 /login으로 돌려보내 탭 아이콘이 안 뜬다 (Next 공식 CSP 가이드의 matcher)
+    // API 라우트·정적 파일·프리페치는 가드도 CSP도 필요 없다 (Next 공식 CSP 가이드의 matcher).
+    // 확장자가 붙은 경로는 전부 정적 파일로 보고 넘긴다 — 파일을 하나씩 열거하면 반드시 빠뜨린다.
+    // 실제로 /icon.png와 /brand/app-icon.png가 가드에 걸려 /login으로 튕겨 아이콘이 안 뜬 적이 있다
     {
-      source:
-        '/((?!api|_next/static|_next/image|icon.png|apple-icon.png|favicon.ico|robots.txt).*)',
+      source: '/((?!api|_next/static|_next/image|.*\\.[\\w]+$).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },
