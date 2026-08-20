@@ -18,7 +18,10 @@ const pending = {
 
 const deps = (over: Partial<CallbackDeps> = {}): CallbackDeps => ({
   exchangeCode: vi.fn(async () => 'id-token'),
-  establishSession: vi.fn(async () => ({ email: 'sujin@gmail.com' })),
+  establishSession: vi.fn(async () => ({
+    email: 'sujin@gmail.com',
+    nickname: '수진',
+  })),
   probeAdmin: vi.fn(async () => undefined),
   endSession: vi.fn(async () => undefined),
   ...over,
@@ -41,7 +44,11 @@ describe('completeSocialLogin', () => {
 
     const outcome = await completeSocialLogin(input(), d);
 
-    expect(outcome).toEqual({ kind: 'done', next: '/feedbacks' });
+    expect(outcome).toEqual({
+      kind: 'done',
+      next: '/feedbacks',
+      nickname: '수진',
+    });
     expect(d.exchangeCode).toHaveBeenCalledWith({
       provider: 'kakao',
       code: 'code',
@@ -79,6 +86,7 @@ describe('completeSocialLogin', () => {
     await expect(completeSocialLogin(input(), d)).resolves.toEqual({
       kind: 'done',
       next: '/feedbacks',
+      nickname: '수진',
     });
     expect(d.endSession).not.toHaveBeenCalled();
   });

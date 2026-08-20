@@ -23,7 +23,7 @@ export interface CallbackDeps {
     provider: string;
     idToken: string;
     nonce: string;
-  }) => Promise<{ email?: string | null }>;
+  }) => Promise<{ email?: string | null; nickname?: string | null }>;
   /** 가장 가벼운 admin 조회 — 403이면 관리자가 아니다 (관리자 판정 API가 생기면 교체) */
   probeAdmin: () => Promise<void>;
   /** POST /api/auth/logout — 관리자 아님이면 세션을 바로 끝낸다 */
@@ -31,7 +31,7 @@ export interface CallbackDeps {
 }
 
 export type CallbackOutcome =
-  | { kind: 'done'; next: string | undefined }
+  | { kind: 'done'; next: string | undefined; nickname: string | null }
   | { kind: 'forbidden'; email: string | null }
   | { kind: 'cancelled' }
   | { kind: 'failed'; message: string };
@@ -66,7 +66,7 @@ export async function completeSocialLogin(
     };
   }
 
-  let user: { email?: string | null };
+  let user: { email?: string | null; nickname?: string | null };
   try {
     const idToken = await deps.exchangeCode({
       provider: input.provider,
@@ -100,5 +100,5 @@ export async function completeSocialLogin(
     // 판정 호출이 다른 이유로 실패하면 들여보낸다 — 보호 구역의 첫 화면이 인라인 오류로 다시 시도하게 한다
   }
 
-  return { kind: 'done', next: pending.next };
+  return { kind: 'done', next: pending.next, nickname: user.nickname ?? null };
 }

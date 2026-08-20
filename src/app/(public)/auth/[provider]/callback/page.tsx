@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { api } from '@/shared/api/client';
 import { parseApiResponse } from '@/shared/api/parse';
+import { writeAccountDisplay } from '@/shared/auth/account-display';
 import { writeForbiddenNotice } from '@/shared/auth/forbidden-notice';
 import { LOGIN_PATH, safeNextPath } from '@/shared/auth/route-guard';
 import {
@@ -89,6 +90,7 @@ export default function SocialLoginCallbackPage({
 
       switch (outcome.kind) {
         case 'done':
+          writeAccountDisplay(outcome.nickname);
           router.replace(safeNextPath(outcome.next));
           return;
         case 'forbidden':

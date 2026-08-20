@@ -69,7 +69,8 @@ pnpm api:types        # 스웨거 → src/shared/api/schema.d.ts 재생성 (BE �
 2. **TDD** — 새 로직·버그 수정은 테스트를 먼저 쓴다. 규칙은 [docs/testing.md](docs/testing.md) (Given/When/Then, 한국어 "~하면 ~한다", 갈림길만, 목은 경계만).
 3. API 타입은 손으로 쓰지 않는다 — `schema.d.ts`에서 가져온다(`Schema<'이름'>`·`ResponseOf<경로, 메서드>` 헬퍼는 `schema-patch.ts`). 스웨거가 틀린 부분만 `schema-patch.ts`에 두고 BE 수정 후 지운다. springdoc은 required를 안 찍어서 생성 타입의 모든 필드가 optional이다 — 화면 코드에서 `!`로 뭉개지 말고 `parse.ts`를 지난 뒤 feature `api/`에서 실제 계약(필수 필드)을 좁힌 타입으로 한 번 감싼다.
 4. 구현 후 Figma 스크린샷과 대조한다(데스크톱 1440 · 모바일 390).
-5. 이슈는 노션 `LAN-XX`. 브랜치 `feat/LAN-XX`, `main`·`develop` 직접 커밋 금지. 커밋 `{type}: 한국어 메시지`(앱 하나라 scope 없음). 나머지는 [CONTRIBUTING.md](CONTRIBUTING.md).
+5. 화면 PR에는 구현 스크린샷과 Figma 원본을 `docs/images/screens/<화면>.png`·`<화면>.figma.png` 쌍으로 커밋하고 PR 본문에 나란히 넣는다(커밋 SHA 기반 blob URL — gh로는 이미지를 올릴 수 없다).
+6. 이슈는 노션 `LAN-XX`. 브랜치 `feat/LAN-XX`, `main`·`develop` 직접 커밋 금지. 커밋 `{type}: 한국어 메시지`(앱 하나라 scope 없음). 나머지는 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 보안 규칙 (어기면 리뷰 반려)
 
