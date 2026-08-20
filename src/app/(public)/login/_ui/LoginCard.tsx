@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import type { ForbiddenNotice } from '@/shared/auth/forbidden-notice';
 import type { WebSocialProvider } from '@/shared/auth/web-social-login';
 import { cn } from '@/shared/lib/cn';
+import { LanditLogo } from '@/shared/ui/LanditLogo';
 
 import { GoogleIcon, KakaoIcon } from './SocialIcons';
 
@@ -30,10 +31,8 @@ export function LoginCard({
       className="flex w-full max-w-[420px] flex-col gap-7"
     >
       <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-[26px] leading-none font-extrabold tracking-tight text-foreground">
-            landit
-          </span>
+        <div className="flex items-baseline gap-2">
+          <LanditLogo height={26} className="text-foreground" />
           <span className="text-lg font-bold text-muted-foreground">
             어드민
           </span>
