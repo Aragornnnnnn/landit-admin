@@ -108,5 +108,6 @@ Figma는 화면마다 페이지(탭)를 나눴다 — 각 페이지 왼쪽이 �
 ## 구현 메모
 
 - shadcn/ui: Sidebar(sidebar-07) · Sheet · Dialog/AlertDialog · Select · Popover · DropdownMenu · Table · Skeleton · Toast(sonner) · Tabs · Switch · Checkbox
+- 위 "공통 상태"·"칩"은 화면마다 다시 만들지 않는다 — `shared/ui`의 `StatusChip`(중립 칩 + 점) · `EmptyState`(한 줄 이유 + 다음 행동) · `InlineError`(문구 + 다시 시도) · `ListSkeleton`(기본 5행)과 `shared/lib/useDelayedPending`(200ms 규칙)을 쓴다. 어떤 라벨에 어떤 점을 쓸지 같은 도메인 판단은 화면이 하고, 프리미티브는 그걸 모른다
 - 데이터: TanStack Query, 목록은 keepPreviousData, 변경 후 관련 쿼리 invalidate(피드백 목록·배지 카운트·대시보드)
 - 폰트: 사용자 웹과 동일. 색: apps/web globals.css 토큰을 어드민 CSS 변수로 복사(페이지 배경만 #F9FAFB)

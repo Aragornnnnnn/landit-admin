@@ -68,11 +68,11 @@ app/
 ```
 shared/
 ├── api/         client.ts(api.get/post/…) · parse.ts(BE 응답 봉투) · api-error.ts · schema.d.ts(생성) · schema-patch.ts · query-client.ts
-├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · clear-session.ts
-├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(EmptyState·InlineError·StatusChip·PageHeader)
+├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · route-guard.ts · forbidden-notice.ts · account-display.ts
+├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(StatusChip·EmptyState·InlineError·ListSkeleton)
 ├── security/    csp.ts · same-origin.ts(CSRF 판정 — 프록시·auth 공용)
 ├── monitoring/  report.ts(reportError·reportWarning — 지금은 콘솔)
-└── lib/         이름 붙일 주제가 없는 범용 유틸·훅만
+└── lib/         cn.ts · use-mobile.ts · useDelayedPending.ts(로딩 200ms 규칙) — 이름 붙일 주제가 없는 범용 유틸·훅만
 ```
 
 - 파일이 3개 이상 모이는 주제는 형제 폴더로 독립시킨다(`auth`·`monitoring`처럼). `shared/lib`은 최후의 자리.
