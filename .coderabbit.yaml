@@ -19,11 +19,14 @@ reviews:
     enabled: true
     auto_incremental_review: true
     drafts: false
+    # develop·main·release로 가는 PR만 자동 리뷰한다.
+    # feat/*를 base로 쌓는 스택 PR까지 넣으면 한 이슈에 PR이 10개면 자동 리뷰도 10번 나가고,
+    # CodeRabbit 무료는 PR 리뷰가 시간당 1회라 금방 한도에 걸린다. 스택 PR은 필요할 때
+    # `@coderabbitai review` 코멘트로 부른다.
     base_branches:
       - '^develop$'
       - '^main$'
       - '^release/.*'
-      - '^feat/.*'
   path_filters:
     - '!pnpm-lock.yaml'
     - '!next-env.d.ts'

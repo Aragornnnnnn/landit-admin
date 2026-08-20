@@ -92,6 +92,9 @@ chore: 스웨거에서 API 타입을 생성하는 스크립트를 둔다
 - PR 리뷰는 모아뒀다가 오프라인 회의 시 진행한다.
 - '코드 추가' 변경 기준 500줄 이하를 권장한다. 기계 생성 파일(shadcn `ui/*`, `schema.d.ts`, lockfile)은 예외로 두되 PR 설명에 "생성 파일, 리뷰 대상 아님"이라 적는다.
 - PR은 5~10분 정도로 리뷰 가능한 볼륨으로 작성한다.
+- **label과 assignee를 붙인다** — 변경 성격에 맞는 label 하나 이상(`feat ✨` `fix 🐛` `refactor ♻️` `chore 🔧` `docs 📝` `test ✅` `remove 🗑️` `security 🔒` `ci ⚙️` `deps 📦` `hotfix 🔥` `release 🚀` `poc 🧪` — 커밋 타입과 같은 이름이다), assignee는 작업자 본인.
+- 자동 리뷰 봇(CodeRabbit·Gemini Code Assist)의 의견은 참고용이다. 사람 리뷰를 대신하지 않고, 동의하지 않으면 이유를 답글로 남긴다.
+- 자동 리뷰는 `develop`·`main`·`release`로 가는 PR에만 붙는다. `feat/*`를 base로 쌓는 스택 PR은 필요할 때 `@coderabbitai review`(또는 `/gemini review`) 코멘트로 부른다 — 스택 전체가 자동으로 돌면 봇 한도를 금방 쓴다.
 
 ### PR 쪼개기
 

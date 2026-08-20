@@ -1,0 +1,26 @@
+# Gemini Code Assist(GitHub) 리뷰 설정. 리뷰 기준은 .gemini/styleguide.md에 있다.
+# CodeRabbit(.coderabbit.yaml)과 함께 돌린다 — 둘 다 참고 의견이고, 사람 리뷰를 대신하지 않는다.
+
+# PR 요약에 시(poem) 같은 장식을 붙이지 않는다
+have_fun: false
+
+code_review:
+  disable: false
+  # MEDIUM 이상만 코멘트 — 취향 지적으로 PR이 묻히지 않게
+  comment_severity_threshold: MEDIUM
+  # 한 PR에 코멘트 15개까지. 넘치면 PR을 쪼개라는 신호다
+  max_review_comments: 15
+  pull_request_opened:
+    help: false
+    summary: true
+    code_review: true
+    # 초안(Draft)에는 붙이지 않는다 — 작업 중인 PR에 알림이 쌓이지 않게
+    include_drafts: false
+
+# 사람이 쓰지 않은 파일은 리뷰 대상이 아니다 (.coderabbit.yaml path_filters와 같은 목록)
+ignore_patterns:
+  - 'pnpm-lock.yaml'
+  - 'next-env.d.ts'
+  - 'src/shared/api/schema.d.ts'
+  - 'src/shared/ui/**'
+  - 'docs/images/**'
