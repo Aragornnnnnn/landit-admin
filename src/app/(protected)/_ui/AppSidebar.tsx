@@ -1,7 +1,7 @@
 'use client';
 
 // 셸 사이드바 — 로고 → 서버 카드 → 내비 그룹(배지) → 내 계정. 데스크톱 고정, 모바일은 shadcn Sidebar가 Sheet로 바꾼다 (docs/admin-spec.md "셸")
-import { ChevronRight, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -11,6 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
+import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
+import { LanditLogo } from '@/shared/ui/LanditLogo';
 import {
   Sidebar,
   SidebarContent,
@@ -51,28 +53,22 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
           className="flex items-center gap-2.5 px-1"
           aria-label="대시보드로"
         >
-          <span className="flex size-8 items-center justify-center rounded-[9px] bg-primary text-sm font-extrabold text-primary-foreground">
-            L
-          </span>
+          <LanditAppIcon size={32} className="rounded-[9px]" />
           <span className="flex items-baseline gap-1.5">
-            <span className="text-base font-extrabold tracking-tight text-foreground">
-              landit
-            </span>
+            <LanditLogo height={16} className="text-foreground" />
             <span className="text-xs font-medium text-muted-foreground">
               어드민
             </span>
           </span>
         </Link>
-        <div className="flex items-center justify-between rounded-xl px-1.5 py-0.5">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[15px] font-medium text-strong">
-              {developServer ? '개발 서버' : '운영 서버'}
-            </span>
-            <span className="text-xs text-subtle">
-              {apiHost || '서버 미설정'}
-            </span>
-          </div>
-          <ChevronRight className="size-4 text-subtle" aria-hidden />
+        {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 누를 곳이 아니므로 화살표 같은 어포던스를 두지 않는다 */}
+        <div className="flex flex-col gap-0.5 px-1.5 py-0.5">
+          <span className="text-[15px] font-medium text-strong">
+            {developServer ? '개발 서버' : '운영 서버'}
+          </span>
+          <span className="text-xs text-subtle">
+            {apiHost || '서버 미설정'}
+          </span>
         </div>
       </SidebarHeader>
 
@@ -131,9 +127,7 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
             className="flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left hover:bg-sidebar-accent"
             aria-label="내 계정 메뉴"
           >
-            <span className="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-strong">
-              {(nickname ?? '관').slice(0, 1)}
-            </span>
+            <LanditAppIcon size={32} className="rounded-full" />
             <span className="flex flex-col">
               <span className="text-[13px] font-medium text-foreground">
                 {nickname ?? '관리자'}
