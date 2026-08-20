@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: 'ko-KR'
+early_access: false
+tone_instructions: >-
+  한국어로 간결하고 직접적으로 작성한다. 실제 결함, 보안 문제, 계약 위반,
+  회귀 가능성처럼 조치가 필요한 내용만 지적한다. 각 지적에는 근거와 영향을
+  포함하고 취향 차이, CI가 검사하는 포맷, 요청 범위 밖 리팩터링은 제안하지 않는다.
+  이 저장소는 관리자 도구다 — 토큰 노출, 인가 우회, 캐시 누출, PII 로그처럼
+  보안에 닿는 변경은 사소해 보여도 지적한다.
+
+reviews:
+  profile: 'chill'
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+  in_progress_fortune: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    base_branches:
+      - '^develop$'
+      - '^main$'
+      - '^release/.*'
+      - '^feat/.*'
+  path_filters:
+    - '!pnpm-lock.yaml'
+    - '!next-env.d.ts'
+    - '!src/shared/api/schema.d.ts'
+    - '!src/shared/ui/**'
+  path_instructions:
+    - path: 'src/app/api/**'
+      instructions: |
+        토큰이 응답 body·로그·URL·클라이언트로 새지 않는지 확인한다.
+        프록시의 경로·메서드 화이트리스트, 변경 요청의 same-origin(Sec-Fetch-Site/Origin) 검사,
+        Cache-Control: no-store, 401 재발급 1회 후 쿠키 삭제가 유지되는지 본다.
+        쿠키 속성(__Host- 접두사, httpOnly, Secure, SameSite=Strict, Path=/)이 약해지면 지적한다.
+    - path: 'src/proxy.ts'
+      instructions: |
+        라우트 가드는 UX일 뿐 보호 수단이 아니다 — 가드에 인가 판단을 넣거나 role을 클라이언트에서
+        해석하는 변경을 지적한다. 오픈 리다이렉트(외부 URL로의 next 파라미터)를 확인한다.
+    - path: 'src/shared/auth/**'
+      instructions: |
+        PKCE·nonce·state 검증이 빠지지 않는지, redirect URI가 고정인지, 토큰이 클라이언트 상태에
+        저장되지 않는지 확인한다.
+    - path: 'src/shared/api/**'
+      instructions: |
+        landit-be의 endpoint, method, 요청·응답 DTO, enum, nullability와 비교한다.
+        타입은 schema.d.ts(스웨거 생성)에서 와야 하고 손으로 쓴 DTO는 지적한다.
+        오류 응답을 성공처럼 처리하거나 서버 응답 형태를 근거 없이 단정하는 변경을 지적한다.
+    - path: 'src/app/**'
+      instructions: |
+        서버 컴포넌트에서 어드민 데이터를 fetch하거나 Server Action으로 변경 요청을 보내는지 확인한다(금지).
+        dangerouslySetInnerHTML, 되돌릴 수 없는 작업의 확인창 누락, 누락된 loading·error·빈 상태,
+        접근성 회귀를 확인한다. docs/screens/*.md 스펙과 다르면 지적한다.
+    - path: 'next.config.ts'
+      instructions: |
+        보안 헤더·CSP가 약해지거나 새 외부 도메인이 문서(docs/security.md) 없이 추가되면 지적한다.
+    - path: 'package.json'
+      instructions: |
+        새 의존성의 이유가 PR에 있는지, minimumReleaseAge·onlyBuiltDependencies가 완화되지 않았는지 확인한다.
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  linked_repositories:
+    - repository: 'Aragornnnnnn/landit-be'
+      instructions: >-
+        공개 HTTP API와 인증·관리자 인가를 소유하는 backend다. /api/v1/admin/* endpoint, DTO, enum,
+        nullability, 오류 코드와 토큰 갱신 계약을 검증할 때 기준으로 참고한다.
+    - repository: 'Aragornnnnnn/landit-fe'
+      instructions: >-
+        같은 백엔드를 쓰는 사용자 웹이다. 편지함·피드백 칩 문구, 색 토큰, API 응답 파싱(parse.ts)의
+        기준으로 참고한다.
