@@ -1,9 +1,23 @@
-// 요청마다 nonce를 만들어 CSP 헤더를 붙인다 (Next 16 Proxy, 구 middleware). 라우트 가드는 로그인 PR에서 여기 더한다
+// Next 16 Proxy(구 middleware) — 요청마다 (1) 세션 쿠키 유무로 라우트 가드, (2) nonce 기반 CSP 헤더. 인가 판단은 하지 않는다 — 그건 BE 몫
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { decideRouteGuard } from '@/shared/auth/route-guard';
+import { sessionCookieNames } from '@/shared/auth/session-cookie';
 import { buildContentSecurityPolicy } from '@/shared/security/csp';
 
 export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  // 쿠키 존재만 본다 — 만료·위조는 첫 프록시 호출에서 BE가 401로 가른다
+  const names = sessionCookieNames(process.env.NODE_ENV === 'production');
+  const decision = decideRouteGuard({
+    pathname,
+    search,
+    hasSession: request.cookies.has(names.refresh),
+  });
+  if (decision.action === 'redirect') {
+    return NextResponse.redirect(new URL(decision.to, request.url));
+  }
+
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = buildContentSecurityPolicy({
     nonce,
@@ -22,9 +36,9 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // API 라우트·정적 파일·프리페치는 CSP가 필요 없다 (Next 공식 CSP 가이드의 matcher)
+    // API 라우트·정적 파일·프리페치는 가드도 CSP도 필요 없다 (Next 공식 CSP 가이드의 matcher)
     {
-      source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+      source: '/((?!api|_next/static|_next/image|favicon.ico|robots.txt).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

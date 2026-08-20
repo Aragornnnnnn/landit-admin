@@ -1,7 +1,8 @@
 // Content-Security-Policy 문자열을 조립한다 — 정책의 단일 출처. 외부 도메인을 더할 땐 여기와 docs/security.md를 같이 고친다
 
-// 스크립트·연결·이미지·프레임을 허용할 외부 오리진. 로그인 SDK(카카오·구글)는 로그인 PR에서 여기 추가한다
-const SCRIPT_ORIGINS: string[] = [];
+// 스크립트·연결·이미지·프레임을 허용할 외부 오리진 — 바꾸면 docs/security.md '헤더'도 같이 고친다
+// 카카오 JS SDK(로그인). strict-dynamic 브라우저는 nonce 스크립트가 불러온 것이라 자동 허용되고, 구형 브라우저 폴백으로 host도 둔다
+const SCRIPT_ORIGINS: string[] = ['https://t1.kakaocdn.net'];
 const CONNECT_ORIGINS: string[] = [];
 const IMG_ORIGINS: string[] = [];
 const FRAME_ORIGINS: string[] = [];
