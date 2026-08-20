@@ -17,11 +17,17 @@ on:
 
 jobs:
   claude:
-    # 멘션이 있을 때만 실행 — 그 외 코멘트는 Actions 분도 쓰지 않는다
-    if: contains(github.event.comment.body, '@claude')
+    # 멘션이 있고, 레포에 쓰기 권한이 있는 사람이 남긴 코멘트일 때만 실행한다.
+    # 지금은 private이라 외부인이 코멘트를 달 수 없지만, 나중에 공개로 바꿔도 아무나 우리 토큰을
+    # 쓰게 되지 않도록 미리 막아둔다. 멘션이 없으면 Actions 분도 쓰지 않는다
+    if: |
+      contains(github.event.comment.body, '@claude')
+      && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
+      # contents는 read만 준다 — Claude가 코드를 읽고 코멘트는 남기지만 커밋·푸시는 못 한다.
+      # PR 본문이나 코드에 "이렇게 커밋해줘" 같은 지시가 섞여 들어와도 실제로 밀어넣을 수 없다
       contents: read
       pull-requests: write
       issues: write
