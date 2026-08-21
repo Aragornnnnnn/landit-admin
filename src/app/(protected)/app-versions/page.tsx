@@ -1,6 +1,6 @@
-// 자리표시자 — 화면 PR(docs/screens/app-versions.md)에서 채운다
-import { ComingSoon } from '../_ui/ComingSoon';
+// 앱 버전 정책 (docs/screens/app-versions.md)
+import { AppVersionsPage } from './_ui/AppVersionsPage';
 
 export default function Page() {
-  return <ComingSoon spec="docs/screens/app-versions.md" />;
+  return <AppVersionsPage />;
 }
