@@ -21,12 +21,14 @@ import {
   type AppVersionDraft,
   type Platform,
 } from '../_model/app-version-draft';
+import type { UpdateKind } from '../_model/update-preview';
 import {
   useAppVersionsQuery,
   useSaveAppVersionMutation,
 } from '../_model/useAppVersions';
 import { AppVersionCard } from './AppVersionCard';
 import { SaveVersionDialog } from './SaveVersionDialog';
+import { UpdatePreviewDialog } from './UpdatePreviewDialog';
 
 export function AppVersionsPage() {
   const versions = useAppVersionsQuery();
@@ -54,6 +56,11 @@ function Editor({ versions }: { versions: AppVersion[] }) {
   const [drafts, setDrafts] = useState(saved);
   const [tab, setTab] = useState<Platform>('IOS');
   const [asking, setAsking] = useState<Platform | null>(null);
+  // 미리보기는 좁은 화면에선 고른 한 종류만 본다 (프레임 1050:12325)
+  const [previewing, setPreviewing] = useState<{
+    platform: Platform;
+    kind: UpdateKind;
+  } | null>(null);
 
   const shown = isMobile ? [tab] : PLATFORMS;
 
@@ -112,10 +119,18 @@ function Editor({ versions }: { versions: AppVersion[] }) {
                 }))
               }
               onSave={() => setAsking(platform)}
+              onPreview={(kind) => setPreviewing({ platform, kind })}
             />
           );
         })}
       </div>
+
+      <UpdatePreviewDialog
+        platform={previewing?.platform ?? null}
+        draft={previewing ? drafts[previewing.platform] : undefined}
+        only={isMobile ? previewing?.kind : undefined}
+        onClose={() => setPreviewing(null)}
+      />
 
       <SaveVersionDialog
         platform={asking}

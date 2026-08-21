@@ -12,6 +12,7 @@ import {
   type AppVersionDraft,
   type Platform,
 } from '../_model/app-version-draft';
+import type { UpdateKind } from '../_model/update-preview';
 
 interface AppVersionCardProps {
   platform: Platform;
@@ -24,6 +25,8 @@ interface AppVersionCardProps {
   onChange: (draft: AppVersionDraft) => void;
   onReset: () => void;
   onSave: () => void;
+  /** 이 문구가 앱에서 어떻게 보이는지 열어 본다 */
+  onPreview: (kind: UpdateKind) => void;
 }
 
 const FIELD =
@@ -39,6 +42,7 @@ export function AppVersionCard({
   onChange,
   onReset,
   onSave,
+  onPreview,
 }: AppVersionCardProps) {
   const set = (patch: Partial<AppVersionDraft>) =>
     onChange({ ...draft, ...patch });
@@ -64,6 +68,7 @@ export function AppVersionCard({
       <Group
         title="강제 업데이트"
         description="이 버전보다 낮은 앱은 스토어로만 갈 수 있어요"
+        onPreview={() => onPreview('force')}
       >
         <Field label="최소 지원 버전">
           <Input
@@ -88,6 +93,7 @@ export function AppVersionCard({
       <Group
         title="업데이트 권유 (소프트)"
         description="최소 지원 이상, 최신 미만인 앱에 닫을 수 있는 안내가 떠요"
+        onPreview={() => onPreview('soft')}
       >
         <div className="flex gap-3">
           <Field label="최신 버전" className="flex-1">
@@ -173,17 +179,31 @@ export function AppVersionCard({
 function Group({
   title,
   description,
+  onPreview,
   children,
 }: {
   title: string;
   description: string;
+  /** 없으면 미리보기 링크를 그리지 않는다 — 기록 묶음은 앱에 안 보인다 */
+  onPreview?: () => void;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-3 rounded-[14px] bg-background px-4 py-4">
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[14px] font-medium text-strong">{title}</span>
-        <span className="text-[12px] text-subtle">{description}</span>
+      <div className="flex items-start gap-3">
+        <div className="flex flex-1 flex-col gap-0.5">
+          <span className="text-[14px] font-medium text-strong">{title}</span>
+          <span className="text-[12px] text-subtle">{description}</span>
+        </div>
+        {onPreview && (
+          <button
+            type="button"
+            onClick={onPreview}
+            className="text-[12px] text-body underline-offset-2 hover:underline"
+          >
+            앱 화면 미리보기
+          </button>
+        )}
       </div>
       {children}
     </div>
