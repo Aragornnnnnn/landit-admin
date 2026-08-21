@@ -10,7 +10,7 @@ import { usePendingFeedbackCountQuery } from '../../_model/usePendingFeedbackCou
 import { FeedbackFilters } from './FeedbackFilters';
 import { FeedbackList } from './FeedbackList';
 import { FeedbackPagination } from './FeedbackPagination';
-import { FeedbackReplySheet } from './FeedbackReplySheet';
+import { FeedbackReply } from './FeedbackReply';
 
 /** Figma: "처리중 12건 · 전체 128건". 조건 때문에 결과가 없으면 "0건"만 (docs/screens/feedbacks.md) */
 function countLabelOf(totalElements: number, pending: number | undefined) {
@@ -57,7 +57,7 @@ export function FeedbackListPage() {
         isError={feedbacks.isError}
         onRetry={() => feedbacks.refetch()}
         onResetFilter={reset}
-        // 상세 시트는 다음 PR — 지금은 주소만 남겨 뒤로가기가 동작하게 한다
+        // 열림·닫힘을 주소에 남긴다 — 모바일 전체화면도 기기 뒤로가기로 닫힌다
         onSelect={(feedbackId) =>
           router.push(`?open=${feedbackId}`, { scroll: false })
         }
@@ -65,7 +65,7 @@ export function FeedbackListPage() {
 
       {openFeedback && (
         // key로 행이 바뀔 때마다 새로 마운트한다 — 입력이 이전 피드백에서 넘어오지 않게
-        <FeedbackReplySheet
+        <FeedbackReply
           key={openFeedback.feedbackId}
           feedback={openFeedback}
           onClose={() => router.back()}
