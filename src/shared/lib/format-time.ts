@@ -13,6 +13,13 @@ export function formatDateTime(iso: string): string {
   return `${two(date.getMonth() + 1)}.${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`;
 }
 
+/** "2026.08.18" — 가입일처럼 연도가 뜻을 갖는 날짜 */
+export function formatDateDot(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}.${two(date.getMonth() + 1)}.${two(date.getDate())}`;
+}
+
 /** "8.16" — 모바일에서 날짜만 적을 때. 월은 0을 채우지 않는다(프레임 기준) */
 export function formatShortDate(iso: string): string {
   const date = new Date(iso);
