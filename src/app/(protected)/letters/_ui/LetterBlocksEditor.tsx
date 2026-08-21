@@ -11,6 +11,7 @@ import {
   type LetterBlock,
   type LetterBlockType,
 } from '../_model/letter-draft';
+import { LetterImageBlock } from './LetterImageBlock';
 
 interface LetterBlocksEditorProps {
   blocks: LetterBlock[];
@@ -106,11 +107,9 @@ export function LetterBlocksEditor({
           )}
 
           {block.type === 'IMAGE' && (
-            <ImageBlock
+            <LetterImageBlock
               block={block}
-              onChangeCaption={(caption) =>
-                replace(index, { ...block, caption })
-              }
+              onChange={(next) => replace(index, next)}
             />
           )}
         </article>
@@ -121,13 +120,6 @@ export function LetterBlocksEditor({
           <button
             key={button.type}
             type="button"
-            // 이미지 추가는 업로드 URL 발급이 필요해 다음 PR에서 열린다
-            disabled={button.type === 'IMAGE'}
-            title={
-              button.type === 'IMAGE'
-                ? '이미지 업로드는 준비 중이에요'
-                : undefined
-            }
             onClick={() => onChange([...blocks, emptyBlock(button.type)])}
             className="rounded-lg bg-muted px-3.5 py-2 text-[13px] font-medium text-body hover:bg-secondary disabled:opacity-40"
           >
@@ -136,33 +128,5 @@ export function LetterBlocksEditor({
         ))}
       </div>
     </section>
-  );
-}
-
-// 이미 올라간 이미지는 캡션만 고칠 수 있다 — 파일 교체는 업로드 PR에서
-function ImageBlock({
-  block,
-  onChangeCaption,
-}: {
-  block: Extract<LetterBlock, { type: 'IMAGE' }>;
-  onChangeCaption: (caption: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-4">
-      {/* 외부 이미지라 next/image 최적화를 쓰지 않는다 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={block.url}
-        alt=""
-        className="h-16 w-24 shrink-0 rounded-lg bg-card object-cover"
-      />
-      <input
-        value={block.caption ?? ''}
-        placeholder="캡션"
-        aria-label="이미지 캡션"
-        onChange={(event) => onChangeCaption(event.target.value)}
-        className="flex-1 rounded-lg bg-card px-3 py-2 text-[13px] text-body outline-none"
-      />
-    </div>
   );
 }

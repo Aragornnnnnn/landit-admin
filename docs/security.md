@@ -54,13 +54,16 @@
 
 ## 환경·비밀
 
-| 변수                                                                                               | 공개 여부       | 위치                 |
-| -------------------------------------------------------------------------------------------------- | --------------- | -------------------- |
-| `API_BASE_URL`                                                                                     | 서버 전용       | Vercel env(환경별)   |
-| `NEXT_PUBLIC_API_HOST`                                                                             | 공개(표시용)    | Vercel env           |
-| `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` · `NEXT_PUBLIC_KAKAO_JS_KEY` · `NEXT_PUBLIC_KAKAO_REST_API_KEY` | 공개(client id) | Vercel env           |
-| `KAKAO_CLIENT_SECRET`                                                                              | **비밀**        | Vercel Sensitive env |
+| 변수                                                                                               | 공개 여부         | 위치                 |
+| -------------------------------------------------------------------------------------------------- | ----------------- | -------------------- |
+| `API_BASE_URL`                                                                                     | 서버 전용         | Vercel env(환경별)   |
+| `NEXT_PUBLIC_API_HOST`                                                                             | 공개(표시용)      | Vercel env           |
+| `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` · `NEXT_PUBLIC_KAKAO_JS_KEY` · `NEXT_PUBLIC_KAKAO_REST_API_KEY` | 공개(client id)   | Vercel env           |
+| `KAKAO_CLIENT_SECRET`                                                                              | **비밀**          | Vercel Sensitive env |
+| `CONTENT_IMAGE_ORIGINS`                                                                            | 공개(오리진 목록) | Vercel env           |
 
+- `CONTENT_IMAGE_ORIGINS`는 편지 본문 이미지가 올라가고 내려오는 스토리지 오리진이다(쉼표 구분). CSP의 `img-src`·`connect-src`에만 더해지고, `https://…` 형식만 통과한다(`readImageOrigins`) — 로컬 스텁용 `http://localhost:PORT`는 개발 서버에서만 허용된다. 비우면 브라우저가 업로드를 막는다(닫힌 쪽이 기본).
+- 업로드는 발급받은 URL로 브라우저가 스토리지에 **직접** PUT한다. 파일이 우리 서버를 지나지 않으므로 프록시가 커지지 않고, 관리자 세션이 필요한 건 URL 발급까지다. 대신 **스토리지(S3·CloudFront) CORS가 어드민 오리진의 PUT을 허용**해야 한다 — 안 되면 브라우저 단계에서 막힌다.
 - Preview·로컬은 develop BE, Production만 prod BE. Preview에서 prod BE를 가리키는 env를 만들지 않는다.
 - 외부 에러 수집기(Sentry 등)는 두지 않는다 — 내부 도구라 사용자가 곧 팀이고, 서버 오류는 Vercel 런타임 로그로 본다. `reportError`/`reportWarning`은 콘솔로만 남기며 extra에 사용자 식별 정보·토큰 금지. 수집기를 붙이게 되면 요청 헤더·쿠키를 이벤트에 싣지 않게 먼저 막는다.
 

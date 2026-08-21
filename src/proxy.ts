@@ -3,7 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { decideRouteGuard } from '@/shared/auth/route-guard';
 import { currentSessionCookieConfig } from '@/shared/auth/session-cookie';
-import { buildContentSecurityPolicy } from '@/shared/security/csp';
+import {
+  buildContentSecurityPolicy,
+  readImageOrigins,
+} from '@/shared/security/csp';
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -19,9 +22,13 @@ export function proxy(request: NextRequest) {
   }
 
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const isDev = process.env.NODE_ENV === 'development';
   const csp = buildContentSecurityPolicy({
     nonce,
-    isDev: process.env.NODE_ENV === 'development',
+    isDev,
+    imageOrigins: readImageOrigins(process.env.CONTENT_IMAGE_ORIGINS, {
+      isDev,
+    }),
   });
 
   // 요청 헤더에도 넣는다 — Next가 여기서 nonce를 읽어 자기 인라인 스크립트에 붙인다
