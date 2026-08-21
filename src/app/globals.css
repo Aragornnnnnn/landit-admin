@@ -61,6 +61,8 @@
   --color-kakao: var(--kakao);
   --color-kakao-foreground: var(--kakao-foreground);
   /* 어드민 전용 — 칩(유형·상태)은 전부 중립 회색, 셸 텍스트 단계 */
+  --color-stripe: var(--stripe);
+  --color-field-border: var(--field-border);
   --color-chip: var(--chip);
   --color-chip-foreground: var(--chip-foreground);
   --color-hairline: var(--hairline);
@@ -89,8 +91,10 @@
   --gray-950: #111111;
   /* 앱인토스 콘솔 톤의 쿨 그레이 — Figma 셸·칩·텍스트 단계에서 그대로 쓰는 값 */
   --console-50: #f9fafb;
+  --console-75: #f4f5f7;
   --console-100: #f2f4f6;
   --console-150: #eef0f3;
+  --console-200: #e5e8eb;
   --console-500: #8b95a1;
   --console-700: #4e5968;
   --console-800: #333d4b;
@@ -148,6 +152,10 @@
   --kakao: #fee500;
   --kakao-foreground: #191919;
   /* 어드민 전용 */
+  /* 목록 얼룩 행 — Figma 테이블은 한 줄 걸러 옅은 배경을 깐다 */
+  --stripe: var(--console-75);
+  /* 필터·페이지 버튼 테두리 — Figma는 흰 배경 + 이 테두리를 쓴다 */
+  --field-border: var(--console-200);
   --chip: var(--console-100);
   --chip-foreground: var(--console-700);
   --hairline: var(--console-150);

@@ -1,6 +1,15 @@
-// 자리표시자 — 화면 PR(docs/screens/feedbacks.md)에서 채운다
-import { ComingSoon } from '../_ui/ComingSoon';
+'use client';
 
-export default function Page() {
-  return <ComingSoon spec="docs/screens/feedbacks.md" />;
+// /feedbacks — URL 파라미터 해석과 조립만. 필터 규칙은 _model, 화면은 _ui에 있다
+import { Suspense } from 'react';
+
+import { FeedbackListPage } from './_ui/FeedbackListPage';
+
+export default function FeedbacksPage() {
+  // useSearchParams는 Suspense 경계를 요구한다
+  return (
+    <Suspense fallback={null}>
+      <FeedbackListPage />
+    </Suspense>
+  );
 }
