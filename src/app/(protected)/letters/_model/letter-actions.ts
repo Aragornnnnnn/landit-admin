@@ -1,5 +1,6 @@
 // 행 ⋯ 메뉴에 무엇이 뜨고 무엇을 보내는지 — 상태·타입만 보고 정한다 (docs/screens/letters.md "행 ⋯ 메뉴").
 // 화면은 이 목록을 그리기만 한다. 무엇이 되돌릴 수 없는 일인지도 여기서 말한다
+import type { LetterStatus } from './letter-filter';
 import type { LetterItem } from './useLetterGroupQuery';
 
 export type LetterAction = 'publish' | 'hide' | 'unhide' | 'pin' | 'unpin';
@@ -69,6 +70,16 @@ function pinItem(item: LetterItem): LetterMenuItem {
     disabledReason:
       item.type === 'NOTICE' ? undefined : '공지만 고정할 수 있어요',
   };
+}
+
+/** 그 일을 하고 나면 편지가 어떤 상태가 되나 — 고정은 상태를 바꾸지 않는다 */
+export function statusAfter(
+  action: LetterAction,
+  current: LetterStatus,
+): LetterStatus {
+  if (action === 'publish' || action === 'unhide') return 'PUBLISHED';
+  if (action === 'hide') return 'UNPUBLISHED';
+  return current;
 }
 
 /** PATCH 본문 — 부분 수정이라 바꿀 것만 보낸다 */
