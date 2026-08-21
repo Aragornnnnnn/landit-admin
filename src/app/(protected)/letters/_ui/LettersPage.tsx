@@ -14,7 +14,9 @@ import {
   type LetterFilter,
 } from '../_model/letter-filter';
 import { letterSummaryLabel } from '../_model/letter-label';
+import { useLetterActions } from '../_model/useLetterActions';
 import { useLetterGroupQuery } from '../_model/useLetterGroupQuery';
+import { LetterActionDialog } from './LetterActionDialog';
 import { LetterFilters } from './LetterFilters';
 import { LetterGroupCard } from './LetterGroupCard';
 
@@ -46,6 +48,8 @@ export function LettersPage() {
     })),
   );
 
+  const actions = useLetterActions();
+
   const change = (patch: Partial<LetterFilter>) => {
     const query = writeLetterFilter({ ...filter, ...patch });
     router.replace(query ? `?${query}` : '/letters', { scroll: false });
@@ -68,8 +72,16 @@ export function LettersPage() {
           key={group.status}
           group={group}
           query={queries[group.status]}
+          onAction={actions.request}
         />
       ))}
+
+      <LetterActionDialog
+        action={actions.asked}
+        pending={actions.pending}
+        onCancel={actions.cancel}
+        onConfirm={actions.confirm}
+      />
     </div>
   );
 }

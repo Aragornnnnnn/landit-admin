@@ -7,6 +7,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 
+import type { LetterAction } from '../_model/letter-actions';
 import type { LetterGroup } from '../_model/letter-filter';
 import { letterGroupCountLabel } from '../_model/letter-label';
 import {
@@ -20,9 +21,15 @@ import { LetterTable } from './LetterTable';
 interface LetterGroupCardProps {
   group: LetterGroup;
   query: ReturnType<typeof useLetterGroupQuery>;
+  /** 행 ⋯ 메뉴에서 고른 일 — 물어볼지 바로 보낼지는 화면이 정한다 */
+  onAction: (letterId: number, action: LetterAction) => void;
 }
 
-export function LetterGroupCard({ group, query }: LetterGroupCardProps) {
+export function LetterGroupCard({
+  group,
+  query,
+  onAction,
+}: LetterGroupCardProps) {
   const isMobile = useIsMobile();
   const items = sortLetters(query.data?.items ?? []);
 
@@ -43,7 +50,13 @@ export function LetterGroupCard({ group, query }: LetterGroupCardProps) {
   );
 
   const body = (
-    <Body group={group} query={query} items={items} isMobile={isMobile} />
+    <Body
+      group={group}
+      query={query}
+      onAction={onAction}
+      items={items}
+      isMobile={isMobile}
+    />
   );
 
   if (isMobile) {
@@ -66,6 +79,7 @@ export function LetterGroupCard({ group, query }: LetterGroupCardProps) {
 function Body({
   group,
   query,
+  onAction,
   items,
   isMobile,
 }: LetterGroupCardProps & { items: LetterItem[]; isMobile: boolean }) {
@@ -81,10 +95,11 @@ function Body({
   if (items.length === 0)
     return <EmptyState className="py-10" title={group.empty} />;
 
+  // 모바일 프레임의 행에는 ⋯가 없다 — 좁은 화면에선 편지를 열어서 바꾼다
   return isMobile ? (
     <LetterCardList items={items} />
   ) : (
-    <LetterTable items={items} />
+    <LetterTable items={items} onAction={onAction} />
   );
 }
 
