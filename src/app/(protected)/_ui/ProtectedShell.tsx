@@ -3,6 +3,7 @@
 // 보호 구역 셸 — 사이드바 + 상단바 + 콘텐츠
 import { SidebarInset, SidebarProvider } from '@/shared/ui/sidebar';
 
+import { ApiHostProvider } from '../_model/api-host';
 import { AppSidebar } from './AppSidebar';
 import { TopBar } from './TopBar';
 
@@ -14,14 +15,16 @@ export function ProtectedShell({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider
-      style={{ '--sidebar-width': '280px' } as React.CSSProperties}
-    >
-      <AppSidebar apiHost={apiHost} />
-      <SidebarInset className="bg-background">
-        <TopBar />
-        <div className="flex-1 px-6 pb-12 md:px-12">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+    <ApiHostProvider value={apiHost}>
+      <SidebarProvider
+        style={{ '--sidebar-width': '280px' } as React.CSSProperties}
+      >
+        <AppSidebar apiHost={apiHost} />
+        <SidebarInset className="bg-background">
+          <TopBar />
+          <div className="flex-1 px-6 pb-12 md:px-12">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
+    </ApiHostProvider>
   );
 }
