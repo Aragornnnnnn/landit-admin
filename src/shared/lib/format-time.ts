@@ -13,6 +13,13 @@ export function formatDateTime(iso: string): string {
   return `${two(date.getMonth() + 1)}.${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`;
 }
 
+/** "8.16" — 모바일에서 날짜만 적을 때. 월은 0을 채우지 않는다(프레임 기준) */
+export function formatShortDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getMonth() + 1}.${two(date.getDate())}`;
+}
+
 /**
  * "방금", "10분 전", "3시간 전", "어제", "8.16" — 모바일 목록.
  * 하루가 넘으면 어제까지만 말로 쓰고 그 뒤로는 날짜를 적는다. "3일 전"보다 날짜가 찾기 쉽다
@@ -29,5 +36,5 @@ export function formatRelativeTime(
   if (elapsed < HOUR) return `${Math.floor(elapsed / MINUTE)}분 전`;
   if (elapsed < DAY) return `${Math.floor(elapsed / HOUR)}시간 전`;
   if (elapsed < 2 * DAY) return '어제';
-  return `${date.getMonth() + 1}.${two(date.getDate())}`;
+  return formatShortDate(iso);
 }

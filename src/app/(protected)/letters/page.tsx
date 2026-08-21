@@ -1,6 +1,13 @@
-// 자리표시자 — 화면 PR(docs/screens/letters.md)에서 채운다
-import { ComingSoon } from '../_ui/ComingSoon';
+// 공지·업데이트 목록 (docs/screens/letters.md)
+import { Suspense } from 'react';
+
+import { LettersPage } from './_ui/LettersPage';
 
 export default function Page() {
-  return <ComingSoon spec="docs/screens/letters.md" />;
+  // useSearchParams는 Suspense 경계가 필요하다 — 목록 화면 전체가 그 경계다
+  return (
+    <Suspense>
+      <LettersPage />
+    </Suspense>
+  );
 }
