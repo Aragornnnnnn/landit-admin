@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { LETTER_CONFIRM, type LetterAction } from './letter-actions';
 import { useLetterActionMutation } from './useLetterActionMutation';
 
-export function useLetterActions() {
+export function useLetterActions(onDone?: (action: LetterAction) => void) {
   const mutation = useLetterActionMutation();
   const [asked, setAsked] = useState<{
     letterId: number;
@@ -15,7 +15,15 @@ export function useLetterActions() {
   } | null>(null);
 
   const run = (letterId: number, action: LetterAction) =>
-    mutation.mutate({ letterId, action }, { onSuccess: () => setAsked(null) });
+    mutation.mutate(
+      { letterId, action },
+      {
+        onSuccess: () => {
+          setAsked(null);
+          onDone?.(action);
+        },
+      },
+    );
 
   return {
     /** 지금 묻고 있는 행동. 없으면 창이 닫혀 있다 */

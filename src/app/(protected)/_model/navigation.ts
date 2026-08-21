@@ -70,8 +70,15 @@ export function pageTitleFor(pathname: string): string {
   const match = NAV_GROUPS.flatMap((g) => g.items).find((item) =>
     isActiveNav(item.href, pathname),
   );
-  return match?.label ?? '';
+  if (!match) return '';
+  // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
+  const sub = SUB_TITLES[pathname];
+  return sub ? `${match.label} / ${sub}` : match.label;
 }
+
+const SUB_TITLES: Record<string, string> = {
+  '/letters/new': '새 편지',
+};
 
 /** 현재 BE 호스트가 develop인지 — 시나리오 테스트 메뉴 노출 기준 */
 export function isDevelopServer(apiHost: string | undefined): boolean {

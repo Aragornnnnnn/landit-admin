@@ -1,6 +1,6 @@
-// 자리표시자 — 에디터 PR(docs/screens/letters.md "새 편지 / 편집")에서 채운다
-import { ComingSoon } from '../../_ui/ComingSoon';
+// 새 편지 (docs/screens/letters.md "새 편지 / 편집")
+import { LetterEditor } from '../_ui/LetterEditor';
 
 export default function Page() {
-  return <ComingSoon spec="docs/screens/letters.md — 새 편지" />;
+  return <LetterEditor />;
 }

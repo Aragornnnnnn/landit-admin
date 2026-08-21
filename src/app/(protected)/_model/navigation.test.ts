@@ -19,7 +19,9 @@ describe('pageTitleFor', () => {
   it.each([
     ['/', '대시보드'],
     ['/feedbacks', '피드백'],
-    ['/letters/new', '공지·업데이트'],
+    // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
+    ['/letters/new', '공지·업데이트 / 새 편지'],
+    ['/letters/21', '공지·업데이트'],
     ['/users/12', '사용자'],
     ['/unknown', ''],
   ])('%s → "%s"', (pathname, title) => {
