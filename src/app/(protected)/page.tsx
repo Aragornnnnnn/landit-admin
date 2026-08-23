@@ -1,6 +1,6 @@
-// 대시보드 자리 — 화면 PR(docs/screens/dashboard.md)에서 채운다
-import { ComingSoon } from './_ui/ComingSoon';
+// 대시보드 (docs/screens/dashboard.md)
+import { DashboardPage } from './_ui/DashboardPage';
 
-export default function DashboardPage() {
-  return <ComingSoon spec="docs/screens/dashboard.md" />;
+export default function Page() {
+  return <DashboardPage />;
 }
