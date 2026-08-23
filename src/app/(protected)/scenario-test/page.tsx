@@ -1,6 +1,6 @@
-// 자리표시자 — 화면 PR(docs/screens/scenario-test.md)에서 채운다
-import { ComingSoon } from '../_ui/ComingSoon';
+// 시나리오 테스트 (docs/screens/scenario-test.md) — develop 전용 화면
+import { ScenarioTestPage } from './_ui/ScenarioTestPage';
 
 export default function Page() {
-  return <ComingSoon spec="docs/screens/scenario-test.md" />;
+  return <ScenarioTestPage />;
 }
