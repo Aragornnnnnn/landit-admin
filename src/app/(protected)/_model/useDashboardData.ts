@@ -9,6 +9,8 @@ import type { AdminUserListItem, Schema } from '@/shared/api/schema-patch';
 
 type FeedbackListResponse = Schema<'AdminMailboxFeedbackListResponse'>;
 type UserListResponse = { items?: AdminUserListItem[] };
+type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
+type AppVersion = Schema<'AdminAppVersionResponse'>;
 
 /** 차트는 7일치다. 그 안의 건수를 다 세려면 넉넉히 받아야 한다 — 넘치면 막대가 낮게 나온다 */
 const RECENT_DAYS = 7;
@@ -46,12 +48,37 @@ export function useDashboardData(now: Date) {
       ),
   });
 
+  // 편지함 카드는 "지금 사용자에게 보이는" 것만 본다 — 발행된 편지 위에서 세 통
+  const letters = useQuery({
+    queryKey: ['dashboard', 'published-letters'] as const,
+    queryFn: () =>
+      api.get<LetterListResponse>(
+        '/api/v1/admin/mailbox/letters?publicationStatus=PUBLISHED&page=0&size=20',
+      ),
+  });
+
+  const drafts = useQuery({
+    queryKey: ['dashboard', 'draft-letters'] as const,
+    queryFn: () =>
+      api.get<LetterListResponse>(
+        '/api/v1/admin/mailbox/letters?publicationStatus=DRAFT&page=0&size=20',
+      ),
+  });
+
+  const appVersions = useQuery({
+    queryKey: ['app-versions'] as const,
+    queryFn: () => api.get<AppVersion[]>('/api/v1/admin/app-versions'),
+  });
+
   return {
     recentFeedbacks: recent.data?.items ?? [],
     recentTotal: recent.data?.totalElements ?? 0,
     pendingFeedbacks: pending.data?.items ?? [],
     pendingTotal: pending.data?.totalElements ?? 0,
     users: users.data?.items ?? [],
+    publishedLetters: letters.data?.items ?? [],
+    draftLetterCount: drafts.data?.items?.length ?? 0,
+    appVersions: appVersions.data ?? [],
     isPending: recent.isPending || pending.isPending || users.isPending,
     isError: recent.isError || pending.isError || users.isError,
     refetch: () => {
