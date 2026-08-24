@@ -20,7 +20,7 @@ export function ProtectedShell({
         style={{ '--sidebar-width': '280px' } as React.CSSProperties}
       >
         <AppSidebar apiHost={apiHost} />
-        <SidebarInset className="bg-background">
+        <SidebarInset className="min-w-0 bg-background">
           <TopBar />
           <div className="flex-1 px-6 pb-12 md:px-12">{children}</div>
         </SidebarInset>

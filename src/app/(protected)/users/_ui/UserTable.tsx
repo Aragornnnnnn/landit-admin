@@ -2,7 +2,6 @@
 
 // 데스크톱 사용자 표 — 흰 카드, 한 줄 걸러 옅은 배경 (Figma 1050:11383).
 // 닉네임이 없는 사용자는 "—"다. 빈칸으로 두면 셀이 밀려 보인다
-import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 import type { AdminUserListItem } from '@/shared/api/schema-patch';
@@ -24,69 +23,65 @@ const CELL = {
   role: 'w-[110px] shrink-0',
   status: 'w-[110px] shrink-0',
   joinedAt: 'w-[110px] shrink-0',
-  chevron: 'w-4 shrink-0',
 };
 
 const DOT_COLOR = { progress: 'bg-primary', done: 'bg-success' } as const;
 
 export function UserTable({ users }: { users: AdminUserListItem[] }) {
   return (
-    <div className="w-full rounded-[20px] bg-card px-2 pb-2">
-      <div
-        role="row"
-        className="flex w-full items-center gap-4 px-5 pt-3 pb-2 text-xs font-medium text-subtle"
-      >
-        <span className={CELL.id}>ID</span>
-        <span className={CELL.email}>이메일</span>
-        <span className={CELL.nickname}>닉네임</span>
-        <span className={CELL.role}>역할</span>
-        <span className={CELL.status}>상태</span>
-        <span className={CELL.joinedAt}>가입</span>
-        <span className={CELL.chevron} />
-      </div>
+    <div className="w-full overflow-x-auto rounded-[20px] bg-card px-1 pb-1">
+      <div className="min-w-[820px]">
+        <div
+          role="row"
+          className="flex w-full items-center gap-4 px-5 pt-3 pb-2 text-xs font-medium text-subtle"
+        >
+          <span className={CELL.id}>ID</span>
+          <span className={CELL.email}>이메일</span>
+          <span className={CELL.nickname}>닉네임</span>
+          <span className={CELL.role}>역할</span>
+          <span className={CELL.status}>상태</span>
+          <span className={CELL.joinedAt}>가입</span>
+        </div>
 
-      <div className="flex flex-col gap-0.5">
-        {users.map((user, index) => (
-          <Link
-            key={user.userProfileId}
-            href={`/users/${user.userProfileId}`}
-            className={cn(
-              'flex w-full items-center gap-4 rounded-xl px-5 py-3 transition-colors hover:bg-hairline',
-              index % 2 === 0 && 'bg-stripe',
-            )}
-          >
-            <span className={cn(CELL.id, 'text-[13px] text-subtle')}>
-              #{user.userProfileId}
-            </span>
-            <span
-              className={cn(CELL.email, 'truncate text-[13px] text-strong')}
+        <div className="flex flex-col gap-0.5">
+          {users.map((user, index) => (
+            <Link
+              key={user.userProfileId}
+              href={`/users/${user.userProfileId}`}
+              className={cn(
+                'flex w-full items-center gap-4 rounded-lg px-5 py-3 transition-colors hover:bg-hairline',
+                index % 2 === 0 && 'bg-stripe',
+              )}
             >
-              {user.email}
-            </span>
-            <span
-              className={cn(CELL.nickname, 'truncate text-[13px] text-body')}
-            >
-              {user.nickname || '—'}
-            </span>
-            <Cell
-              className={CELL.role}
-              dot={user.role ? USER_ROLE_DOT[user.role] : undefined}
-              label={user.role ? USER_ROLE_LABEL[user.role] : ''}
-            />
-            <Cell
-              className={CELL.status}
-              dot={user.status ? USER_STATUS_DOT[user.status] : undefined}
-              label={user.status ? USER_STATUS_LABEL[user.status] : ''}
-            />
-            <span className={cn(CELL.joinedAt, 'text-[13px] text-subtle')}>
-              {user.createdAt ? formatDateDot(user.createdAt) : ''}
-            </span>
-            <ChevronRight
-              className={cn(CELL.chevron, 'text-subtle')}
-              aria-hidden
-            />
-          </Link>
-        ))}
+              <span className={cn(CELL.id, 'text-[13px] text-subtle')}>
+                #{user.userProfileId}
+              </span>
+              <span
+                className={cn(CELL.email, 'truncate text-[13px] text-strong')}
+              >
+                {user.email}
+              </span>
+              <span
+                className={cn(CELL.nickname, 'truncate text-[13px] text-body')}
+              >
+                {user.nickname || '—'}
+              </span>
+              <Cell
+                className={CELL.role}
+                dot={user.role ? USER_ROLE_DOT[user.role] : undefined}
+                label={user.role ? USER_ROLE_LABEL[user.role] : ''}
+              />
+              <Cell
+                className={CELL.status}
+                dot={user.status ? USER_STATUS_DOT[user.status] : undefined}
+                label={user.status ? USER_STATUS_LABEL[user.status] : ''}
+              />
+              <span className={cn(CELL.joinedAt, 'text-[13px] text-subtle')}>
+                {user.createdAt ? formatDateDot(user.createdAt) : ''}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

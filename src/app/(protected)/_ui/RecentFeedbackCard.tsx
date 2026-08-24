@@ -65,56 +65,58 @@ export function RecentFeedbackCard({ items }: { items: FeedbackItem[] }) {
           ))}
         </ul>
       ) : (
-        <div className="pt-2">
-          <div
-            role="row"
-            className="flex items-center gap-4 px-3 pb-2 text-xs font-medium text-subtle"
-          >
-            <span className="w-[90px] shrink-0">유형</span>
-            <span className="min-w-px flex-1">내용</span>
-            <span className="w-[200px] shrink-0">보낸 사람</span>
-            <span className="w-[90px] shrink-0">상태</span>
-            <span className="w-20 shrink-0">접수</span>
-          </div>
-          {shown.map((item, index) => (
-            <Link
-              key={item.feedbackId}
-              href={`/feedbacks?open=${item.feedbackId}`}
-              className={cn(
-                'flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-hairline',
-                index % 2 === 0 && 'bg-stripe',
-              )}
+        <div className="overflow-x-auto pt-2">
+          <div className="min-w-[760px]">
+            <div
+              role="row"
+              className="flex items-center gap-4 px-3 pb-2 text-xs font-medium text-subtle"
             >
-              <span className="w-[90px] shrink-0 text-[13px] font-medium text-chip-foreground">
-                {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}
-              </span>
-              <span className="min-w-px flex-1 truncate text-[13px] text-strong">
-                {item.content}
-              </span>
-              <span className="w-[200px] shrink-0 truncate text-[13px] text-subtle">
-                {item.nickname} · {item.email}
-              </span>
-              <span className="flex w-[90px] shrink-0 items-center gap-[5px] text-[13px] text-body">
-                {item.status && (
-                  <>
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'size-1.5 rounded-full',
-                        FEEDBACK_STATUS_DOT[item.status] === 'done'
-                          ? 'bg-success'
-                          : 'bg-primary',
-                      )}
-                    />
-                    {FEEDBACK_STATUS_LABEL[item.status]}
-                  </>
+              <span className="w-[90px] shrink-0">유형</span>
+              <span className="min-w-px flex-1">내용</span>
+              <span className="w-[200px] shrink-0">보낸 사람</span>
+              <span className="w-[90px] shrink-0">상태</span>
+              <span className="w-20 shrink-0">접수</span>
+            </div>
+            {shown.map((item, index) => (
+              <Link
+                key={item.feedbackId}
+                href={`/feedbacks?open=${item.feedbackId}`}
+                className={cn(
+                  'flex items-center gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-hairline',
+                  index % 2 === 0 && 'bg-stripe',
                 )}
-              </span>
-              <span className="w-20 shrink-0 text-[13px] text-subtle">
-                {item.createdAt ? formatRelativeTime(item.createdAt) : ''}
-              </span>
-            </Link>
-          ))}
+              >
+                <span className="w-[90px] shrink-0 text-[13px] font-medium text-chip-foreground">
+                  {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}
+                </span>
+                <span className="min-w-px flex-1 truncate text-[13px] text-strong">
+                  {item.content}
+                </span>
+                <span className="w-[200px] shrink-0 truncate text-[13px] text-subtle">
+                  {item.nickname} · {item.email}
+                </span>
+                <span className="flex w-[90px] shrink-0 items-center gap-[5px] text-[13px] text-body">
+                  {item.status && (
+                    <>
+                      <span
+                        aria-hidden
+                        className={cn(
+                          'size-1.5 rounded-full',
+                          FEEDBACK_STATUS_DOT[item.status] === 'done'
+                            ? 'bg-success'
+                            : 'bg-primary',
+                        )}
+                      />
+                      {FEEDBACK_STATUS_LABEL[item.status]}
+                    </>
+                  )}
+                </span>
+                <span className="w-20 shrink-0 text-[13px] text-subtle">
+                  {item.createdAt ? formatRelativeTime(item.createdAt) : ''}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </section>
