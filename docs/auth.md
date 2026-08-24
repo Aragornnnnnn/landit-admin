@@ -31,11 +31,11 @@ route handler ──▶ Set-Cookie: __Host-landit-admin-access (Max-Age=accessTo
                ──▶ Set-Cookie: __Host-landit-admin-refresh (Max-Age=refreshTokenExpiresIn)
                ──▶ body: { success: true, data: { user } }   (토큰 없음)
 브라우저 ── router.replace(next ?? '/')
-(protected) 첫 화면 ── GET /api/proxy/api/v1/admin/… ──▶ 200 → 관리자 / 403 → "관리자 아님" 화면
+소셜 로그인 응답 data.user.role ──▶ ADMIN → 들여보냄 / 그 외 → 로그아웃 + "관리자 아님" 화면
 ```
 
 - 카카오·구글 로그인 코드는 landit-fe `shared/auth/web-social-login.ts`·`crypto.ts`를 옮긴다(PKCE·nonce·state 검증 포함). redirect URI는 `/auth/{provider}/callback`으로 고정하고 각 콘솔에 등록한다.
-- 관리자 판정 API가 없어 로그인 성공 = 관리자가 아니다. 첫 admin 호출의 403으로 판정하고, "관리자 아님" 화면에서 로그아웃(쿠키 삭제)을 제공한다. BE에 `/auth/me`가 생기면 social-login 직후 판정으로 바꾼다.
+- 관리자 판정은 **로그인 응답의 `data.user.role`**로 한다(LAN-337). ADMIN이 아니거나 role이 없으면(옛 빌드 대비) 세션을 바로 끝내고 "관리자 아님" 화면 — 모르면 닫는 쪽이 안전하다. 화면 진입 후의 실제 인가는 여전히 BE(`AdminAuthorizationFilter`) 몫이다.
 
 ### 요청
 

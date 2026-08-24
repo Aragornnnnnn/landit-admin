@@ -1,4 +1,4 @@
-// 콜백 흐름 검증 — state 대조, 교환→세션→관리자 판정 순서, 403이면 세션을 끝내고 forbidden, 취소는 조용히
+// 콜백 흐름 검증 — state 대조, 교환→세션 순서, 로그인 응답 role이 ADMIN이 아니면 세션을 끝내고 forbidden, 취소는 조용히
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/shared/api/api-error';
@@ -21,8 +21,8 @@ const deps = (over: Partial<CallbackDeps> = {}): CallbackDeps => ({
   establishSession: vi.fn(async () => ({
     email: 'sujin@gmail.com',
     nickname: '수진',
+    role: 'ADMIN',
   })),
-  probeAdmin: vi.fn(async () => undefined),
   endSession: vi.fn(async () => undefined),
   ...over,
 });
@@ -39,7 +39,7 @@ const input = (
 });
 
 describe('completeSocialLogin', () => {
-  it('교환 → 세션 → 관리자 판정을 거쳐 pending.next로 보낸다', async () => {
+  it('교환 → 세션을 거치고 role이 ADMIN이면 pending.next로 보낸다', async () => {
     const d = deps();
 
     const outcome = await completeSocialLogin(input(), d);
@@ -60,14 +60,15 @@ describe('completeSocialLogin', () => {
       idToken: 'id-token',
       nonce: 'nonce',
     });
-    expect(d.probeAdmin).toHaveBeenCalled();
   });
 
-  it('관리자 판정이 403이면 세션을 끝내고 이메일과 함께 forbidden을 돌려준다', async () => {
+  it('role이 USER면 세션을 끝내고 이메일과 함께 forbidden을 돌려준다', async () => {
     const d = deps({
-      probeAdmin: vi.fn(async () => {
-        throw new ApiError('forbidden', 403, '/api/v1/admin/app-versions');
-      }),
+      establishSession: vi.fn(async () => ({
+        email: 'sujin@gmail.com',
+        nickname: '수진',
+        role: 'USER',
+      })),
     });
 
     const outcome = await completeSocialLogin(input(), d);
@@ -76,19 +77,32 @@ describe('completeSocialLogin', () => {
     expect(d.endSession).toHaveBeenCalled();
   });
 
-  it('관리자 판정이 403이 아닌 이유로 실패하면 들여보낸다 — 보호 구역이 다시 시도한다', async () => {
+  it('응답에 role이 아예 없어도 관리자가 아니다 — 모르면 닫는 쪽이 안전하다', async () => {
     const d = deps({
-      probeAdmin: vi.fn(async () => {
-        throw new ApiError('down', 502, '/api/v1/admin/app-versions');
+      establishSession: vi.fn(async () => ({
+        email: 'old@gmail.com',
+        nickname: '옛빌드',
+      })),
+    });
+
+    const outcome = await completeSocialLogin(input(), d);
+
+    expect(outcome).toEqual({ kind: 'forbidden', email: 'old@gmail.com' });
+    expect(d.endSession).toHaveBeenCalled();
+  });
+
+  it('로그아웃이 실패해도 forbidden 안내는 그대로 간다 — 쿠키는 서버가 지운다', async () => {
+    const d = deps({
+      establishSession: vi.fn(async () => ({ role: 'USER' })),
+      endSession: vi.fn(async () => {
+        throw new Error('down');
       }),
     });
 
     await expect(completeSocialLogin(input(), d)).resolves.toEqual({
-      kind: 'done',
-      next: '/feedbacks',
-      nickname: '수진',
+      kind: 'forbidden',
+      email: null,
     });
-    expect(d.endSession).not.toHaveBeenCalled();
   });
 
   it('state가 다르면 교환을 시도하지 않는다 — CSRF', async () => {

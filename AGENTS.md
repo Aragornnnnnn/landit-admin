@@ -171,5 +171,5 @@ PR = 노션 이슈 1개 = 한 문장으로 설명되는 변경. 코드 추가 50
 ## 주의사항
 
 - **Next 16은 학습 데이터와 다르다.** 코드 쓰기 전 `node_modules/next/dist/docs/`에서 해당 API를 확인한다. `middleware.ts`는 `proxy.ts`로 바뀌었다.
-- 관리자 판정 API(`/auth/me` 류)는 BE에 아직 없다. 로그인 직후 첫 admin 호출의 403으로 판정한다. API가 생기면 `docs/auth.md`와 로그인 가드를 갱신한다.
+- 관리자 판정은 소셜 로그인 응답의 `data.user.role`로 한다(LAN-337). ADMIN이 아니면 콜백이 세션을 끝내고 "관리자 아님" 화면을 보여준다 — 별도 판정 호출이 없다.
 - `plan.md` `checklist.md` `context-notes.md`는 에이전트 작업 문서라 gitignore다. 결정을 내리면 `context-notes.md`에 이유와 함께 남긴다.
