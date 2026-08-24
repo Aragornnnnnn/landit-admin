@@ -1,5 +1,4 @@
-// 소셜 로그인 콜백의 본체 — code→id_token 교환 → 세션 쿠키 발급 → 관리자 판정(첫 admin 호출 403) → 갈 곳 결정. 순수 함수라 테스트로 고정한다
-import { ApiError } from '@/shared/api/api-error';
+// 소셜 로그인 콜백의 본체 — code→id_token 교환 → 세션 쿠키 발급 → 관리자 판정(로그인 응답의 role) → 갈 곳 결정. 순수 함수라 테스트로 고정한다
 import type { PendingSocialLogin } from '@/shared/auth/web-social-login';
 
 export interface CallbackInput {
@@ -18,14 +17,16 @@ export interface CallbackDeps {
     redirectUri: string;
     codeVerifier?: string;
   }) => Promise<string>;
-  /** POST /api/auth/social-login — 세션 쿠키를 심고 user를 돌려준다 */
+  /** POST /api/auth/social-login — 세션 쿠키를 심고 user(role 포함)를 돌려준다 */
   establishSession: (input: {
     provider: string;
     idToken: string;
     nonce: string;
-  }) => Promise<{ email?: string | null; nickname?: string | null }>;
-  /** 가장 가벼운 admin 조회 — 403이면 관리자가 아니다 (관리자 판정 API가 생기면 교체) */
-  probeAdmin: () => Promise<void>;
+  }) => Promise<{
+    email?: string | null;
+    nickname?: string | null;
+    role?: string | null;
+  }>;
   /** POST /api/auth/logout — 관리자 아님이면 세션을 바로 끝낸다 */
   endSession: () => Promise<void>;
 }
@@ -66,7 +67,11 @@ export async function completeSocialLogin(
     };
   }
 
-  let user: { email?: string | null; nickname?: string | null };
+  let user: {
+    email?: string | null;
+    nickname?: string | null;
+    role?: string | null;
+  };
   try {
     const idToken = await deps.exchangeCode({
       provider: input.provider,
@@ -88,15 +93,11 @@ export async function completeSocialLogin(
     return { kind: 'failed', message };
   }
 
-  try {
-    await deps.probeAdmin();
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 403) {
-      // 관리자가 아니다 — 세션을 남기지 않는다 (실패해도 쿠키는 서버가 지운다)
-      await deps.endSession().catch(() => undefined);
-      return { kind: 'forbidden', email: user.email ?? null };
-    }
-    // 판정 호출이 다른 이유로 실패하면 들여보낸다 — 보호 구역의 첫 화면이 인라인 오류로 다시 시도하게 한다
+  // 로그인 응답이 role을 준다(LAN-337) — 별도 판정 호출 없이 여기서 가른다.
+  // ADMIN이 아니면 세션을 남기지 않는다 (로그아웃이 실패해도 쿠키는 서버가 지운다)
+  if (user.role !== 'ADMIN') {
+    await deps.endSession().catch(() => undefined);
+    return { kind: 'forbidden', email: user.email ?? null };
   }
 
   return { kind: 'done', next: pending.next, nickname: user.nickname ?? null };

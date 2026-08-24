@@ -1,6 +1,8 @@
 // 사용자 목록 필터 — BE에 검색·필터가 없어 불러온 목록에서 우리가 거른다 (docs/screens/users.md).
 // 그래서 이 파일이 곧 "검색 기능"이다. BE 검색이 생기면 여기를 서버 쿼리로 바꾼다
-import type { AdminUserListItem } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 export type UserRole = NonNullable<AdminUserListItem['role']>;
 export type UserStatus = NonNullable<AdminUserListItem['status']>;

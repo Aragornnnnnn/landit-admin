@@ -5,7 +5,9 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { api } from '@/shared/api/client';
-import type { AdminUserListItem, Schema } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 type FeedbackListResponse = Schema<'AdminMailboxFeedbackListResponse'>;
 type UserListResponse = { items?: AdminUserListItem[] };

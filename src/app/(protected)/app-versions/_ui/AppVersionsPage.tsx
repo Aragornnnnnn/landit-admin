@@ -148,10 +148,10 @@ const findDraft = (versions: AppVersion[], platform: Platform) => {
   return found ? toAppVersionDraft(found) : EMPTY_APP_VERSION_DRAFT;
 };
 
-// 프레임의 "마지막 수정 08.12 10:31 · 김준서" — 누가 고쳤는지는 BE가 주지 않아 시각만 적는다
+// 프레임의 "마지막 수정 08.12 10:31 · 김준서" — BE가 수정 시각·수정자 닉네임을 준다(LAN-337)
 function lastEditedLabel(versions: AppVersion[], platform: Platform): string {
   const found = versions.find((version) => version.platform === platform);
-  return found?.releasedAt
-    ? `마지막 배포 ${formatDateTime(found.releasedAt)}`
-    : '';
+  if (!found?.updatedAt) return '';
+  const at = `마지막 수정 ${formatDateTime(found.updatedAt)}`;
+  return found.updatedBy ? `${at} · ${found.updatedBy}` : at;
 }

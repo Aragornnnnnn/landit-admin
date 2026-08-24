@@ -98,7 +98,7 @@ export function toAppVersionRequest(draft: AppVersionDraft) {
 }
 
 // datetime-local 입력이 읽을 수 있는 형태(YYYY-MM-DDTHH:mm)로 — 초·시간대는 버린다
-function toLocalInput(iso: string | undefined): string {
+function toLocalInput(iso: string | null | undefined): string {
   if (!iso) return '';
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return '';

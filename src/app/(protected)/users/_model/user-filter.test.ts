@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { AdminUserListItem } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 
 import {
   changeUserFilter,
@@ -11,6 +11,8 @@ import {
   USERS_PAGE_SIZE,
   writeUserFilter,
 } from './user-filter';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 const user = (patch: Partial<AdminUserListItem>): AdminUserListItem => ({
   userProfileId: 1,
