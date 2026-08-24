@@ -1,8 +1,6 @@
 'use client';
 
 // 데스크톱 목록 — 흰 카드 안 표. 행은 한 줄 걸러 옅은 배경(Figma 1050:8193). 유형·상태는 배경 없는 텍스트다
-import { ChevronRight } from 'lucide-react';
-
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
 
@@ -25,12 +23,11 @@ const CELL = {
   sender: 'w-[220px] shrink-0',
   status: 'w-[88px] shrink-0',
   receivedAt: 'w-[100px] shrink-0',
-  chevron: 'w-4 shrink-0',
 };
 
 export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
   return (
-    <div className="w-full rounded-[20px] bg-card px-2 pb-2">
+    <div className="w-full rounded-[20px] bg-card px-1 pb-1">
       <div
         role="row"
         className="flex w-full items-center gap-4 px-5 pt-3 pb-2 text-xs font-medium text-subtle"
@@ -40,7 +37,6 @@ export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
         <span className={CELL.sender}>보낸 사람</span>
         <span className={CELL.status}>상태</span>
         <span className={CELL.receivedAt}>접수</span>
-        <span className={CELL.chevron} />
       </div>
 
       <div className="flex flex-col gap-0.5">
@@ -50,7 +46,7 @@ export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
             type="button"
             onClick={() => item.feedbackId && onSelect(item.feedbackId)}
             className={cn(
-              'flex w-full items-center gap-4 rounded-xl px-5 py-3 text-left transition-colors hover:bg-hairline',
+              'flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left transition-colors hover:bg-hairline',
               // 한 줄 걸러 옅은 배경 — 가로로 긴 행을 눈이 따라가기 쉽게
               index % 2 === 0 && 'bg-stripe',
             )}
@@ -94,10 +90,6 @@ export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
             <span className={cn(CELL.receivedAt, 'text-[13px] text-subtle')}>
               {item.createdAt ? formatDateTime(item.createdAt) : ''}
             </span>
-            <ChevronRight
-              className={cn(CELL.chevron, 'size-4 text-subtle')}
-              aria-hidden
-            />
           </button>
         ))}
       </div>

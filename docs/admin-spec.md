@@ -113,3 +113,11 @@ Figma는 화면마다 페이지(탭)를 나눴다 — 각 페이지 왼쪽이 �
 - 위 "공통 상태"·"칩"은 화면마다 다시 만들지 않는다 — `shared/ui`의 `StatusChip`(중립 칩 + 점) · `EmptyState`(한 줄 이유 + 다음 행동) · `InlineError`(문구 + 다시 시도) · `ListSkeleton`(기본 5행)과 `shared/lib/useDelayedPending`(200ms 규칙)을 쓴다. 어떤 라벨에 어떤 점을 쓸지 같은 도메인 판단은 화면이 하고, 프리미티브는 그걸 모른다
 - 데이터: TanStack Query, 목록은 keepPreviousData, 변경 후 관련 쿼리 invalidate(피드백 목록·배지 카운트·대시보드)
 - 폰트: 사용자 웹과 동일. 색: apps/web globals.css 토큰을 어드민 CSS 변수로 복사(페이지 배경만 #F9FAFB)
+
+## 목록 행 다듬기 (운영자 결정 · 2026-08-24)
+
+Figma 프레임과 다르게 확정한 것들 — 앱인토스 콘솔 목록을 레퍼런스로 운영자가 결정했다. Figma를 이 규칙에 맞게 갱신해야 한다.
+
+- 데스크톱 표의 행 오른쪽 화살표(›)를 그리지 않는다. 행 전체가 hover로 반응하므로 클릭 어포던스는 전달된다. (모바일 카드의 ›는 유지)
+- 줄무늬·hover 행은 카드 가장자리에 겹칠락 말락하게 붙인다 — 카드 안쪽 여백 4px(px-1), 행 모서리 8px(rounded-lg).
+- 행 hover는 어느 행에서나 같은 색 --hairline(#EEF0F3) — 줄무늬(#F4F5F7)보다 한 단계 진하다.

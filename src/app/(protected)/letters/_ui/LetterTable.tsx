@@ -35,7 +35,7 @@ interface LetterTableProps {
 
 export function LetterTable({ items, onAction }: LetterTableProps) {
   return (
-    <div className="w-full px-2 pb-2">
+    <div className="w-full px-1 pb-1">
       <div
         role="row"
         className="flex w-full items-center gap-4 px-5 pt-2 pb-2 text-xs font-medium text-subtle"
@@ -58,7 +58,7 @@ export function LetterTable({ items, onAction }: LetterTableProps) {
             <div
               key={item.letterId}
               className={cn(
-                'flex w-full items-center gap-4 rounded-xl pr-3 pl-5 transition-colors hover:bg-hairline',
+                'flex w-full items-center gap-4 rounded-lg pr-3 pl-5 transition-colors hover:bg-hairline',
                 index % 2 === 0 && 'bg-stripe',
               )}
             >
