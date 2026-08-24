@@ -50,7 +50,7 @@ export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
             type="button"
             onClick={() => item.feedbackId && onSelect(item.feedbackId)}
             className={cn(
-              'flex w-full items-center gap-4 rounded-xl px-5 py-3 text-left transition-colors hover:bg-muted',
+              'flex w-full items-center gap-4 rounded-xl px-5 py-3 text-left transition-colors hover:bg-hairline',
               // 한 줄 걸러 옅은 배경 — 가로로 긴 행을 눈이 따라가기 쉽게
               index % 2 === 0 && 'bg-stripe',
             )}

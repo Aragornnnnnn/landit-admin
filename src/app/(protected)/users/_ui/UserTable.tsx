@@ -51,7 +51,7 @@ export function UserTable({ users }: { users: AdminUserListItem[] }) {
             key={user.userProfileId}
             href={`/users/${user.userProfileId}`}
             className={cn(
-              'flex w-full items-center gap-4 rounded-xl px-5 py-3 transition-colors hover:bg-muted',
+              'flex w-full items-center gap-4 rounded-xl px-5 py-3 transition-colors hover:bg-hairline',
               index % 2 === 0 && 'bg-stripe',
             )}
           >

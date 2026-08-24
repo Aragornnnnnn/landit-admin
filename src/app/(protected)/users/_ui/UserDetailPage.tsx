@@ -199,7 +199,7 @@ function UserFeedbackCard({
             <Link
               key={item.feedbackId}
               href={`/feedbacks?open=${item.feedbackId}`}
-              className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-colors hover:bg-muted ${
+              className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-colors hover:bg-hairline ${
                 index % 2 === 0 ? 'bg-stripe' : ''
               }`}
             >
