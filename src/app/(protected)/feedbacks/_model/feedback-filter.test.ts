@@ -113,10 +113,10 @@ describe('hasActiveFeedbackFilter', () => {
 describe('toFeedbackQuery', () => {
   const now = new Date('2026-08-20T00:00:00.000Z');
 
-  it('days를 createdFrom 시각으로 바꾼다', () => {
+  it('days를 createdFrom 날짜로 바꾼다 — BE 계약이 date라 시각을 붙이면 400', () => {
     const query = toFeedbackQuery({ ...DEFAULT_FEEDBACK_FILTER, days: 7 }, now);
 
-    expect(query.createdFrom).toBe('2026-08-13T00:00:00.000Z');
+    expect(query.createdFrom).toBe('2026-08-13');
   });
 
   it('전체 기간(0)이면 createdFrom을 보내지 않는다', () => {

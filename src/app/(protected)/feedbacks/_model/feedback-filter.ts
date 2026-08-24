@@ -107,11 +107,13 @@ export function hasActiveFeedbackFilter(filter: FeedbackFilter): boolean {
   );
 }
 
-/** BE 조회 파라미터로 — days는 createdFrom 시각으로 바꾼다 */
+/** BE 조회 파라미터로 — days는 createdFrom 날짜로 바꾼다. BE 계약이 date라 시각을 붙이면 400이 난다 (실 서버 확인) */
 export function toFeedbackQuery(filter: FeedbackFilter, now: Date) {
   const createdFrom =
     filter.days > 0
-      ? new Date(now.getTime() - filter.days * 86_400_000).toISOString()
+      ? new Date(now.getTime() - filter.days * 86_400_000)
+          .toISOString()
+          .slice(0, 10)
       : undefined;
   return {
     keyword: filter.keyword || undefined,
