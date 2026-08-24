@@ -72,14 +72,14 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-5">
+      <SidebarContent className="gap-0 px-5">
         {NAV_GROUPS.map((group, index) => {
           const items = group.items.filter(
             (item) => !item.developOnly || developServer,
           );
           if (items.length === 0) return null;
           return (
-            <SidebarGroup key={group.label ?? index} className="py-1">
+            <SidebarGroup key={group.label ?? index} className="p-0">
               {group.label && (
                 <SidebarGroupLabel className="h-auto px-3.5 pt-6 pb-2 text-[13px] font-medium text-subtle">
                   {group.label}
