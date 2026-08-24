@@ -12,16 +12,18 @@ type UserListResponse = { items?: AdminUserListItem[] };
 type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
 type AppVersion = Schema<'AdminAppVersionResponse'>;
 
-/** 차트는 7일치다. 그 안의 건수를 다 세려면 넉넉히 받아야 한다 — 넘치면 막대가 낮게 나온다 */
+/** 차트는 7일치다. BE가 한 번에 최대 50건까지만 준다(51부터 400, 실 서버 확인) — 7일 접수가 50건을
+ * 넘으면 막대와 카운트가 실제보다 작게 나온다. 그때는 페이지를 이어 받도록 바꿔야 한다 */
 const RECENT_DAYS = 7;
-const RECENT_SIZE = 200;
+const RECENT_SIZE = 50;
 /** 가입 수는 최근 두 주만 세면 되는데 BE에 기간 필터가 없어 최신순으로 받아 자른다 */
-const USERS_SIZE = 200;
+const USERS_SIZE = 50;
 
 export function useDashboardData(now: Date) {
-  const createdFrom = new Date(
-    now.getTime() - RECENT_DAYS * 86_400_000,
-  ).toISOString();
+  // BE 계약이 date라 시각을 붙이면 400이 난다 (실 서버 확인)
+  const createdFrom = new Date(now.getTime() - RECENT_DAYS * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
 
   const recent = useQuery({
     queryKey: ['dashboard', 'recent-feedbacks'] as const,
