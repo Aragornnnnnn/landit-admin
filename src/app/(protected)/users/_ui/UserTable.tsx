@@ -4,7 +4,7 @@
 // 닉네임이 없는 사용자는 "—"다. 빈칸으로 두면 셀이 밀려 보인다
 import Link from 'next/link';
 
-import type { AdminUserListItem } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 
@@ -14,6 +14,8 @@ import {
   USER_STATUS_DOT,
   USER_STATUS_LABEL,
 } from '../_model/user-label';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 // Figma 셀 너비 — ID 86 / 이메일 flex / 닉네임 120 / 역할 110 / 상태 110 / 가입 110 / › 16
 const CELL = {

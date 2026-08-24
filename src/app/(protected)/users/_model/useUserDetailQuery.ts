@@ -16,7 +16,7 @@ export function useUserDetailQuery(userProfileId: number) {
 }
 
 /** 이 사용자가 보낸 피드백 — BE에 사용자별 조회가 없어 이메일을 검색어로 쓴다 (docs/screens/users.md) */
-export function useUserFeedbacksQuery(email: string | undefined) {
+export function useUserFeedbacksQuery(email: string | null | undefined) {
   return useQuery({
     queryKey: ['feedbacks', 'byUser', email] as const,
     queryFn: () =>

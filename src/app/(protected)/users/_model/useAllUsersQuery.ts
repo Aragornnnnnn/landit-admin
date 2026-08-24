@@ -6,12 +6,12 @@ import { useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { api } from '@/shared/api/client';
-import type {
-  AdminUserListItem,
-  AdminUserListResponse,
-} from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 
 import { USERS_FETCH_SIZE } from './user-filter';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
+type AdminUserListResponse = Schema<'AdminUserListResponse'>;
 
 const PATH = '/api/v1/admin/users';
 

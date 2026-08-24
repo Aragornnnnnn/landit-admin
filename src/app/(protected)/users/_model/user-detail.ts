@@ -1,15 +1,14 @@
 // 사용자 상세가 쓰는 말 — 코드 값을 사람 말로 바꾼다 (docs/screens/users.md "상세")
-import type { Schema } from '@/shared/api/schema-patch';
+import type { AdminUserDetail } from '@/shared/api/schema-patch';
 import { formatDateDot } from '@/shared/lib/format-time';
 
-export type UserDetail = Schema<'AdminUserDetailResponse'>;
+export type UserDetail = AdminUserDetail;
 type LearningLevel = NonNullable<UserDetail['learningLevel']>;
 type PushStatus = NonNullable<UserDetail['pushPermissionStatus']>;
-type ScenarioType = NonNullable<
-  NonNullable<
-    NonNullable<UserDetail['learningSummary']>['currentScenario']
-  >['dailyScenarioType']
+type CurrentScenario = NonNullable<
+  UserDetail['learningSummary']['currentScenario']
 >;
+type ScenarioType = CurrentScenario['dailyScenarioType'];
 
 export const LEARNING_LEVEL_LABEL: Record<LearningLevel, string> = {
   BEGINNER: '초급',
@@ -34,7 +33,7 @@ export const EMPTY_VALUE = '—';
 
 /** "카페에서 주문하기 · Day 13 · 오늘의 시나리오" */
 export function currentScenarioLabel(
-  scenario: NonNullable<UserDetail['learningSummary']>['currentScenario'],
+  scenario: Partial<CurrentScenario> | null | undefined,
 ): string {
   if (!scenario?.scenarioTitle) return EMPTY_VALUE;
   return [
@@ -53,7 +52,7 @@ export function currentScenarioLabel(
  * @param today 오늘 날짜 (테스트에서 고정한다)
  */
 export function lastLearningLabel(
-  date: string | undefined,
+  date: string | null | undefined,
   today: Date,
 ): string {
   if (!date) return EMPTY_VALUE;
@@ -77,7 +76,7 @@ function daysBetween(from: Date, to: Date): number {
 }
 
 /** "2026.08.18 09:12" — 마지막 수정 */
-export function formatDateTimeDot(iso: string | undefined): string {
+export function formatDateTimeDot(iso: string | null | undefined): string {
   if (!iso) return EMPTY_VALUE;
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return EMPTY_VALUE;

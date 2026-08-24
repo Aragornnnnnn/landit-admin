@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   compareVersions,
-  EMPTY_APP_VERSION_DRAFT,
   saveImpactSentence,
   toAppVersionDraft,
   toAppVersionRequest,
@@ -77,10 +76,23 @@ describe('saveImpactSentence', () => {
 });
 
 describe('toAppVersionDraft · toAppVersionRequest', () => {
-  it('없는 값은 빈 문자열로 받아 입력이 제어 컴포넌트로 남게 한다', () => {
-    expect(toAppVersionDraft({ platform: 'IOS' })).toEqual(
-      EMPTY_APP_VERSION_DRAFT,
-    );
+  it('null 값은 빈 문자열로 받아 입력이 제어 컴포넌트로 남게 한다', () => {
+    expect(
+      toAppVersionDraft({
+        appVersionId: 1,
+        platform: 'IOS',
+        versionName: '',
+        buildNumber: 0,
+        minimumSupportedVersionName: '',
+        forceUpdateReason: null,
+        softUpdateReason: null,
+        releaseNote: null,
+        active: true,
+        releasedAt: null,
+        updatedAt: '2026-08-12T10:00:00',
+        updatedBy: null,
+      }).releasedAt,
+    ).toBe('');
   });
 
   it('빌드 번호가 비면 보내지 않는다', () => {

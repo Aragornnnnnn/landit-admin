@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import type { AdminUserListItem } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
@@ -34,6 +34,8 @@ import {
 } from '../_model/user-label';
 import { UserFilters } from './UserFilters';
 import { UserTable } from './UserTable';
+
+type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 export function UsersPage() {
   const router = useRouter();
