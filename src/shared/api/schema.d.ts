@@ -1,6 +1,26 @@
 // 이 파일은 `pnpm api:types`가 스웨거(https://api-develop.landit.im/v3/api-docs)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
+    "/api/v1/me/learning-level": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 사용자 학습 수준 변경
+         * @description 온보딩에서 선택한 1부터 5까지의 학습 수준을 저장합니다.
+         */
+        put: operations["updateLearningLevel"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/expo-push-token": {
         parameters: {
             query?: never;
@@ -883,12 +903,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ExpoPushTokenUpdateRequest: {
-            /** @enum {string} */
-            platform: "IOS" | "ANDROID";
-            expoPushToken: string;
-            enabled: boolean;
-            expoPushTokenFormatValid?: boolean;
+        /** @description 사용자 학습 수준 변경 요청 */
+        UserLearningLevelUpdateRequest: {
+            /**
+             * Format: int32
+             * @description 1부터 5까지의 학습 수준
+             * @example 3
+             */
+            learningLevel: number;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseVoid: {
@@ -914,6 +936,13 @@ export interface components {
              * @example 요청한 리소스를 찾을 수 없습니다.
              */
             message?: string;
+        };
+        ExpoPushTokenUpdateRequest: {
+            /** @enum {string} */
+            platform: "IOS" | "ANDROID";
+            expoPushToken: string;
+            enabled: boolean;
+            expoPushTokenFormatValid?: boolean;
         };
         /** @description 사용자 발화 제출 요청 */
         SessionMessageSubmitRequest: {
@@ -1441,22 +1470,26 @@ export interface components {
             error?: components["schemas"]["ErrorResponse"];
         };
         AuthTokenResponse: {
-            tokenType?: string;
-            accessToken?: string;
+            tokenType: string;
+            accessToken: string;
             /** Format: int64 */
-            accessTokenExpiresIn?: number;
-            refreshToken?: string;
+            accessTokenExpiresIn: number;
+            refreshToken: string;
             /** Format: int64 */
-            refreshTokenExpiresIn?: number;
-            user?: components["schemas"]["AuthUserResponse"];
+            refreshTokenExpiresIn: number;
+            user: components["schemas"]["AuthUserResponse"];
         };
         AuthUserResponse: {
             /** Format: int64 */
-            userId?: number;
-            nickname?: string;
-            email?: string;
-            provider?: string;
-            newUser?: boolean;
+            userId: number;
+            nickname: string;
+            email: string | null;
+            provider: string;
+            newUser: boolean;
+            /** @enum {string} */
+            role: "USER" | "ADMIN";
+            /** @enum {string} */
+            status: "ACTIVE" | "WITHDRAWN" | "BANNED";
         };
         LogoutRequest: {
             refreshToken: string;
@@ -1616,19 +1649,22 @@ export interface components {
         };
         AdminAppVersionResponse: {
             /** Format: int64 */
-            appVersionId?: number;
+            appVersionId: number;
             /** @enum {string} */
-            platform?: "IOS" | "ANDROID";
-            versionName?: string;
+            platform: "IOS" | "ANDROID";
+            versionName: string;
             /** Format: int64 */
-            buildNumber?: number;
-            minimumSupportedVersionName?: string;
-            forceUpdateReason?: string;
-            softUpdateReason?: string;
-            releaseNote?: string;
-            active?: boolean;
+            buildNumber: number;
+            minimumSupportedVersionName: string;
+            forceUpdateReason: string | null;
+            softUpdateReason: string | null;
+            releaseNote: string | null;
+            active: boolean;
             /** Format: date-time */
-            releasedAt?: string;
+            releasedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            updatedBy: string | null;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminAppVersionResponse: {
@@ -2511,13 +2547,25 @@ export interface components {
             /** Format: date-time */
             releasedAt?: string;
         };
+        AdminUserListItem: {
+            /** Format: int64 */
+            userProfileId: number;
+            email: string | null;
+            nickname: string;
+            /** @enum {string} */
+            role: "USER" | "ADMIN";
+            /** @enum {string} */
+            status: "ACTIVE" | "WITHDRAWN" | "BANNED";
+            /** Format: date-time */
+            createdAt: string;
+        };
         AdminUserListResponse: {
-            items?: components["schemas"]["Item"][];
+            items: components["schemas"]["AdminUserListItem"][];
             /** Format: int32 */
-            page?: number;
+            page: number;
             /** Format: int32 */
-            size?: number;
-            hasNext?: boolean;
+            size: number;
+            hasNext: boolean;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminUserListResponse: {
@@ -2533,30 +2581,30 @@ export interface components {
         };
         AdminUserDetailResponse: {
             /** Format: int64 */
-            userProfileId?: number;
-            email?: string;
-            nickname?: string;
+            userProfileId: number;
+            email: string | null;
+            nickname: string;
             /** @enum {string} */
-            role?: "USER" | "ADMIN";
+            role: "USER" | "ADMIN";
             /** @enum {string} */
-            status?: "ACTIVE" | "WITHDRAWN" | "BANNED";
+            status: "ACTIVE" | "WITHDRAWN" | "BANNED";
             /** @enum {string} */
-            targetLocale?: "EN" | "KR";
+            targetLocale: "EN" | "KR";
             /** @enum {string} */
-            baseLocale?: "EN" | "KR";
-            /** @enum {string} */
-            learningLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+            baseLocale: "EN" | "KR";
             /** Format: int32 */
-            currentLevel?: number;
+            learningLevel: number | null;
+            /** Format: int32 */
+            currentLevel: number;
             /** Format: int64 */
-            aiTutorId?: number;
+            aiTutorId: number | null;
             /** @enum {string} */
-            pushPermissionStatus?: "GRANTED" | "DENIED" | "NOT_DETERMINED";
+            pushPermissionStatus: "GRANTED" | "DENIED" | "NOT_DETERMINED";
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: date-time */
-            updatedAt?: string;
-            learningSummary?: components["schemas"]["LearningSummary"];
+            updatedAt: string;
+            learningSummary: components["schemas"]["LearningSummary"];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminUserDetailResponse: {
@@ -2572,21 +2620,21 @@ export interface components {
         };
         CurrentScenario: {
             /** Format: int64 */
-            scenarioId?: number;
-            scenarioTitle?: string;
+            scenarioId: number;
+            scenarioTitle: string;
             /** Format: int32 */
-            displayOrder?: number;
+            displayOrder: number;
             /** @enum {string} */
-            dailyScenarioType?: "NEW" | "RETRY" | "CLEARED";
+            dailyScenarioType: "NEW" | "RETRY" | "CLEARED";
         };
         LearningSummary: {
             /** Format: int64 */
-            completedScenarioCount?: number;
-            currentScenario?: components["schemas"]["CurrentScenario"];
+            completedScenarioCount: number;
+            currentScenario: components["schemas"]["CurrentScenario"];
             /** Format: int32 */
-            currentStreakDays?: number;
+            currentStreakDays: number;
             /** Format: date */
-            lastLearningDate?: string;
+            lastLearningDate: string | null;
         };
         AdminScenarioListResponse: {
             categories?: components["schemas"]["CategoryResponse"][];
@@ -2712,6 +2760,48 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    updateLearningLevel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserLearningLevelUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description 변경 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 요청 검증 실패 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
     update: {
         parameters: {
             query?: never;
