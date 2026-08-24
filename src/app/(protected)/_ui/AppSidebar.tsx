@@ -72,7 +72,7 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3">
+      <SidebarContent className="px-5">
         {NAV_GROUPS.map((group, index) => {
           const items = group.items.filter(
             (item) => !item.developOnly || developServer,
@@ -81,7 +81,7 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
           return (
             <SidebarGroup key={group.label ?? index} className="py-1">
               {group.label && (
-                <SidebarGroupLabel className="px-3.5 pt-4 text-[13px] font-medium text-subtle">
+                <SidebarGroupLabel className="h-auto px-3.5 pt-5 pb-1.5 text-[12px] font-medium text-subtle">
                   {group.label}
                 </SidebarGroupLabel>
               )}
@@ -106,8 +106,9 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
                             <span>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
+                        {/* 배지는 hover·활성에서도 흰 글자 — shadcn 기본값이 진회색으로 바꿔 오렌지 배경과 뭉갠다 */}
                         {badge ? (
-                          <SidebarMenuBadge className="rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground">
+                          <SidebarMenuBadge className="rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground peer-hover/menu-button:text-primary-foreground peer-data-active/menu-button:text-primary-foreground">
                             {badge}
                           </SidebarMenuBadge>
                         ) : null}

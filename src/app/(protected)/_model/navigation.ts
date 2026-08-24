@@ -1,18 +1,18 @@
 // 사이드바 내비 정의 — 그룹·순서·라벨·아이콘은 docs/admin-spec.md "셸". 상단바 제목도 여기서 찾는다
+// 아이콘은 Figma 셸의 채움형 벡터를 그대로 옮긴 것 (NavIcons.tsx) — lucide가 아니다
 import {
-  FlaskConical,
-  Home,
-  Mail,
-  Megaphone,
-  Smartphone,
-  User,
-  type LucideIcon,
-} from 'lucide-react';
+  AppVersionsIcon,
+  DashboardIcon,
+  FeedbackIcon,
+  LettersIcon,
+  ScenarioTestIcon,
+  UsersIcon,
+} from '../_ui/NavIcons';
 
 export interface NavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element;
   /** develop 서버에서만 보인다 (시나리오 테스트) */
   developOnly?: boolean;
   /** 배지 — 피드백 처리중 건수 */
@@ -27,7 +27,7 @@ export interface NavGroup {
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: null,
-    items: [{ href: '/', label: '대시보드', icon: Home }],
+    items: [{ href: '/', label: '대시보드', icon: DashboardIcon }],
   },
   {
     label: '편지함',
@@ -35,24 +35,24 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         href: '/feedbacks',
         label: '피드백',
-        icon: Mail,
+        icon: FeedbackIcon,
         badge: 'pendingFeedbacks',
       },
-      { href: '/letters', label: '공지·업데이트', icon: Megaphone },
+      { href: '/letters', label: '공지·업데이트', icon: LettersIcon },
     ],
   },
   {
     label: '사용자',
-    items: [{ href: '/users', label: '사용자', icon: User }],
+    items: [{ href: '/users', label: '사용자', icon: UsersIcon }],
   },
   {
     label: '설정',
     items: [
-      { href: '/app-versions', label: '앱 버전', icon: Smartphone },
+      { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
       {
         href: '/scenario-test',
         label: '시나리오 테스트',
-        icon: FlaskConical,
+        icon: ScenarioTestIcon,
         developOnly: true,
       },
     ],
