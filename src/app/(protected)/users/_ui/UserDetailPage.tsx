@@ -184,51 +184,53 @@ function UserFeedbackCard({
           아직 보낸 피드백이 없어요
         </p>
       ) : (
-        <div className="pt-3">
-          <div
-            role="row"
-            className="flex items-center gap-4 px-4 pb-2 text-xs font-medium text-subtle"
-          >
-            <span className="w-24 shrink-0">유형</span>
-            <span className="min-w-px flex-1">내용</span>
-            <span className="w-[88px] shrink-0">상태</span>
-            <span className="w-[100px] shrink-0">접수</span>
-          </div>
-          {items.map((item, index) => (
-            // 행을 누르면 그 피드백의 답장 화면으로 — 목록 화면이 ?open을 읽는다
-            <Link
-              key={item.feedbackId}
-              href={`/feedbacks?open=${item.feedbackId}`}
-              className={`flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-hairline ${
-                index % 2 === 0 ? 'bg-stripe' : ''
-              }`}
+        <div className="overflow-x-auto pt-3">
+          <div className="min-w-[640px]">
+            <div
+              role="row"
+              className="flex items-center gap-4 px-4 pb-2 text-xs font-medium text-subtle"
             >
-              <span className="w-24 shrink-0 text-[13px] font-medium text-chip-foreground">
-                {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}
-              </span>
-              <span className="min-w-px flex-1 truncate text-[13px] text-strong">
-                {item.content}
-              </span>
-              <span className="flex w-[88px] shrink-0 items-center gap-[5px] text-[13px] text-body">
-                {item.status && (
-                  <>
-                    <span
-                      aria-hidden
-                      className={`size-1.5 rounded-full ${
-                        FEEDBACK_STATUS_DOT[item.status] === 'done'
-                          ? 'bg-success'
-                          : 'bg-primary'
-                      }`}
-                    />
-                    {FEEDBACK_STATUS_LABEL[item.status]}
-                  </>
-                )}
-              </span>
-              <span className="w-[100px] shrink-0 text-[13px] text-subtle">
-                {item.createdAt ? formatDateTime(item.createdAt) : ''}
-              </span>
-            </Link>
-          ))}
+              <span className="w-24 shrink-0">유형</span>
+              <span className="min-w-px flex-1">내용</span>
+              <span className="w-[88px] shrink-0">상태</span>
+              <span className="w-[100px] shrink-0">접수</span>
+            </div>
+            {items.map((item, index) => (
+              // 행을 누르면 그 피드백의 답장 화면으로 — 목록 화면이 ?open을 읽는다
+              <Link
+                key={item.feedbackId}
+                href={`/feedbacks?open=${item.feedbackId}`}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-hairline ${
+                  index % 2 === 0 ? 'bg-stripe' : ''
+                }`}
+              >
+                <span className="w-24 shrink-0 text-[13px] font-medium text-chip-foreground">
+                  {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}
+                </span>
+                <span className="min-w-px flex-1 truncate text-[13px] text-strong">
+                  {item.content}
+                </span>
+                <span className="flex w-[88px] shrink-0 items-center gap-[5px] text-[13px] text-body">
+                  {item.status && (
+                    <>
+                      <span
+                        aria-hidden
+                        className={`size-1.5 rounded-full ${
+                          FEEDBACK_STATUS_DOT[item.status] === 'done'
+                            ? 'bg-success'
+                            : 'bg-primary'
+                        }`}
+                      />
+                      {FEEDBACK_STATUS_LABEL[item.status]}
+                    </>
+                  )}
+                </span>
+                <span className="w-[100px] shrink-0 text-[13px] text-subtle">
+                  {item.createdAt ? formatDateTime(item.createdAt) : ''}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </section>
