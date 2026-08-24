@@ -81,7 +81,7 @@ export function RecentFeedbackCard({ items }: { items: FeedbackItem[] }) {
               key={item.feedbackId}
               href={`/feedbacks?open=${item.feedbackId}`}
               className={cn(
-                'flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-muted',
+                'flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-hairline',
                 index % 2 === 0 && 'bg-stripe',
               )}
             >

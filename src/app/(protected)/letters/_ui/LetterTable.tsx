@@ -58,7 +58,7 @@ export function LetterTable({ items, onAction }: LetterTableProps) {
             <div
               key={item.letterId}
               className={cn(
-                'flex w-full items-center gap-4 rounded-xl pr-3 pl-5 transition-colors hover:bg-muted',
+                'flex w-full items-center gap-4 rounded-xl pr-3 pl-5 transition-colors hover:bg-hairline',
                 index % 2 === 0 && 'bg-stripe',
               )}
             >
