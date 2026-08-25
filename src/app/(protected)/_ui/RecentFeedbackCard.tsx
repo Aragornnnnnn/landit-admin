@@ -10,6 +10,7 @@ import { formatRelativeTime } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 import { InlineError } from '@/shared/ui/InlineError';
 
+import { feedbackOpenPath } from '../feedbacks/_model/feedback-filter';
 import {
   FEEDBACK_STATUS_DOT,
   FEEDBACK_STATUS_LABEL,
@@ -62,7 +63,7 @@ export function RecentFeedbackCard({
               className="border-t border-hairline first:border-t-0"
             >
               <Link
-                href={`/feedbacks?open=${item.feedbackId}`}
+                href={feedbackOpenPath(item)}
                 className="flex flex-col gap-1 px-2 py-3"
               >
                 <span className="flex items-center gap-2 text-[12px] text-subtle">
@@ -96,7 +97,7 @@ export function RecentFeedbackCard({
             {shown.map((item) => (
               <Link
                 key={item.feedbackId}
-                href={`/feedbacks?open=${item.feedbackId}`}
+                href={feedbackOpenPath(item)}
                 className="flex items-center gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-hairline"
               >
                 <span className="w-[90px] shrink-0 text-[13px] font-medium text-chip-foreground">

@@ -108,9 +108,10 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
                             <span>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
-                        {/* 배지는 hover·활성에서도 흰 글자 — shadcn 기본값이 진회색으로 바꿔 오렌지 배경과 뭉갠다 */}
+                        {/* 배지는 hover·활성에서도 흰 글자 — shadcn 기본값이 진회색으로 바꿔 오렌지 배경과 뭉갠다.
+                            top도 기본값이 32px 버튼 기준(top 6px)이라 44px 버튼에선 위로 치우친다 — 세로 중앙으로 고정 */}
                         {badge ? (
-                          <SidebarMenuBadge className="h-[17px] min-w-[27px] rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground!">
+                          <SidebarMenuBadge className="top-1/2! right-3.5 h-[17px] min-w-[27px] -translate-y-1/2 rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground!">
                             {badge}
                           </SidebarMenuBadge>
                         ) : null}
