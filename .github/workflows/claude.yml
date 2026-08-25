@@ -1,0 +1,45 @@
+# PR·이슈에서 @claude를 멘션하면 Claude가 답한다 (리뷰·질문·수정 제안).
+#
+# 자동 리뷰(pull_request 트리거)는 일부러 걸지 않았다 — 모든 PR·모든 푸시마다 돌면 Claude 사용량이
+# 빠르게 닳는다. 넓게 훑는 자동 리뷰는 Gemini(.gemini/config.yaml)가 맡고, Claude는 깊게 봐야 할 때
+# 사람이 부른다. 자동으로 돌리고 싶어지면 pull_request 트리거와 prompt를 추가하되 사용량을 먼저 보라.
+#
+# 필요한 시크릿 (레포 Settings → Secrets → Actions)
+#   CLAUDE_CODE_OAUTH_TOKEN — 로컬에서 `claude setup-token`으로 발급. 발급한 사람의 구독 한도를 쓴다.
+#   (조직이 함께 쓰려면 ANTHROPIC_API_KEY로 바꾼다 — 이쪽은 사용량만큼 과금된다)
+name: Claude
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    # 멘션이 있고, 레포에 쓰기 권한이 있는 사람이 남긴 코멘트일 때만 실행한다.
+    # 지금은 private이라 외부인이 코멘트를 달 수 없지만, 나중에 공개로 바꿔도 아무나 우리 토큰을
+    # 쓰게 되지 않도록 미리 막아둔다. 멘션이 없으면 Actions 분도 쓰지 않는다
+    if: |
+      contains(github.event.comment.body, '@claude')
+      && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      # contents는 read만 준다 — Claude가 코드를 읽고 코멘트는 남기지만 커밋·푸시는 못 한다.
+      # PR 본문이나 코드에 "이렇게 커밋해줘" 같은 지시가 섞여 들어와도 실제로 밀어넣을 수 없다
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # 저장소 루트의 CLAUDE.md(= AGENTS.md)를 자동으로 읽는다 — 보안 규칙·구조·컨벤션이 그대로 적용된다.
+          # 사용량을 아끼려고 턴 수를 제한하고 Sonnet을 쓴다. 더 깊게 봐야 하면 멘션에 적어 요청한다
+          claude_args: '--max-turns 15 --model claude-sonnet-5'

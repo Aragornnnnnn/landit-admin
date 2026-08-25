@@ -1,0 +1,40 @@
+# 의존성
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+
+# 테스트·커버리지
+coverage/
+
+# 로그
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# 환경변수 — 실제 값은 로컬 .env.local과 Vercel에만. 예시 파일만 커밋
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# 에이전트 작업용 로컬 문서 (레포에 올리지 않음)
+/plan.md
+/checklist.md
+/context-notes.md
+
+# 브라우저 테스트 도구(Playwright MCP) 산출물
+.playwright-mcp/
+
+# OS
+.DS_Store
+*.pem
+.env*

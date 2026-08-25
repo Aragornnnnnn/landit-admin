@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+pnpm-lock.yaml
+next-env.d.ts
+# 스웨거에서 생성하는 타입 파일 — 재생성되므로 포맷하지 않는다
+src/shared/api/schema.d.ts

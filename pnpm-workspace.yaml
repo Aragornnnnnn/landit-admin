@@ -1,0 +1,12 @@
+# 단일 앱이라 workspace 패키지는 없다. pnpm 10의 설정 파일 역할만 한다.
+
+# 공급망 방어 — npm에 공개된 지 이 시간(분)이 지난 버전만 설치한다. 배포 직후 탈취된 악성 버전을 피한다 (3일)
+minimumReleaseAge: 4320
+
+# 빌드 스크립트(postinstall) 실행이 필요한 패키지는 여기 명시적으로 허용한다. 없는 패키지는 스크립트가 실행되지 않는다
+onlyBuiltDependencies: []
+
+# 빌드 스크립트 경고를 내지 않을 패키지 (create-next-app 기본값)
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
