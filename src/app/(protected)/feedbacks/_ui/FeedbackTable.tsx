@@ -1,6 +1,6 @@
 'use client';
 
-// 데스크톱 목록 — 흰 카드 안 표. 행은 한 줄 걸러 옅은 배경(Figma 1050:8193). 유형·상태는 배경 없는 텍스트다
+// 데스크톱 목록 — 흰 카드 안 표. 행 구분은 hover만(Figma 1050:8193에서 운영자 결정으로 변경). 유형·상태는 배경 없는 텍스트다
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
 
@@ -41,16 +41,12 @@ export function FeedbackTable({ items, onSelect }: FeedbackTableProps) {
         </div>
 
         <div className="flex flex-col gap-0.5">
-          {items.map((item, index) => (
+          {items.map((item) => (
             <button
               key={item.feedbackId}
               type="button"
               onClick={() => item.feedbackId && onSelect(item.feedbackId)}
-              className={cn(
-                'flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left transition-colors hover:bg-hairline',
-                // 한 줄 걸러 옅은 배경 — 가로로 긴 행을 눈이 따라가기 쉽게
-                index % 2 === 0 && 'bg-stripe',
-              )}
+              className="flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left transition-colors hover:bg-hairline"
             >
               <span
                 className={cn(

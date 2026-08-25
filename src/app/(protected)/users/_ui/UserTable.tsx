@@ -1,6 +1,6 @@
 'use client';
 
-// 데스크톱 사용자 표 — 흰 카드, 한 줄 걸러 옅은 배경 (Figma 1050:11383).
+// 데스크톱 사용자 표 — 흰 카드, 행 구분은 hover만 (Figma 1050:11383에서 운영자 결정으로 변경).
 // 닉네임이 없는 사용자는 "—"다. 빈칸으로 두면 셀이 밀려 보인다
 import Link from 'next/link';
 
@@ -46,14 +46,11 @@ export function UserTable({ users }: { users: AdminUserListItem[] }) {
         </div>
 
         <div className="flex flex-col gap-0.5">
-          {users.map((user, index) => (
+          {users.map((user) => (
             <Link
               key={user.userProfileId}
               href={`/users/${user.userProfileId}`}
-              className={cn(
-                'flex w-full items-center gap-4 rounded-lg px-5 py-3 transition-colors hover:bg-hairline',
-                index % 2 === 0 && 'bg-stripe',
-              )}
+              className="flex w-full items-center gap-4 rounded-lg px-5 py-3 transition-colors hover:bg-hairline"
             >
               <span className={cn(CELL.id, 'text-[13px] text-subtle')}>
                 #{user.userProfileId}

@@ -61,7 +61,6 @@
   --color-kakao: var(--kakao);
   --color-kakao-foreground: var(--kakao-foreground);
   /* 어드민 전용 — 칩(유형·상태)은 전부 중립 회색, 셸 텍스트 단계 */
-  --color-stripe: var(--stripe);
   --color-field-border: var(--field-border);
   --color-chip: var(--chip);
   --color-chip-foreground: var(--chip-foreground);
@@ -152,8 +151,6 @@
   --kakao: #fee500;
   --kakao-foreground: #191919;
   /* 어드민 전용 */
-  /* 목록 얼룩 행 — Figma 테이블은 한 줄 걸러 옅은 배경을 깐다 */
-  --stripe: var(--console-75);
   /* 필터·페이지 버튼 테두리 — Figma는 흰 배경 + 이 테두리를 쓴다 */
   --field-border: var(--console-200);
   --chip: var(--console-100);
