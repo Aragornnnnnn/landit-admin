@@ -48,14 +48,15 @@ export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
 
   return (
     <div className="flex flex-col gap-4 pt-1 pb-12">
+      {/* 뒤로가기는 자기 줄에 — 프로필 헤더와 같은 줄에 끼면 어디 붙은 요소인지 애매하다 (운영자 결정) */}
+      <Link
+        href="/users"
+        className="flex w-fit items-center gap-1.5 text-[13px] text-body hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        목록
+      </Link>
       <header className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/users"
-          className="flex items-center gap-1.5 text-[13px] text-body hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          목록
-        </Link>
         <span aria-hidden className="size-11 shrink-0 rounded-full bg-muted" />
         <span className="flex flex-col gap-0.5">
           <span className="flex flex-wrap items-center gap-2">
