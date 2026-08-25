@@ -28,13 +28,6 @@ export function DashboardPage() {
   const data = useDashboardData(now);
 
   if (data.isPending) return <ListSkeleton rows={6} className="pt-4" />;
-  if (data.isError)
-    return (
-      <InlineError
-        message="대시보드를 불러오지 못했어요"
-        onRetry={data.refetch}
-      />
-    );
 
   const oldest = oldestPending(data.pendingFeedbacks, now);
   const signups = signupCounts(data.users, now);
@@ -49,23 +42,39 @@ export function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 md:flex md:flex-row">
         <SummaryCard
           label="답장 기다리는 피드백"
-          value={String(data.pendingTotal)}
-          hint={`건 · 오늘 +${countCreatedToday(data.pendingFeedbacks, now)}`}
+          value={data.feedbacksError ? '—' : String(data.pendingTotal)}
+          hint={
+            data.feedbacksError
+              ? '불러오지 못했어요'
+              : `건 · 오늘 +${countCreatedToday(data.pendingFeedbacks, now)}`
+          }
         />
         <SummaryCard
           label="가장 오래 기다린 건"
-          value={oldest ? `${oldest.waitingDays}일` : '없음'}
+          value={
+            data.feedbacksError
+              ? '—'
+              : oldest
+                ? `${oldest.waitingDays}일`
+                : '없음'
+          }
           hint={
-            oldest
-              ? `· ${oldest.type ? FEEDBACK_TYPE_LABEL[oldest.type] : ''} · ${oldest.nickname ?? ''}`
-              : '· 다 답장했어요'
+            data.feedbacksError
+              ? '불러오지 못했어요'
+              : oldest
+                ? `· ${oldest.type ? FEEDBACK_TYPE_LABEL[oldest.type] : ''} · ${oldest.nickname ?? ''}`
+                : '· 다 답장했어요'
           }
         />
         <SummaryCard
           className="col-span-2 md:col-span-1"
           label="이번 주 가입"
-          value={String(signups.thisWeek)}
-          hint={`명 · 지난주 ${signups.lastWeek}`}
+          value={data.usersError ? '—' : String(signups.thisWeek)}
+          hint={
+            data.usersError
+              ? '불러오지 못했어요'
+              : `명 · 지난주 ${signups.lastWeek}`
+          }
         />
       </div>
 
@@ -76,81 +85,111 @@ export function DashboardPage() {
               피드백 접수
             </h2>
             <span className="text-[12px] text-subtle">
-              최근 7일 · 총 {data.recentTotal}건
+              {data.feedbacksError
+                ? '최근 7일'
+                : `최근 7일 · 총 ${data.recentTotal}건`}
             </span>
           </header>
 
-          <div className="flex items-end gap-2">
-            {bars.map((bar) => (
-              <span
-                key={bar.date.toISOString()}
-                className="flex flex-1 flex-col items-center gap-1.5"
-              >
-                <span
-                  aria-hidden
-                  style={{
-                    height: `${barHeight(
-                      bar.count,
-                      bars.map((one) => one.count),
-                    )}px`,
-                  }}
-                  className={`w-full max-w-10 rounded ${bar.today ? 'bg-foreground' : 'bg-hairline'}`}
-                />
-                <span className="text-[11px] text-subtle">
-                  {bar.date.getMonth() + 1}.{bar.date.getDate()}
-                </span>
-                <span className="sr-only">{bar.count}건</span>
-              </span>
-            ))}
-          </div>
-
-          {/* 좁은 화면 프레임에는 유형별 분포가 없다 — 막대만으로 추세를 본다 */}
-          <div className="hidden h-px bg-muted md:block" />
-
-          <div className="hidden items-baseline justify-between md:flex">
-            <h3 className="text-[13px] font-medium text-strong">
-              처리중 유형별
-            </h3>
-            <span className="text-[12px] text-subtle">
-              {data.pendingTotal}건
-            </span>
-          </div>
-          <div className="hidden flex-col gap-2 md:flex">
-            {byType.map(({ type, count }) => (
-              <div key={type} className="flex items-center gap-3">
-                <span className="w-[72px] shrink-0 text-[13px] text-body">
-                  {FEEDBACK_TYPE_LABEL[type]}
-                </span>
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <span
-                    aria-hidden
-                    style={{ width: `${share(count, byType)}%` }}
-                    className="block h-full rounded-full bg-foreground"
-                  />
-                </span>
-                <span className="w-6 shrink-0 text-right text-[13px] font-medium text-strong">
-                  {count}
-                </span>
-              </div>
-            ))}
-          </div>
+          {data.feedbacksError ? (
+            <InlineError
+              message="피드백을 불러오지 못했어요"
+              onRetry={data.refetchFeedbacks}
+              className="py-10"
+            />
+          ) : (
+            <ChartBody data={data} bars={bars} byType={byType} />
+          )}
         </section>
 
         {/* 오른쪽 열은 "지금 나가 있는 것" — 앱 버전과 편지함 맨 위 (프레임의 400px 열) */}
         <div className="flex w-full flex-col gap-5 xl:w-[400px] xl:shrink-0">
-          <AppVersionSummaryCard versions={data.appVersions} />
+          <AppVersionSummaryCard
+            versions={data.appVersions}
+            error={data.appVersionsError}
+          />
           {/* 편지함 카드도 좁은 화면 프레임에 없다 — 대시보드는 현황판이고 편지는 그 화면에서 본다 */}
           <div className="hidden md:block">
             <MailboxSummaryCard
               letters={data.publishedLetters}
               draftCount={data.draftLetterCount}
+              error={data.lettersError}
             />
           </div>
         </div>
       </div>
 
-      <RecentFeedbackCard items={data.recentFeedbacks} />
+      <RecentFeedbackCard
+        items={data.recentFeedbacks}
+        error={data.feedbacksError}
+        onRetry={data.refetchFeedbacks}
+      />
     </div>
+  );
+}
+
+function ChartBody({
+  data,
+  bars,
+  byType,
+}: {
+  data: ReturnType<typeof useDashboardData>;
+  bars: ReturnType<typeof dailyCounts>;
+  byType: ReturnType<typeof countsByType>;
+}) {
+  return (
+    <>
+      <div className="flex items-end gap-2">
+        {bars.map((bar) => (
+          <span
+            key={bar.date.toISOString()}
+            className="flex flex-1 flex-col items-center gap-1.5"
+          >
+            <span
+              aria-hidden
+              style={{
+                height: `${barHeight(
+                  bar.count,
+                  bars.map((one) => one.count),
+                )}px`,
+              }}
+              className={`w-full max-w-10 rounded ${bar.today ? 'bg-foreground' : 'bg-hairline'}`}
+            />
+            <span className="text-[11px] text-subtle">
+              {bar.date.getMonth() + 1}.{bar.date.getDate()}
+            </span>
+            <span className="sr-only">{bar.count}건</span>
+          </span>
+        ))}
+      </div>
+
+      {/* 좁은 화면 프레임에는 유형별 분포가 없다 — 막대만으로 추세를 본다 */}
+      <div className="hidden h-px bg-muted md:block" />
+
+      <div className="hidden items-baseline justify-between md:flex">
+        <h3 className="text-[13px] font-medium text-strong">처리중 유형별</h3>
+        <span className="text-[12px] text-subtle">{data.pendingTotal}건</span>
+      </div>
+      <div className="hidden flex-col gap-2 md:flex">
+        {byType.map(({ type, count }) => (
+          <div key={type} className="flex items-center gap-3">
+            <span className="w-[72px] shrink-0 text-[13px] text-body">
+              {FEEDBACK_TYPE_LABEL[type]}
+            </span>
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+              <span
+                aria-hidden
+                style={{ width: `${share(count, byType)}%` }}
+                className="block h-full rounded-full bg-foreground"
+              />
+            </span>
+            <span className="w-6 shrink-0 text-right text-[13px] font-medium text-strong">
+              {count}
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 

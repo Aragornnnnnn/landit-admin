@@ -84,10 +84,16 @@ export function useDashboardData(now: Date) {
     draftLetterCount: drafts.data?.items?.length ?? 0,
     appVersions: appVersions.data ?? [],
     isPending: recent.isPending || pending.isPending || users.isPending,
-    isError: recent.isError || pending.isError || users.isError,
-    refetch: () => {
+    // 실패는 구역별로 알린다 — 피드백 API가 죽어도 사용자·편지·앱 버전은 멀쩡히 보여야 한다
+    feedbacksError: recent.isError || pending.isError,
+    usersError: users.isError,
+    lettersError: letters.isError || drafts.isError,
+    appVersionsError: appVersions.isError,
+    refetchFeedbacks: () => {
       void recent.refetch();
       void pending.refetch();
+    },
+    refetchUsers: () => {
       void users.refetch();
     },
   };
