@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { cn } from '@/shared/lib/cn';
 import { formatRelativeTime } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
+import { InlineError } from '@/shared/ui/InlineError';
 
 import {
   FEEDBACK_STATUS_DOT,
@@ -18,7 +19,16 @@ import type { FeedbackItem } from '../feedbacks/_model/useFeedbackListQuery';
 
 const RECENT_COUNT = 5;
 
-export function RecentFeedbackCard({ items }: { items: FeedbackItem[] }) {
+export function RecentFeedbackCard({
+  items,
+  error = false,
+  onRetry,
+}: {
+  items: FeedbackItem[];
+  /** 조회 실패 — 카드 자리는 유지하고 안에서만 알린다 */
+  error?: boolean;
+  onRetry?: () => void;
+}) {
   const isMobile = useIsMobile();
   const shown = items.slice(0, isMobile ? 3 : RECENT_COUNT);
 
@@ -34,7 +44,13 @@ export function RecentFeedbackCard({ items }: { items: FeedbackItem[] }) {
         </Link>
       </header>
 
-      {shown.length === 0 ? (
+      {error ? (
+        <InlineError
+          message="피드백을 불러오지 못했어요"
+          onRetry={onRetry}
+          className="py-8"
+        />
+      ) : shown.length === 0 ? (
         <p className="py-8 text-center text-[14px] text-subtle">
           아직 받은 피드백이 없어요
         </p>

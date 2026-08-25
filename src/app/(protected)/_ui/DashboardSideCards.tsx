@@ -17,9 +17,18 @@ type Letter = Schema<'AdminMailboxLetterResponse'>;
 
 export function AppVersionSummaryCard({
   versions,
+  error = false,
 }: {
   versions: AppVersion[];
+  /** 조회 실패 — 조용히 "—"로 두면 값이 없는 것과 구분이 안 돼 실패라고 밝힌다 */
+  error?: boolean;
 }) {
+  if (error)
+    return (
+      <Card title="앱 버전" href="/app-versions" linkLabel="앱 버전">
+        <FetchFailed />
+      </Card>
+    );
   return (
     <Card title="앱 버전" href="/app-versions" linkLabel="앱 버전">
       {PLATFORMS.map((platform) => {
@@ -46,10 +55,18 @@ export function AppVersionSummaryCard({
 export function MailboxSummaryCard({
   letters,
   draftCount,
+  error = false,
 }: {
   letters: Letter[];
   draftCount: number;
+  error?: boolean;
 }) {
+  if (error)
+    return (
+      <Card title="지금 편지함 맨 위" href="/letters" linkLabel="공지·업데이트">
+        <FetchFailed />
+      </Card>
+    );
   // 사용자 편지함과 같은 순서 — 고정이 맨 위, 그다음 최신
   const top = [...letters]
     .sort((left, right) => {
@@ -88,6 +105,10 @@ export function MailboxSummaryCard({
       )}
     </Card>
   );
+}
+
+function FetchFailed() {
+  return <p className="py-2 text-[13px] text-subtle">불러오지 못했어요</p>;
 }
 
 function Card({
