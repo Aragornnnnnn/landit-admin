@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   changeFeedbackFilter,
   DEFAULT_FEEDBACK_FILTER,
+  feedbackOpenPath,
   hasActiveFeedbackFilter,
   readFeedbackFilter,
   toFeedbackQuery,
@@ -129,5 +130,25 @@ describe('toFeedbackQuery', () => {
     expect(
       toFeedbackQuery(DEFAULT_FEEDBACK_FILTER, now).keyword,
     ).toBeUndefined();
+  });
+});
+
+describe('feedbackOpenPath', () => {
+  it('처리완료 건은 상태·전체 기간을 함께 싣는다 — 기본 필터(처리중·30일)가 그 건을 걸러 상세가 안 열린다', () => {
+    expect(feedbackOpenPath({ feedbackId: 7, status: 'COMPLETED' })).toBe(
+      '/feedbacks?status=COMPLETED&days=0&open=7',
+    );
+  });
+
+  it('처리중 건은 상태를 싣지 않는다 — 기본값이라 주소만 길어진다', () => {
+    expect(feedbackOpenPath({ feedbackId: 7, status: 'PENDING' })).toBe(
+      '/feedbacks?days=0&open=7',
+    );
+  });
+
+  it('상태를 모르면 전체 상태로 연다 — 어느 쪽이든 목록에 걸리게', () => {
+    expect(feedbackOpenPath({ feedbackId: 7 })).toBe(
+      '/feedbacks?status=ALL&days=0&open=7',
+    );
   });
 });
