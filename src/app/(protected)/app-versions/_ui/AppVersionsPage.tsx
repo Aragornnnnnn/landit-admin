@@ -27,6 +27,7 @@ import {
   useSaveAppVersionMutation,
 } from '../_model/useAppVersions';
 import { AppVersionCard } from './AppVersionCard';
+import { AndroidIcon, AppleIcon } from './PlatformIcons';
 import { SaveVersionDialog } from './SaveVersionDialog';
 import { UpdatePreviewDialog } from './UpdatePreviewDialog';
 
@@ -87,10 +88,15 @@ function Editor({ versions }: { versions: AppVersion[] }) {
               aria-selected={tab === platform}
               onClick={() => setTab(platform)}
               className={cn(
-                'flex-1 rounded-lg px-4 py-2 text-[14px] font-medium text-subtle transition-colors',
+                'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-[14px] font-medium text-subtle transition-colors',
                 tab === platform && 'bg-muted text-strong',
               )}
             >
+              {platform === 'IOS' ? (
+                <AppleIcon className="size-4" />
+              ) : (
+                <AndroidIcon className="size-4" />
+              )}
               {PLATFORM_LABEL[platform]}
             </button>
           ))}

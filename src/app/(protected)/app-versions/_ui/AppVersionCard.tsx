@@ -13,6 +13,7 @@ import {
   type Platform,
 } from '../_model/app-version-draft';
 import type { UpdateKind } from '../_model/update-preview';
+import { AndroidIcon, AppleIcon } from './PlatformIcons';
 
 interface AppVersionCardProps {
   platform: Platform;
@@ -50,7 +51,12 @@ export function AppVersionCard({
   return (
     <section className="flex w-full flex-col gap-4 rounded-[20px] bg-card px-6 py-5">
       <header className="flex items-center justify-between">
-        <h2 className="text-[19px] font-bold text-foreground">
+        <h2 className="flex items-center gap-2 text-[19px] font-bold text-foreground">
+          {platform === 'IOS' ? (
+            <AppleIcon className="size-5" />
+          ) : (
+            <AndroidIcon className="size-5" />
+          )}
           {PLATFORM_LABEL[platform]}
         </h2>
         <span className="flex items-center gap-1.5 text-[12px] text-subtle">

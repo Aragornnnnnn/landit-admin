@@ -48,14 +48,15 @@ export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
 
   return (
     <div className="flex flex-col gap-4 pt-1 pb-12">
+      {/* 뒤로가기는 자기 줄에 — 프로필 헤더와 같은 줄에 끼면 어디 붙은 요소인지 애매하다 (운영자 결정) */}
+      <Link
+        href="/users"
+        className="flex w-fit items-center gap-1.5 text-[13px] text-body hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        목록
+      </Link>
       <header className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/users"
-          className="flex items-center gap-1.5 text-[13px] text-body hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          목록
-        </Link>
         <span aria-hidden className="size-11 shrink-0 rounded-full bg-muted" />
         <span className="flex flex-col gap-0.5">
           <span className="flex flex-wrap items-center gap-2">
@@ -195,14 +196,12 @@ function UserFeedbackCard({
               <span className="w-[88px] shrink-0">상태</span>
               <span className="w-[100px] shrink-0">접수</span>
             </div>
-            {items.map((item, index) => (
+            {items.map((item) => (
               // 행을 누르면 그 피드백의 답장 화면으로 — 목록 화면이 ?open을 읽는다
               <Link
                 key={item.feedbackId}
                 href={`/feedbacks?open=${item.feedbackId}`}
-                className={`flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-hairline ${
-                  index % 2 === 0 ? 'bg-stripe' : ''
-                }`}
+                className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-hairline"
               >
                 <span className="w-24 shrink-0 text-[13px] font-medium text-chip-foreground">
                   {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}

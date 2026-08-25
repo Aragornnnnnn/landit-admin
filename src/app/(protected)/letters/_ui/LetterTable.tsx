@@ -1,6 +1,6 @@
 'use client';
 
-// 데스크톱 그룹 표 — 흰 카드 안, 한 줄 걸러 옅은 배경 (Figma 1050:10110).
+// 데스크톱 그룹 표 — 흰 카드 안, 행 구분은 hover만 (Figma 1050:10110에서 운영자 결정으로 변경).
 // 타입·상태는 배경 없는 텍스트다. 행 오른쪽 ⋯로 상태를 바꾼다
 import Link from 'next/link';
 
@@ -50,7 +50,7 @@ export function LetterTable({ items, onAction }: LetterTableProps) {
         </div>
 
         <div className="flex flex-col gap-0.5">
-          {items.map((item, index) => {
+          {items.map((item) => {
             const dot = item.publicationStatus
               ? LETTER_STATUS_DOT[item.publicationStatus]
               : undefined;
@@ -58,10 +58,7 @@ export function LetterTable({ items, onAction }: LetterTableProps) {
               // 링크 안에 버튼을 넣을 수 없어 행 전체가 아니라 내용 부분만 링크다
               <div
                 key={item.letterId}
-                className={cn(
-                  'flex w-full items-center gap-4 rounded-lg pr-3 pl-5 transition-colors hover:bg-hairline',
-                  index % 2 === 0 && 'bg-stripe',
-                )}
+                className="flex w-full items-center gap-4 rounded-lg pr-3 pl-5 transition-colors hover:bg-hairline"
               >
                 <Link
                   href={`/letters/${item.letterId}`}

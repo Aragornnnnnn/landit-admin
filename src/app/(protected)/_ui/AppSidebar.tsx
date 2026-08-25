@@ -47,7 +47,7 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
-      <SidebarHeader className="gap-5 px-5 pt-6">
+      <SidebarHeader className="gap-3.5 px-5 pt-6">
         <Link
           href="/"
           className="flex items-center gap-2.5 px-1"
@@ -61,15 +61,17 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
             </span>
           </span>
         </Link>
-        {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 누를 곳이 아니므로 화살표 같은 어포던스를 두지 않는다 */}
-        <div className="flex flex-col gap-0.5 px-1.5 py-0.5">
-          <span className="text-[15px] font-medium text-strong">
+        {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 카드처럼 크게 두면 눌러야 할 것처럼 보여 한 줄로 줄였다 (운영자 결정) */}
+        <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
+          <span
+            aria-hidden
+            className="size-1.5 shrink-0 rounded-full bg-subtle"
+          />
+          <span className="shrink-0 font-medium text-body">
             {developServer ? '개발 서버' : '운영 서버'}
           </span>
-          <span className="text-xs text-subtle">
-            {apiHost || '서버 미설정'}
-          </span>
-        </div>
+          <span className="truncate">· {apiHost || '서버 미설정'}</span>
+        </span>
       </SidebarHeader>
 
       <SidebarContent className="gap-0 px-5">

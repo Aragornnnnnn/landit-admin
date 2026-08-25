@@ -1,6 +1,6 @@
 'use client';
 
-// 로그인 카드 — 카카오·Google 버튼, 안내 한 줄, (관리자 아님일 때) 권한 없음 안내 + 다른 계정으로 로그인 (docs/screens/login.md)
+// 로그인 카드 — 카카오·Google 버튼, (관리자 아님일 때) 권한 없음 안내 + 다른 계정으로 로그인 (docs/screens/login.md)
 import { Loader2 } from 'lucide-react';
 
 import type { ForbiddenNotice } from '@/shared/auth/forbidden-notice';
@@ -38,7 +38,7 @@ export function LoginCard({
           </span>
         </div>
         <h1 id="login-title" className="text-[15px] text-muted-foreground">
-          관리자 계정으로 로그인해 주세요
+          로그인해 주세요
         </h1>
       </header>
 
@@ -72,11 +72,6 @@ export function LoginCard({
           관리자 권한이 없어요. 관리자에게 권한을 요청해 주세요.
         </div>
       )}
-
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        랜딧 앱과 같은 계정으로 로그인해요. 관리자 권한이 있는 계정만 들어올 수
-        있어요.
-      </p>
 
       {forbidden && (
         <button
