@@ -2,7 +2,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
 import { FeedbackReply } from './FeedbackReply';
@@ -49,6 +49,8 @@ function renderPending() {
 }
 
 describe('답장 템플릿', () => {
+  beforeEach(() => localStorage.clear());
+
   it('칩을 누르면 공식 문구가 제목·본문에 채워진다', async () => {
     renderPending();
 
@@ -78,5 +80,19 @@ describe('답장 템플릿', () => {
     expect(screen.getByLabelText('답장 제목')).toHaveValue(
       '따뜻한 응원 감사합니다',
     );
+  });
+
+  it('관리에서 칩 이름을 바꿔 저장하면 칩에 바로 반영된다', async () => {
+    renderPending();
+
+    await userEvent.click(screen.getByRole('button', { name: '관리' }));
+    const label = screen.getByLabelText('칩 이름');
+    await userEvent.clear(label);
+    await userEvent.type(label, '나만의 인사');
+    await userEvent.click(screen.getByRole('button', { name: '저장' }));
+
+    expect(
+      screen.getByRole('button', { name: '나만의 인사' }),
+    ).toBeInTheDocument();
   });
 });
