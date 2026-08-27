@@ -24,7 +24,7 @@ import { Textarea } from '@/shared/ui/textarea';
 
 import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
-import { type ReplyTemplate } from '../_model/reply-templates';
+import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
@@ -114,7 +114,7 @@ export function ReplyFields({
 
       <TogetherSection draft={draft} />
 
-      <TemplateRow draft={draft} />
+      <TemplateRow draft={draft} feedbackType={feedback.type} />
 
       <Input
         value={draft.title}
@@ -142,12 +142,21 @@ export function ReplyFields({
 
 /**
  * 답장 템플릿 칩 줄 — 유형에 맞는 템플릿이 미리 채워져 있고(진한 칩), 다른 칩을 누르면 바꿔 끼운다.
+ * 그 유형에 어울리는 템플릿(+직접 만든 것)만 보여줘 고르기 쉽게 한다.
  * 템플릿 그대로면 확인 없이 바꾸고, 직접 고친 글자가 있을 때만 덮어쓰기 전에 묻는다
  */
-function TemplateRow({ draft }: { draft: ReplyDraft }) {
+function TemplateRow({
+  draft,
+  feedbackType,
+}: {
+  draft: ReplyDraft;
+  feedbackType: FeedbackItem['type'];
+}) {
   const store = draft.templatesStore;
   const [confirming, setConfirming] = useState<ReplyTemplate | null>(null);
   const [managing, setManaging] = useState(false);
+
+  const shown = templatesFor(feedbackType, store.templates);
 
   const apply = (template: ReplyTemplate) => {
     if (draft.isTemplateUntouched) {
@@ -160,7 +169,7 @@ function TemplateRow({ draft }: { draft: ReplyDraft }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="text-[12px] text-subtle">템플릿</span>
-      {store.templates.map((template) => (
+      {shown.map((template) => (
         <button
           key={template.id}
           type="button"

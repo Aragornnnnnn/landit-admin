@@ -5,6 +5,7 @@ import {
   defaultTemplateFor,
   fillTemplate,
   REPLY_TEMPLATES,
+  templatesFor,
 } from './reply-templates';
 
 const template = {
@@ -59,5 +60,29 @@ describe('defaultTemplateFor', () => {
     const custom = [{ id: 'mine', label: '나만', title: '제목', body: '본문' }];
 
     expect(defaultTemplateFor('QUESTION', custom)).toBeNull();
+  });
+});
+
+describe('templatesFor', () => {
+  it('버그 신고엔 버그용 두 개만 보인다 — 고를 게 적어야 빠르다', () => {
+    expect(
+      templatesFor('BUG_REPORT', REPLY_TEMPLATES).map((one) => one.id),
+    ).toEqual(['bug-checking', 'bug-fixed']);
+  });
+
+  it('직접 만든 템플릿은 어느 유형에서나 보인다', () => {
+    const withCustom = [
+      ...REPLY_TEMPLATES,
+      { id: 'mine', label: '나만', title: '제목', body: '본문' },
+    ];
+
+    expect(templatesFor('QUESTION', withCustom).map((one) => one.id)).toEqual([
+      'question',
+      'mine',
+    ]);
+  });
+
+  it('유형을 모르면 전부 보인다', () => {
+    expect(templatesFor(undefined, REPLY_TEMPLATES)).toEqual(REPLY_TEMPLATES);
   });
 });
