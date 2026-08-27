@@ -1,11 +1,21 @@
 'use client';
 
-// 답장 화면의 알맹이 — 누구에게 쓰는지 · 무엇에 대한 답인지 · 함께 보낼 건 · 제목과 본문.
+// 답장 화면의 알맹이 — 누구에게 쓰는지 · 무엇에 대한 답인지 · 함께 보낼 건 · 템플릿 · 제목과 본문.
 // 데스크톱 시트(1050:8441)와 모바일 전체화면(1050:9368)이 같은 내용을 담고 입력 배경만 다르다
+import { useState } from 'react';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/shared/ui/alert-dialog';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { InlineError } from '@/shared/ui/InlineError';
 import { Input } from '@/shared/ui/input';
@@ -14,6 +24,7 @@ import { Textarea } from '@/shared/ui/textarea';
 
 import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
+import { REPLY_TEMPLATES, type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
 
@@ -102,6 +113,8 @@ export function ReplyFields({
 
       <TogetherSection draft={draft} />
 
+      <TemplateRow draft={draft} />
+
       <Input
         value={draft.title}
         maxLength={REPLY_TITLE_MAX}
@@ -123,6 +136,61 @@ export function ReplyFields({
         )}
       />
     </>
+  );
+}
+
+/**
+ * 답장 템플릿 칩 줄 — 누르면 제목·본문이 채워진다({닉네임} 치환).
+ * 이미 쓰던 내용이 있으면 덮어쓰기 전에 한 번 묻는다 — 쓰던 글이 소리 없이 날아가면 안 된다
+ */
+function TemplateRow({ draft }: { draft: ReplyDraft }) {
+  const [confirming, setConfirming] = useState<ReplyTemplate | null>(null);
+
+  const apply = (template: ReplyTemplate) => {
+    if (draft.title.trim() || draft.bodyText.trim()) {
+      setConfirming(template);
+      return;
+    }
+    draft.applyTemplate(template);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[12px] text-subtle">템플릿</span>
+      {REPLY_TEMPLATES.map((template) => (
+        <button
+          key={template.id}
+          type="button"
+          onClick={() => apply(template)}
+          className="rounded-full bg-chip px-3 py-1.5 text-[12px] font-medium text-chip-foreground transition-colors hover:bg-hairline"
+        >
+          {template.label}
+        </button>
+      ))}
+
+      <AlertDialog
+        open={confirming !== null}
+        onOpenChange={(next) => !next && setConfirming(null)}
+      >
+        <AlertDialogContent className="w-[calc(100%-4rem)] gap-3.5 rounded-2xl p-6 sm:w-[400px]">
+          <AlertDialogTitle className="text-[17px] font-bold text-foreground">
+            쓰던 내용을 지우고 템플릿을 적용할까요?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-[14px] text-muted-foreground">
+            지금 입력한 제목과 본문이 템플릿 내용으로 바뀌어요.
+          </AlertDialogDescription>
+          <AlertDialogFooter className="mx-0 mb-0 flex-row gap-2 border-0 bg-transparent p-0 pt-1 sm:justify-stretch">
+            <AlertDialogCancel className="m-0 flex-1">취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirming && draft.applyTemplate(confirming)}
+              className="m-0 flex-1"
+            >
+              적용
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 
