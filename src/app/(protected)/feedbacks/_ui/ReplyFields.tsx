@@ -24,10 +24,9 @@ import { Textarea } from '@/shared/ui/textarea';
 
 import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
-import { type ReplyTemplate } from '../_model/reply-templates';
+import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
-import { useReplyTemplates } from '../_model/useReplyTemplates';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
@@ -115,7 +114,7 @@ export function ReplyFields({
 
       <TogetherSection draft={draft} />
 
-      <TemplateRow draft={draft} />
+      <TemplateRow draft={draft} feedbackType={feedback.type} />
 
       <Input
         value={draft.title}
@@ -142,31 +141,45 @@ export function ReplyFields({
 }
 
 /**
- * 답장 템플릿 칩 줄 — 누르면 제목·본문이 채워진다({닉네임} 치환).
- * 이미 쓰던 내용이 있으면 덮어쓰기 전에 한 번 묻는다 — 쓰던 글이 소리 없이 날아가면 안 된다
+ * 답장 템플릿 칩 줄 — 유형에 맞는 템플릿이 미리 채워져 있고(진한 칩), 다른 칩을 누르면 바꿔 끼운다.
+ * 그 유형에 어울리는 템플릿(+직접 만든 것)만 보여줘 고르기 쉽게 한다.
+ * 템플릿 그대로면 확인 없이 바꾸고, 직접 고친 글자가 있을 때만 덮어쓰기 전에 묻는다
  */
-function TemplateRow({ draft }: { draft: ReplyDraft }) {
-  const store = useReplyTemplates();
+function TemplateRow({
+  draft,
+  feedbackType,
+}: {
+  draft: ReplyDraft;
+  feedbackType: FeedbackItem['type'];
+}) {
+  const store = draft.templatesStore;
   const [confirming, setConfirming] = useState<ReplyTemplate | null>(null);
   const [managing, setManaging] = useState(false);
 
+  const shown = templatesFor(feedbackType, store.templates);
+
   const apply = (template: ReplyTemplate) => {
-    if (draft.title.trim() || draft.bodyText.trim()) {
-      setConfirming(template);
+    if (draft.isTemplateUntouched) {
+      draft.applyTemplate(template);
       return;
     }
-    draft.applyTemplate(template);
+    setConfirming(template);
   };
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="text-[12px] text-subtle">템플릿</span>
-      {store.templates.map((template) => (
+      {shown.map((template) => (
         <button
           key={template.id}
           type="button"
           onClick={() => apply(template)}
-          className="rounded-full bg-chip px-3 py-1.5 text-[12px] font-medium text-chip-foreground transition-colors hover:bg-hairline"
+          className={cn(
+            'rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors',
+            template.id === draft.appliedTemplateId
+              ? 'bg-foreground text-background'
+              : 'bg-chip text-chip-foreground hover:bg-hairline',
+          )}
         >
           {template.label}
         </button>

@@ -37,13 +37,13 @@ const pending: FeedbackDetail = {
   reply: null,
 };
 
-function renderPending() {
+function renderPending(type: FeedbackDetail['type'] = 'QUESTION') {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <FeedbackReply feedback={pending} onClose={() => {}} />
+      <FeedbackReply feedback={{ ...pending, type }} onClose={() => {}} />
     </QueryClientProvider>,
   );
 }
@@ -51,10 +51,8 @@ function renderPending() {
 describe('답장 템플릿', () => {
   beforeEach(() => localStorage.clear());
 
-  it('칩을 누르면 공식 문구가 제목·본문에 채워진다', async () => {
-    renderPending();
-
-    await userEvent.click(screen.getByRole('button', { name: '문의 답변' }));
+  it('문의 피드백을 열면 문의 답변 템플릿이 미리 채워지고, 문의용 칩만 보인다', () => {
+    renderPending('QUESTION');
 
     expect(screen.getByLabelText('답장 제목')).toHaveValue(
       '문의하신 내용에 답변드립니다',
@@ -62,28 +60,49 @@ describe('답장 템플릿', () => {
     const body = screen.getByLabelText('답장 본문') as HTMLTextAreaElement;
     expect(body.value).toContain('안녕하세요, 랜딧입니다.');
     expect(body.value).toContain('랜딧 팀 드림');
+    // 다른 유형의 템플릿은 숨긴다 — 고를 게 적어야 빠르다
+    expect(
+      screen.queryByRole('button', { name: '응원 감사' }),
+    ).not.toBeInTheDocument();
   });
 
-  it('쓰던 내용이 있으면 바로 덮지 않고 확인 창을 거친다', async () => {
-    renderPending();
-    await userEvent.type(screen.getByLabelText('답장 제목'), '직접 쓴 제목');
+  it('템플릿 그대로면 다른 칩을 눌렀을 때 확인 없이 바로 바뀐다', async () => {
+    renderPending('BUG_REPORT');
 
-    await userEvent.click(screen.getByRole('button', { name: '응원 감사' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: '버그 수정 완료' }),
+    );
+
+    expect(
+      screen.queryByText('쓰던 내용을 지우고 템플릿을 적용할까요?'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('답장 제목')).toHaveValue(
+      '제보하신 오류를 수정했습니다',
+    );
+  });
+
+  it('직접 고친 글자가 있으면 바로 덮지 않고 확인 창을 거친다', async () => {
+    renderPending('BUG_REPORT');
+    await userEvent.type(screen.getByLabelText('답장 제목'), ' 추가로 씀');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: '버그 수정 완료' }),
+    );
 
     // 아직 안 덮였다 — 확인 창이 먼저다
-    expect(screen.getByLabelText('답장 제목')).toHaveValue('직접 쓴 제목');
     expect(
       screen.getByText('쓰던 내용을 지우고 템플릿을 적용할까요?'),
     ).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: '적용' }));
     expect(screen.getByLabelText('답장 제목')).toHaveValue(
-      '따뜻한 응원 감사합니다',
+      '제보하신 오류를 수정했습니다',
     );
   });
 
   it('관리에서 칩 이름을 바꿔 저장하면 칩에 바로 반영된다', async () => {
-    renderPending();
+    // 관리 목록의 첫 템플릿이 응원 감사라, 그 칩이 보이는 응원 유형으로 연다
+    renderPending('CHEER');
 
     await userEvent.click(screen.getByRole('button', { name: '관리' }));
     const label = screen.getByLabelText('칩 이름');

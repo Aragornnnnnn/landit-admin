@@ -54,6 +54,42 @@ export const REPLY_TEMPLATES: ReplyTemplate[] = [
   },
 ];
 
+/**
+ * 유형별로 어울리는 템플릿 — 첫 번째가 기본 채움이다.
+ * 답장 화면은 그 유형에 맞는 것만 보여줘 고르기 쉽게 한다
+ */
+const TEMPLATE_IDS_BY_TYPE: Record<string, string[]> = {
+  QUESTION: ['question'],
+  CHEER: ['cheer'],
+  BUG_REPORT: ['bug-checking', 'bug-fixed'],
+  FEATURE_REQUEST: ['feature-received', 'feature-shipped', 'feature-declined'],
+};
+
+const TYPED_IDS = new Set(Object.values(TEMPLATE_IDS_BY_TYPE).flat());
+
+/** 이 유형의 답장에 보여줄 템플릿 — 유형 전용 + 직접 만든 템플릿. 유형을 모르면 전부 */
+export function templatesFor(
+  type: string | undefined,
+  templates: ReplyTemplate[],
+): ReplyTemplate[] {
+  const ids = type ? TEMPLATE_IDS_BY_TYPE[type] : undefined;
+  if (!ids) return templates;
+  return templates.filter(
+    // 직접 만든 템플릿(유형 매핑에 없는 id)은 어느 유형에서나 보인다 — 개인이 아껴 쓰는 문구다
+    (one) => ids.includes(one.id) || !TYPED_IDS.has(one.id),
+  );
+}
+
+export function defaultTemplateFor(
+  type: string | undefined,
+  templates: ReplyTemplate[],
+): ReplyTemplate | null {
+  if (!type) return null;
+  const id = TEMPLATE_IDS_BY_TYPE[type]?.[0];
+  // 커스텀 목록에서 그 템플릿을 지웠을 수 있다 — 그럼 빈 폼으로 시작한다
+  return templates.find((one) => one.id === id) ?? null;
+}
+
 /** 빈 닉네임이면 "회원"으로 — 빈 칸으로 두면 "님, 안녕하세요"처럼 문장이 깨진다 */
 const FALLBACK_NAME = '회원';
 
