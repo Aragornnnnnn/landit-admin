@@ -89,21 +89,13 @@ export function writeFeedbackFilter(filter: FeedbackFilter): string {
 
 /**
  * 다른 화면(대시보드·사용자 상세)에서 이 피드백의 상세를 여는 주소.
- * 상세는 목록 위에서 열리므로 목록 기본 필터(처리중·30일)가 대상 건을 걸러내면 아무것도 안 열린다 —
- * 그 건이 반드시 목록에 걸리는 필터(자기 상태·전체 기간)를 함께 싣는다.
- * 한계: 단건 조회 API가 없어 뒤 페이지(21번째 이후)의 건은 여전히 못 연다 (docs/screens/feedbacks.md "BE 확인")
+ * 상세는 단건 조회(BE LAN-374)로 열리므로 목록 필터와 무관하다 — open만 싣는다
  */
 export function feedbackOpenPath(feedback: {
   feedbackId?: number;
   status?: FeedbackStatus;
 }): string {
-  const params = new URLSearchParams();
-  if (feedback.status !== DEFAULT_FEEDBACK_FILTER.status) {
-    params.set('status', feedback.status ?? 'ALL');
-  }
-  params.set('days', '0');
-  params.set('open', String(feedback.feedbackId));
-  return `/feedbacks?${params.toString()}`;
+  return `/feedbacks?open=${feedback.feedbackId}`;
 }
 
 /** 필터를 바꾸면 첫 페이지로 돌아간다 — 3페이지를 보다 조건을 바꾸면 결과가 3페이지보다 적을 수 있다 */

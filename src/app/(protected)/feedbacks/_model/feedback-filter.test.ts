@@ -134,21 +134,10 @@ describe('toFeedbackQuery', () => {
 });
 
 describe('feedbackOpenPath', () => {
-  it('처리완료 건은 상태·전체 기간을 함께 싣는다 — 기본 필터(처리중·30일)가 그 건을 걸러 상세가 안 열린다', () => {
+  it('open만 싣는다 — 상세가 단건 조회로 열려 목록 필터와 무관하다 (BE LAN-374)', () => {
     expect(feedbackOpenPath({ feedbackId: 7, status: 'COMPLETED' })).toBe(
-      '/feedbacks?status=COMPLETED&days=0&open=7',
+      '/feedbacks?open=7',
     );
-  });
-
-  it('처리중 건은 상태를 싣지 않는다 — 기본값이라 주소만 길어진다', () => {
-    expect(feedbackOpenPath({ feedbackId: 7, status: 'PENDING' })).toBe(
-      '/feedbacks?days=0&open=7',
-    );
-  });
-
-  it('상태를 모르면 전체 상태로 연다 — 어느 쪽이든 목록에 걸리게', () => {
-    expect(feedbackOpenPath({ feedbackId: 7 })).toBe(
-      '/feedbacks?status=ALL&days=0&open=7',
-    );
+    expect(feedbackOpenPath({ feedbackId: 3 })).toBe('/feedbacks?open=3');
   });
 });
