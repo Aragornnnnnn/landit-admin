@@ -11,6 +11,7 @@ import {
   replyButtonLabel,
   toggleTogetherFeedback,
 } from './reply-draft';
+import { fillTemplate, type ReplyTemplate } from './reply-templates';
 import type { FeedbackItem } from './useFeedbackListQuery';
 import { useSendReplyMutation } from './useSendReplyMutation';
 import { useUserPendingFeedbacksQuery } from './useUserPendingFeedbacksQuery';
@@ -46,6 +47,12 @@ export function useReplyDraft(feedback: FeedbackItem) {
       ),
     expanded,
     toggleExpanded: () => setExpanded((value) => !value),
+    /** 템플릿을 제목·본문에 채운다 — {닉네임}은 이 피드백의 닉네임으로 바뀐다. 쓰던 내용은 덮인다(확인은 UI가 한다) */
+    applyTemplate: (template: ReplyTemplate) => {
+      const filled = fillTemplate(template, feedback.nickname);
+      setTitle(filled.title);
+      setBodyText(filled.bodyText);
+    },
     confirming,
     openConfirm: () => setConfirming(true),
     closeConfirm: () => setConfirming(false),
