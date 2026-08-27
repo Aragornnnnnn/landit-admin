@@ -54,6 +54,27 @@ export const REPLY_TEMPLATES: ReplyTemplate[] = [
   },
 ];
 
+/**
+ * 유형에 맞는 기본 템플릿 — 답장 화면을 열면 이 문구가 미리 채워진다.
+ * 어드민은 필요한 부분만 고치면 되고, 다른 템플릿은 칩에서 고른다
+ */
+const TEMPLATE_ID_BY_TYPE: Record<string, string> = {
+  QUESTION: 'question',
+  CHEER: 'cheer',
+  BUG_REPORT: 'bug-checking',
+  FEATURE_REQUEST: 'feature-received',
+};
+
+export function defaultTemplateFor(
+  type: string | undefined,
+  templates: ReplyTemplate[],
+): ReplyTemplate | null {
+  if (!type) return null;
+  const id = TEMPLATE_ID_BY_TYPE[type];
+  // 커스텀 목록에서 그 템플릿을 지웠을 수 있다 — 그럼 빈 폼으로 시작한다
+  return templates.find((one) => one.id === id) ?? null;
+}
+
 /** 빈 닉네임이면 "회원"으로 — 빈 칸으로 두면 "님, 안녕하세요"처럼 문장이 깨진다 */
 const FALLBACK_NAME = '회원';
 

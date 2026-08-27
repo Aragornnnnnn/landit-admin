@@ -27,7 +27,6 @@ import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
 import { type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
-import { useReplyTemplates } from '../_model/useReplyTemplates';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
@@ -142,20 +141,20 @@ export function ReplyFields({
 }
 
 /**
- * 답장 템플릿 칩 줄 — 누르면 제목·본문이 채워진다({닉네임} 치환).
- * 이미 쓰던 내용이 있으면 덮어쓰기 전에 한 번 묻는다 — 쓰던 글이 소리 없이 날아가면 안 된다
+ * 답장 템플릿 칩 줄 — 유형에 맞는 템플릿이 미리 채워져 있고(진한 칩), 다른 칩을 누르면 바꿔 끼운다.
+ * 템플릿 그대로면 확인 없이 바꾸고, 직접 고친 글자가 있을 때만 덮어쓰기 전에 묻는다
  */
 function TemplateRow({ draft }: { draft: ReplyDraft }) {
-  const store = useReplyTemplates();
+  const store = draft.templatesStore;
   const [confirming, setConfirming] = useState<ReplyTemplate | null>(null);
   const [managing, setManaging] = useState(false);
 
   const apply = (template: ReplyTemplate) => {
-    if (draft.title.trim() || draft.bodyText.trim()) {
-      setConfirming(template);
+    if (draft.isTemplateUntouched) {
+      draft.applyTemplate(template);
       return;
     }
-    draft.applyTemplate(template);
+    setConfirming(template);
   };
 
   return (
@@ -166,7 +165,12 @@ function TemplateRow({ draft }: { draft: ReplyDraft }) {
           key={template.id}
           type="button"
           onClick={() => apply(template)}
-          className="rounded-full bg-chip px-3 py-1.5 text-[12px] font-medium text-chip-foreground transition-colors hover:bg-hairline"
+          className={cn(
+            'rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors',
+            template.id === draft.appliedTemplateId
+              ? 'bg-foreground text-background'
+              : 'bg-chip text-chip-foreground hover:bg-hairline',
+          )}
         >
           {template.label}
         </button>
