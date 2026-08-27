@@ -24,9 +24,11 @@ import { Textarea } from '@/shared/ui/textarea';
 
 import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
-import { REPLY_TEMPLATES, type ReplyTemplate } from '../_model/reply-templates';
+import { type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
+import { useReplyTemplates } from '../_model/useReplyTemplates';
+import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
   feedback: FeedbackItem;
@@ -144,7 +146,9 @@ export function ReplyFields({
  * 이미 쓰던 내용이 있으면 덮어쓰기 전에 한 번 묻는다 — 쓰던 글이 소리 없이 날아가면 안 된다
  */
 function TemplateRow({ draft }: { draft: ReplyDraft }) {
+  const store = useReplyTemplates();
   const [confirming, setConfirming] = useState<ReplyTemplate | null>(null);
+  const [managing, setManaging] = useState(false);
 
   const apply = (template: ReplyTemplate) => {
     if (draft.title.trim() || draft.bodyText.trim()) {
@@ -157,7 +161,7 @@ function TemplateRow({ draft }: { draft: ReplyDraft }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="text-[12px] text-subtle">템플릿</span>
-      {REPLY_TEMPLATES.map((template) => (
+      {store.templates.map((template) => (
         <button
           key={template.id}
           type="button"
@@ -167,6 +171,21 @@ function TemplateRow({ draft }: { draft: ReplyDraft }) {
           {template.label}
         </button>
       ))}
+      <button
+        type="button"
+        onClick={() => setManaging(true)}
+        className="px-1 text-[12px] text-subtle underline-offset-2 hover:text-foreground hover:underline"
+      >
+        관리
+      </button>
+
+      {managing && (
+        // 열 때마다 새로 마운트한다 — 작업 사본이 항상 현재 저장값에서 시작하게
+        <TemplateManagerDialog
+          store={store}
+          onClose={() => setManaging(false)}
+        />
+      )}
 
       <AlertDialog
         open={confirming !== null}
