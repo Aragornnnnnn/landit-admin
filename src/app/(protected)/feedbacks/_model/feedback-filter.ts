@@ -87,6 +87,17 @@ export function writeFeedbackFilter(filter: FeedbackFilter): string {
   return params.toString();
 }
 
+/**
+ * 다른 화면(대시보드·사용자 상세)에서 이 피드백의 상세를 여는 주소.
+ * 상세는 단건 조회(BE LAN-374)로 열리므로 목록 필터와 무관하다 — open만 싣는다
+ */
+export function feedbackOpenPath(feedback: {
+  feedbackId?: number;
+  status?: FeedbackStatus;
+}): string {
+  return `/feedbacks?open=${feedback.feedbackId}`;
+}
+
 /** 필터를 바꾸면 첫 페이지로 돌아간다 — 3페이지를 보다 조건을 바꾸면 결과가 3페이지보다 적을 수 있다 */
 export function changeFeedbackFilter(
   filter: FeedbackFilter,

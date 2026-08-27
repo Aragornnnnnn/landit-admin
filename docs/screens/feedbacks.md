@@ -75,6 +75,7 @@ API: GET admin/mailbox/feedbacks · POST admin/mailbox/replies
   4. 입력/제목 — placeholder "제목" (연회색 배경 #F2F4F6, 둥근 12px)
   5. 입력/본문 — 여러 줄, 남은 높이 채움. 예시 본문 "안녕하세요, 랜딧 팀이에요. / 알려주신 마이크 문제를 확인했고 1.4.3에서 고쳐 배포할 예정이에요. 불편을 드려 죄송해요."
   6. 버튼/답장 보내기 — 오렌지(#E07A3A) 전체 너비 primary. 라벨 "답장 보내기". 함께 답장 체크가 있으면 "답장 보내기 · 2건 함께 처리" (`1050:9683`).
+- **답장 템플릿 (운영자 결정 · 2026-08-26, 프레임에 없음)** — 함께 답장 아래·제목 입력 위에 "템플릿" 칩 줄. 팀이 확정한 공식 답장 문구 7종(응원 감사 · 기능 접수 · 기능 반영 · 반영 어려움 · 버그 확인 중 · 버그 수정 완료 · 문의 답변)이며, `OO`·괄호 자리는 적용 후 본문에서 직접 채운다. **유형에 맞는 템플릿이 미리 채워져 시작하고, 칩도 그 유형에 어울리는 것(+직접 만든 것)만 보인다**(문의→문의 답변 1개, 응원→응원 감사 1개, 버그→확인 중·수정 완료 2개, 기능 요청→접수·반영·반영 어려움 3개) — 적용된 칩은 진하게 표시. 템플릿 그대로면 다른 칩으로 확인 없이 바꾸고, 직접 고친 글자가 있을 때만 "쓰던 내용을 지우고 템플릿을 적용할까요?" 확인 창을 거친다. 칩 끝의 "관리"에서 어드민 안에서 문구를 고치고 추가·삭제·기본값 복원할 수 있다 — BE 저장 API가 없어 **이 브라우저(localStorage)에만 유지**되고, 팀 공유 기본값은 `_model/reply-templates.ts` 배열이 진실이다({닉네임} 자리 표시 지원). 공지용 템플릿(일반 공지·업데이트·점검)은 편지 에디터에 붙어 있다. Figma 갱신 필요.
 - 스펙 원문과 화면 프레임의 차이 (구현 시 판단 필요).
   - 스펙 원문은 "답장 기다리는 피드백 N건 · 한 통으로 답장돼요" 목록(체크 기본 on) / "처리완료 N건 접힘" / "N건에 답장 보내기" / "결과 안내 한 줄"이라 쓰여 있다.
   - 화면 프레임은 클릭한 피드백을 "피드백 원문" 카드로 크게 보여주고, 나머지 처리중 건은 "이 사용자의 다른 피드백 N건 · 함께 답장" 접힘 목록으로 둔다. 버튼 라벨은 "답장 보내기" / "답장 보내기 · N건 함께 처리". "가입" 정보, "처리완료 N건 접힘", "결과 안내 한 줄"은 프레임에 보이지 않는다.
@@ -146,19 +147,20 @@ API: GET admin/mailbox/feedbacks · POST admin/mailbox/replies
 
 ## 데이터
 
-| 항목        | 내용                                                                                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 목록        | GET admin/mailbox/feedbacks — keyword, type, status, createdFrom, createdTo, page, size, sort → items[], totalElements, totalPages                     |
-| 항목        | feedbackId, userProfileId, email, nickname, type, content(전문), status, resolvedByFeedbackId, createdAt, updatedAt                                    |
-| 사용자 묶음 | 상세를 열 때 GET feedbacks?keyword={email}&status=PENDING 으로 그 사용자의 처리중 전부를 가져온다(전용 API 없음). 처리완료는 status=COMPLETED로 접어서 |
-| 답장        | POST admin/mailbox/replies — 체크된 feedbackIds만. 응답 recipientCount(=1), completedFeedbackCount, representativeFeedbackIds                          |
+| 항목        | 내용                                                                                                                                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 목록        | GET admin/mailbox/feedbacks — keyword, type, status, createdFrom, createdTo, page, size, sort → items[], totalElements, totalPages                                                                       |
+| 상세        | GET admin/mailbox/feedbacks/{feedbackId} — 목록 항목 + 최신 답장 reply { letterId, title, bodyText, sentAt } (없으면 null, LAN-374). 열린 상세(?open)는 이걸로 조회해 목록 필터·페이지와 무관하게 열린다 |
+| 항목        | feedbackId, userProfileId, email, nickname, type, content(전문), status, resolvedByFeedbackId, createdAt, updatedAt                                                                                      |
+| 사용자 묶음 | 상세를 열 때 GET feedbacks?keyword={email}&status=PENDING 으로 그 사용자의 처리중 전부를 가져온다(전용 API 없음). 처리완료는 status=COMPLETED로 접어서                                                   |
+| 답장        | POST admin/mailbox/replies — 체크된 feedbackIds만. 응답 recipientCount(=1), completedFeedbackCount, representativeFeedbackIds                                                                            |
 
 ## 인터랙션
 
 | 요소              | 동작 · API                                                                                                                                     | 결과                                                                                           |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | 필터 변경         | 즉시 재조회, page=0. 검색어 300ms 디바운스                                                                                                     | URL 갱신                                                                                       |
-| 행 클릭           | 시트 열림 + 사용자 묶음 조회                                                                                                                   | ?open=feedbackId. 클릭한 건이 목록 첫 줄, 나머지는 시각순                                      |
+| 행 클릭           | 단건 조회로 상세 열림. 처리중이면 답장 폼 + 사용자 묶음 조회, 처리완료면 보낸 답장(reply) 읽기 전용                                            | ?open=feedbackId. 클릭한 건이 목록 첫 줄, 나머지는 시각순                                      |
 | 묶음 체크 해제    | 이번 답장에서 제외                                                                                                                             | 버튼 숫자 갱신 "N건에 답장 보내기". 0건이면 비활성                                             |
 | 답장 보내기       | AlertDialog "수진님에게 답장 N건을 보낼까요? / 보낸 답장은 되돌릴 수 없어요." → 보내기 → POST replies. (BE에 답장 회수·처리완료 되돌리기 없음) | 성공: 시트 안 "보냈어요" 상태 → 닫기. 목록 행 처리완료·배지 갱신. 실패: 오류 토스트, 입력 유지 |
 | 처리완료 N건 보기 | 접힌 목록 펼침(읽기 전용, resolvedBy 대표 표시)                                                                                                | —                                                                                              |
@@ -184,7 +186,9 @@ API: GET admin/mailbox/feedbacks · POST admin/mailbox/replies
 
 ## BE 확인 / 열린 질문
 
-- keyword가 이메일로 검색되는지(사용자 묶음 조회가 이걸로 동작). 안 되면 admin/users/{id}/feedbacks 같은 전용 조회 요청
+- ~~keyword가 이메일로 검색되는지(사용자 묶음 조회가 이걸로 동작)~~ → **안 된다** (2026-08-25 실서버 확인: keyword는 content만 검색 — 닉네임·이메일 전체·이메일 앞부분 모두 0건). 검색 placeholder가 약속하는 "내용·이메일·닉네임"이 되려면 BE 확장이 필요하고, 사용자 상세의 "이 사용자가 보낸 피드백"(keyword={email} 조회)도 이것 때문에 항상 빈 결과다. keyword 확장 또는 `admin/users/{id}/feedbacks` 전용 조회를 요청한다.
+- ~~피드백 단건 조회가 없다(GET feedbacks/{id})~~ → **해결** (landit-be #123 · LAN-374). 열린 상세는 단건 조회로 받는다 — 딥링크가 목록 필터·페이지와 무관하게 열린다.
+- ~~처리완료 건의 답장 내용을 볼 수 없다~~ → **해결** (같은 PR). 단건 조회 응답의 `reply`(최신 답장 제목·본문·발송 시각)를 처리완료 상세에 그대로 그린다. 답장 이력 전체는 여전히 없다 — 최신 한 건만.
 - title/bodyText 길이 제한
 - ~~(문서 작성 중 발견) 스펙 원문의 시트 구성과 화면 프레임의 구성이 다르다~~ → **프레임을 따른다**(AGENTS.md "UI는 Figma를 정확히 따른다"). 클릭한 1건이 원문 카드, 나머지 처리중은 접힌 "함께 답장"이고 기본 선택은 1건뿐이다 — BE에 답장 회수가 없어 여러 건을 기본으로 묶는 쪽이 위험하다.
 - ~~(문서 작성 중 발견) 확인 창 제목이 스펙은 "답장 N건을 보낼까요?", 프레임은 "답장을 보낼까요?"로 다르다~~ → 프레임 카피("{닉네임}님에게 답장을 보낼까요?")를 쓴다. 건수는 확인 창 대신 버튼 라벨("답장 보내기 · N건 함께 처리")이 말한다.

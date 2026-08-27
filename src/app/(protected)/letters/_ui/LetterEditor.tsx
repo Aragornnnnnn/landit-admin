@@ -35,6 +35,7 @@ import { LetterActionDialog } from './LetterActionDialog';
 import { LetterBasicFields } from './LetterBasicFields';
 import { LetterBlocksEditor } from './LetterBlocksEditor';
 import { LetterPreview } from './LetterPreview';
+import { LetterTemplateRow } from './LetterTemplateRow';
 
 /** 편집이면 편지 번호, 새 편지면 없음 */
 export function LetterEditor({ letterId }: { letterId?: number }) {
@@ -153,6 +154,7 @@ function Editor({
 
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
         <div className="flex flex-1 flex-col gap-4">
+          <LetterTemplateRow draft={draft} onChange={setDraft} />
           <LetterBasicFields draft={draft} onChange={setDraft} />
           <LetterBlocksEditor
             blocks={draft.contentBlocks}

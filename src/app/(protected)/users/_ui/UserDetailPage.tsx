@@ -23,6 +23,7 @@ import {
   useUserDetailQuery,
   useUserFeedbacksQuery,
 } from '../_model/useUserDetailQuery';
+import { feedbackOpenPath } from '../../feedbacks/_model/feedback-filter';
 import {
   FEEDBACK_STATUS_DOT,
   FEEDBACK_STATUS_LABEL,
@@ -197,10 +198,10 @@ function UserFeedbackCard({
               <span className="w-[100px] shrink-0">접수</span>
             </div>
             {items.map((item) => (
-              // 행을 누르면 그 피드백의 답장 화면으로 — 목록 화면이 ?open을 읽는다
+              // 행을 누르면 그 피드백의 답장 화면으로 — 그 건이 목록 필터에 걸리도록 상태·기간을 실어 보낸다
               <Link
                 key={item.feedbackId}
-                href={`/feedbacks?open=${item.feedbackId}`}
+                href={feedbackOpenPath(item)}
                 className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-hairline"
               >
                 <span className="w-24 shrink-0 text-[13px] font-medium text-chip-foreground">
