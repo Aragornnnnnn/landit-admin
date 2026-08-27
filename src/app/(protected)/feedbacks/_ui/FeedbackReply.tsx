@@ -4,9 +4,9 @@
 // 폼은 폭에 따라 시트(데스크톱)와 전체화면(모바일) 중 하나를 그린다
 import { useState } from 'react';
 
-import type { AdminFeedbackDetail } from '@/shared/api/schema-patch';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 
+import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
 import { useReplyDraft } from '../_model/useReplyDraft';
 import { FeedbackReplyScreen } from './FeedbackReplyScreen';
 import { FeedbackReplySheet } from './FeedbackReplySheet';
@@ -14,7 +14,7 @@ import { SentReplyView } from './SentReplyView';
 
 interface FeedbackReplyProps {
   /** 단건 조회로 받은 상세 (부모가 feedbackId를 key로 줘서 행이 바뀌면 새로 마운트된다) */
-  feedback: AdminFeedbackDetail;
+  feedback: FeedbackDetail;
   onClose: () => void;
 }
 

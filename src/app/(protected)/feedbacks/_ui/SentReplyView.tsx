@@ -4,14 +4,14 @@
 // 보낸 답장은 되돌릴 수 없으므로 이 화면엔 읽기만 있다
 import { X } from 'lucide-react';
 
-import type { AdminFeedbackDetail } from '@/shared/api/schema-patch';
 import { formatDateTime } from '@/shared/lib/format-time';
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet';
 
+import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
 import { FeedbackOriginCard, FeedbackPersonHeader } from './ReplyFields';
 
 interface SentReplyViewProps {
-  feedback: AdminFeedbackDetail;
+  feedback: FeedbackDetail;
   onClose: () => void;
 }
 
@@ -47,7 +47,7 @@ export function SentReplyView({ feedback, onClose }: SentReplyViewProps) {
   );
 }
 
-function SentReplyCard({ reply }: { reply: AdminFeedbackDetail['reply'] }) {
+function SentReplyCard({ reply }: { reply: FeedbackDetail['reply'] }) {
   // 처리완료인데 답장 연결이 없는 건 — 옛 데이터일 수 있어 조용히 사실만 말한다
   if (!reply)
     return (

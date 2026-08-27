@@ -26,18 +26,3 @@ export type AdminUserDetail = Omit<
 > & {
   learningLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null;
 };
-
-/**
- * 피드백 단건 상세 — 아직 스웨거에 없는 계약 선행.
- * landit-be #123(LAN-374)이 확정한 GET /admin/mailbox/feedbacks/{id} 응답으로,
- * 목록 항목에 최신 답장(reply, 없으면 null)이 더해진 모양이다.
- * BE가 머지·배포되면 `pnpm api:types`로 재생성하고 이 타입을 지운다.
- */
-export type AdminFeedbackDetail = Schema<'AdminMailboxFeedbackResponse'> & {
-  reply?: {
-    letterId?: number;
-    title?: string;
-    bodyText?: string;
-    sentAt?: string;
-  } | null;
-};

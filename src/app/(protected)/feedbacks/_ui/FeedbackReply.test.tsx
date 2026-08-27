@@ -2,11 +2,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import type { AdminFeedbackDetail } from '@/shared/api/schema-patch';
-
+import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
 import { FeedbackReply } from './FeedbackReply';
 
-const completed: AdminFeedbackDetail = {
+const completed: FeedbackDetail = {
   feedbackId: 7,
   userProfileId: 3,
   email: 'sujin@example.com',
