@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { cn } from '@/shared/lib/cn';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,11 +62,15 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
             </span>
           </span>
         </Link>
-        {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 카드처럼 크게 두면 눌러야 할 것처럼 보여 한 줄로 줄였다 (운영자 결정) */}
+        {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 카드처럼 크게 두면 눌러야 할 것처럼 보여 한 줄로 줄였다 (운영자 결정).
+            점 색이 환경을 가른다 — 개발은 초록(안전), 운영은 오렌지(조심). 글자를 안 읽어도 구분되게 */}
         <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
           <span
             aria-hidden
-            className="size-1.5 shrink-0 rounded-full bg-subtle"
+            className={cn(
+              'size-1.5 shrink-0 rounded-full',
+              developServer ? 'bg-success' : 'bg-primary',
+            )}
           />
           <span className="shrink-0 font-medium text-body">
             {developServer ? '개발 서버' : '운영 서버'}

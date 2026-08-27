@@ -9,6 +9,7 @@ import { isDevelopServer } from '../_model/navigation';
 
 export function ServerBadge({ className }: { className?: string }) {
   const apiHost = useApiHost();
+  const develop = isDevelopServer(apiHost);
 
   return (
     <span
@@ -17,8 +18,15 @@ export function ServerBadge({ className }: { className?: string }) {
         className,
       )}
     >
-      <span aria-hidden className="size-1.5 rounded-full bg-subtle" />
-      {isDevelopServer(apiHost) ? '개발 서버' : '운영 서버'}
+      {/* 점 색이 환경을 가른다 — 개발은 초록(안전), 운영은 오렌지(조심). 사이드바 서버 표시와 같은 규칙 */}
+      <span
+        aria-hidden
+        className={cn(
+          'size-1.5 rounded-full',
+          develop ? 'bg-success' : 'bg-primary',
+        )}
+      />
+      {develop ? '개발 서버' : '운영 서버'}
     </span>
   );
 }
