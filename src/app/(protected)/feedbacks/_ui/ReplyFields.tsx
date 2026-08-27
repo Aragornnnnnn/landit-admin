@@ -26,6 +26,62 @@ interface ReplyFieldsProps {
   trailing?: React.ReactNode;
 }
 
+/** 누구에게 쓰는지 — 닉네임·이메일·사용자 상세 링크. 답장 폼과 보낸 답장 뷰가 같이 쓴다 */
+export function FeedbackPersonHeader({
+  feedback,
+  trailing,
+}: {
+  feedback: FeedbackItem;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <header className="flex items-start gap-3">
+      <div className="flex flex-1 flex-col gap-0.5">
+        <h2 className="text-[22px] leading-tight font-bold text-foreground">
+          {feedback.nickname}
+        </h2>
+        <p className="flex items-center gap-1 text-[13px] text-subtle">
+          {feedback.email}
+          {feedback.userProfileId && (
+            <>
+              <span aria-hidden>·</span>
+              <a
+                href={`/users/${feedback.userProfileId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-0.5 hover:text-foreground"
+              >
+                사용자 상세
+                <ExternalLink className="size-3" aria-hidden />
+              </a>
+            </>
+          )}
+        </p>
+      </div>
+      {trailing}
+    </header>
+  );
+}
+
+/** 클릭한 피드백 원문 — 무엇에 대한 답인지 */
+export function FeedbackOriginCard({ feedback }: { feedback: FeedbackItem }) {
+  return (
+    <article className="flex flex-col gap-2 rounded-[14px] bg-background p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-medium text-chip-foreground">
+          {feedback.type ? FEEDBACK_TYPE_LABEL[feedback.type] : ''}
+        </span>
+        <span className="text-xs text-subtle">
+          {feedback.createdAt ? formatDateTime(feedback.createdAt) : ''}
+        </span>
+      </div>
+      <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-strong">
+        {feedback.content}
+      </p>
+    </article>
+  );
+}
+
 export function ReplyFields({
   feedback,
   draft,
@@ -40,46 +96,9 @@ export function ReplyFields({
 
   return (
     <>
-      <header className="flex items-start gap-3">
-        <div className="flex flex-1 flex-col gap-0.5">
-          <h2 className="text-[22px] leading-tight font-bold text-foreground">
-            {feedback.nickname}
-          </h2>
-          <p className="flex items-center gap-1 text-[13px] text-subtle">
-            {feedback.email}
-            {feedback.userProfileId && (
-              <>
-                <span aria-hidden>·</span>
-                <a
-                  href={`/users/${feedback.userProfileId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-0.5 hover:text-foreground"
-                >
-                  사용자 상세
-                  <ExternalLink className="size-3" aria-hidden />
-                </a>
-              </>
-            )}
-          </p>
-        </div>
-        {trailing}
-      </header>
+      <FeedbackPersonHeader feedback={feedback} trailing={trailing} />
 
-      {/* 클릭한 피드백 원문 — 답장하려고 연 그 건이다 */}
-      <article className="flex flex-col gap-2 rounded-[14px] bg-background p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-[13px] font-medium text-chip-foreground">
-            {feedback.type ? FEEDBACK_TYPE_LABEL[feedback.type] : ''}
-          </span>
-          <span className="text-xs text-subtle">
-            {feedback.createdAt ? formatDateTime(feedback.createdAt) : ''}
-          </span>
-        </div>
-        <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-strong">
-          {feedback.content}
-        </p>
-      </article>
+      <FeedbackOriginCard feedback={feedback} />
 
       <TogetherSection draft={draft} />
 

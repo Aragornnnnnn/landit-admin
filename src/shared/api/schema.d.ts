@@ -862,6 +862,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/mailbox/feedbacks/{feedbackId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 피드백 상세 조회 */
+        get: operations["getFeedback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/app-versions": {
         parameters: {
             query?: never;
@@ -2736,6 +2753,40 @@ export interface components {
             success?: boolean;
             /** @description 성공 응답 데이터. 실패 시 null입니다. */
             data?: components["schemas"]["AdminMailboxFeedbackListResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 편지함 어드민 피드백 상세 응답 */
+        AdminMailboxFeedbackDetailResponse: {
+            /** Format: int64 */
+            feedbackId?: number;
+            /** Format: int64 */
+            userProfileId?: number;
+            email?: string;
+            nickname?: string;
+            /** @enum {string} */
+            type?: "BUG_REPORT" | "FEATURE_REQUEST" | "QUESTION" | "CHEER";
+            content?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "COMPLETED";
+            /** Format: int64 */
+            resolvedByFeedbackId?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            /** @description 최신 답장. 없으면 null */
+            reply?: components["schemas"]["Reply"];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminMailboxFeedbackDetailResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminMailboxFeedbackDetailResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
@@ -4710,6 +4761,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseAdminMailboxFeedbackListResponse"];
+                };
+            };
+        };
+    };
+    getFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedbackId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminMailboxFeedbackDetailResponse"];
                 };
             };
         };
