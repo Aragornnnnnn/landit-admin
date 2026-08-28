@@ -45,8 +45,15 @@ export function FeedbackListPage() {
     Number.isInteger(openId) && openId > 0 ? openId : undefined,
   );
 
-  // 상세 조회 실패(삭제된 건 등)면 알리고 open만 걷어낸다 — 시트가 없으니 자리 오류를 그릴 곳이 없다
-  const detailFailed = detail.isError;
+  // 단건 조회가 아직 없는 BE(운영 구버전)면 목록의 그 행으로라도 연다 —
+  // 보낸 답장 표시만 빠질 뿐 답장 업무는 돌아야 한다. BE 운영 릴리스 후엔 자연히 안 쓰인다
+  const fallbackFeedback = detail.isError
+    ? items.find((item) => item.feedbackId === openId)
+    : undefined;
+  const openFeedback = detail.data ?? fallbackFeedback;
+
+  // 폴백조차 없으면(삭제된 건 등) 알리고 open만 걷어낸다 — 시트가 없으니 자리 오류를 그릴 곳이 없다
+  const detailFailed = detail.isError && !fallbackFeedback;
   useEffect(() => {
     if (!detailFailed) return;
     toast.error('피드백을 불러오지 못했어요');
@@ -82,11 +89,11 @@ export function FeedbackListPage() {
         }
       />
 
-      {detail.data && (
+      {openFeedback && (
         // key로 행이 바뀔 때마다 새로 마운트한다 — 입력이 이전 피드백에서 넘어오지 않게
         <FeedbackReply
-          key={detail.data.feedbackId}
-          feedback={detail.data}
+          key={openFeedback.feedbackId}
+          feedback={openFeedback}
           onClose={() => router.back()}
         />
       )}

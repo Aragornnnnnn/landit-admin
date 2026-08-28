@@ -38,7 +38,7 @@ describe('FeedbackReply', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('처리완료인데 답장 연결이 없으면 기록이 없다고 알린다 — 옛 데이터 방어', () => {
+  it('처리완료인데 답장 연결이 없으면 못 불러왔다고 알린다 — 옛 데이터·구버전 BE 방어', () => {
     render(
       <FeedbackReply
         feedback={{ ...completed, reply: null }}
@@ -46,6 +46,8 @@ describe('FeedbackReply', () => {
       />,
     );
 
-    expect(screen.getByText('답장 기록을 찾지 못했어요')).toBeInTheDocument();
+    expect(
+      screen.getByText('답장 내용을 불러오지 못했어요'),
+    ).toBeInTheDocument();
   });
 });

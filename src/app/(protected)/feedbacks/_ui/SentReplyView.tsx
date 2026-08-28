@@ -48,11 +48,11 @@ export function SentReplyView({ feedback, onClose }: SentReplyViewProps) {
 }
 
 function SentReplyCard({ reply }: { reply: FeedbackDetail['reply'] }) {
-  // 처리완료인데 답장 연결이 없는 건 — 옛 데이터일 수 있어 조용히 사실만 말한다
+  // 답장 연결이 없는 건 — 옛 데이터거나 단건 조회가 없는 BE(운영 구버전) 폴백이다. 조용히 사실만 말한다
   if (!reply)
     return (
       <p className="rounded-[14px] bg-muted px-4 py-3 text-[13px] text-subtle">
-        답장 기록을 찾지 못했어요
+        답장 내용을 불러오지 못했어요
       </p>
     );
 
