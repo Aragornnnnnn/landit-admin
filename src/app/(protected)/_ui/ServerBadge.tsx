@@ -28,14 +28,11 @@ export function ServerBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground',
+        'flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary',
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="size-1.5 rounded-full bg-primary-foreground"
-      />
+      <span aria-hidden className="size-1.5 rounded-full bg-primary" />
       운영 서버
     </span>
   );

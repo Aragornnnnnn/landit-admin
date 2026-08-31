@@ -73,13 +73,14 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
             <span className="truncate">· {apiHost || '서버 미설정'}</span>
           </span>
         ) : (
-          <span className="mx-1 flex w-fit max-w-full items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+          // 솔리드 칩은 과하다는 피드백 — 연오렌지 배경 + 오렌지 글자 톤온톤으로 도드라지되 점잖게
+          <span className="mx-1 flex w-fit max-w-full items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
             <span
               aria-hidden
-              className="size-1.5 shrink-0 rounded-full bg-primary-foreground"
+              className="size-1.5 shrink-0 rounded-full bg-primary"
             />
             <span className="shrink-0">운영 서버</span>
-            <span className="truncate font-normal opacity-90">
+            <span className="truncate font-normal opacity-75">
               · {apiHost || '서버 미설정'}
             </span>
           </span>
