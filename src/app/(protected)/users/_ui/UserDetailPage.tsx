@@ -83,7 +83,8 @@ export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
         <Card title="프로필" className="lg:flex-1">
           <Row label="학습 목표 언어" value={detail.targetLocale} />
           <Row label="모국어" value={detail.baseLocale} />
-          <Row label="학습 레벨">
+          {/* 사용자가 온보딩·마이페이지에서 스스로 고른 수준(learningLevel) — 시스템 진행 레벨(currentLevel)과 다르다 */}
+          <Row label="사용자 선택 수준 (learningLevel)">
             {detail.learningLevel ? (
               <span className="flex items-center gap-2">
                 <StatusChip>
