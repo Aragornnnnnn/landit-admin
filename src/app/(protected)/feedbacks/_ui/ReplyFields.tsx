@@ -167,30 +167,35 @@ function TemplateRow({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[12px] text-subtle">템플릿</span>
-      {shown.map((template) => (
+    // 라벨·관리는 윗줄, 칩은 아랫줄 — 한 줄에 섞이면 칩과 관리가 같은 급으로 보인다 (운영자 결정)
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] text-subtle">템플릿</span>
         <button
-          key={template.id}
           type="button"
-          onClick={() => apply(template)}
-          className={cn(
-            'rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors',
-            template.id === draft.appliedTemplateId
-              ? 'bg-foreground text-background'
-              : 'bg-chip text-chip-foreground hover:bg-hairline',
-          )}
+          onClick={() => setManaging(true)}
+          className="text-[12px] text-subtle underline-offset-2 hover:text-foreground hover:underline"
         >
-          {template.label}
+          관리
         </button>
-      ))}
-      <button
-        type="button"
-        onClick={() => setManaging(true)}
-        className="px-1 text-[12px] text-subtle underline-offset-2 hover:text-foreground hover:underline"
-      >
-        관리
-      </button>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {shown.map((template) => (
+          <button
+            key={template.id}
+            type="button"
+            onClick={() => apply(template)}
+            className={cn(
+              'rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors',
+              template.id === draft.appliedTemplateId
+                ? 'bg-foreground text-background'
+                : 'bg-chip text-chip-foreground hover:bg-hairline',
+            )}
+          >
+            {template.label}
+          </button>
+        ))}
+      </div>
 
       {managing && (
         // 열 때마다 새로 마운트한다 — 작업 사본이 항상 현재 저장값에서 시작하게
