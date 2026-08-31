@@ -63,20 +63,28 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
           </span>
         </Link>
         {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 카드처럼 크게 두면 눌러야 할 것처럼 보여 한 줄로 줄였다 (운영자 결정).
-            점 색이 환경을 가른다 — 개발은 초록(안전), 운영은 오렌지(조심). 글자를 안 읽어도 구분되게 */}
-        <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
-          <span
-            aria-hidden
-            className={cn(
-              'size-1.5 shrink-0 rounded-full',
-              developServer ? 'bg-success' : 'bg-primary',
-            )}
-          />
-          <span className="shrink-0 font-medium text-body">
-            {developServer ? '개발 서버' : '운영 서버'}
+            개발은 조용한 초록 점, 운영은 오렌지 칩으로 도드라지게 — 실사용자에게 영향 가는 환경임이 한눈에 박혀야 한다 */}
+        {developServer ? (
+          <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
+            <span
+              aria-hidden
+              className="size-1.5 shrink-0 rounded-full bg-success"
+            />
+            <span className="shrink-0 font-medium text-body">개발 서버</span>
+            <span className="truncate">· {apiHost || '서버 미설정'}</span>
           </span>
-          <span className="truncate">· {apiHost || '서버 미설정'}</span>
-        </span>
+        ) : (
+          <span className="mx-1 flex w-fit max-w-full items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+            <span
+              aria-hidden
+              className="size-1.5 shrink-0 rounded-full bg-primary-foreground"
+            />
+            <span className="shrink-0">운영 서버</span>
+            <span className="truncate font-normal opacity-90">
+              · {apiHost || '서버 미설정'}
+            </span>
+          </span>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="gap-0 px-5">

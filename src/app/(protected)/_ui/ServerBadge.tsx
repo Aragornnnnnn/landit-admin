@@ -11,22 +11,32 @@ export function ServerBadge({ className }: { className?: string }) {
   const apiHost = useApiHost();
   const develop = isDevelopServer(apiHost);
 
+  // 개발은 조용한 초록 점, 운영은 오렌지 칩으로 도드라지게 — 사이드바 서버 표시와 같은 규칙
+  if (develop)
+    return (
+      <span
+        className={cn(
+          'flex items-center gap-1.5 text-[13px] text-subtle',
+          className,
+        )}
+      >
+        <span aria-hidden className="size-1.5 rounded-full bg-success" />
+        개발 서버
+      </span>
+    );
+
   return (
     <span
       className={cn(
-        'flex items-center gap-1.5 text-[13px] text-subtle',
+        'flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground',
         className,
       )}
     >
-      {/* 점 색이 환경을 가른다 — 개발은 초록(안전), 운영은 오렌지(조심). 사이드바 서버 표시와 같은 규칙 */}
       <span
         aria-hidden
-        className={cn(
-          'size-1.5 rounded-full',
-          develop ? 'bg-success' : 'bg-primary',
-        )}
+        className="size-1.5 rounded-full bg-primary-foreground"
       />
-      {develop ? '개발 서버' : '운영 서버'}
+      운영 서버
     </span>
   );
 }
