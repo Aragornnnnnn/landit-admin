@@ -83,10 +83,15 @@ export function FeedbackListPage() {
         isError={feedbacks.isError}
         onRetry={() => feedbacks.refetch()}
         onResetFilter={reset}
-        // 열림·닫힘을 주소에 남긴다 — 모바일 전체화면도 기기 뒤로가기로 닫힌다
-        onSelect={(feedbackId) =>
-          router.push(`?open=${feedbackId}`, { scroll: false })
-        }
+        // 열림·닫힘을 주소에 남긴다 — 모바일 전체화면도 기기 뒤로가기로 닫힌다.
+        // 보고 있던 필터를 함께 싣는다 — open만 남기면 뒤 목록이 기본 필터(처리중)로 돌아가 버린다
+        onSelect={(feedbackId) => {
+          const query = writeFeedbackFilter(filter);
+          router.push(
+            query ? `?${query}&open=${feedbackId}` : `?open=${feedbackId}`,
+            { scroll: false },
+          );
+        }}
       />
 
       {openFeedback && (
