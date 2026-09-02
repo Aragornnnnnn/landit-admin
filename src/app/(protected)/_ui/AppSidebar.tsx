@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { cn } from '@/shared/lib/cn';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,29 +63,20 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
           </span>
         </Link>
         {/* 지금 어느 BE를 보고 있는지 알리기만 한다 — 카드처럼 크게 두면 눌러야 할 것처럼 보여 한 줄로 줄였다 (운영자 결정).
-            개발은 조용한 초록 점, 운영은 오렌지 칩으로 도드라지게 — 실사용자에게 영향 가는 환경임이 한눈에 박혀야 한다 */}
-        {developServer ? (
-          <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
-            <span
-              aria-hidden
-              className="size-1.5 shrink-0 rounded-full bg-success"
-            />
-            <span className="shrink-0 font-medium text-body">개발 서버</span>
-            <span className="truncate">· {apiHost || '서버 미설정'}</span>
+            운영은 초록 점(살아 있는 실서비스), 개발은 회색 점 — 색과 라벨은 운영자가 확정했다 */}
+        <span className="flex items-center gap-1.5 px-1.5 text-xs text-subtle">
+          <span
+            aria-hidden
+            className={cn(
+              'size-1.5 shrink-0 rounded-full',
+              developServer ? 'bg-subtle' : 'bg-success',
+            )}
+          />
+          <span className="shrink-0 font-medium text-body">
+            {developServer ? '개발' : '운영'}
           </span>
-        ) : (
-          // 솔리드 칩은 과하다는 피드백 — 연오렌지 배경 + 오렌지 글자 톤온톤으로 도드라지되 점잖게
-          <span className="mx-1 flex w-fit max-w-full items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-            <span
-              aria-hidden
-              className="size-1.5 shrink-0 rounded-full bg-primary"
-            />
-            <span className="shrink-0">운영 서버</span>
-            <span className="truncate font-normal opacity-75">
-              · {apiHost || '서버 미설정'}
-            </span>
-          </span>
-        )}
+          <span className="truncate">· {apiHost || '서버 미설정'}</span>
+        </span>
       </SidebarHeader>
 
       <SidebarContent className="gap-0 px-5">
