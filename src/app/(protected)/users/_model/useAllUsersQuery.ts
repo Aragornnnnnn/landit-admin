@@ -5,22 +5,22 @@
 import { useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
+import {
+  fetchUserPage,
+  type UserListItem,
+} from '@/features/user/api/user-list';
 
 import { USERS_FETCH_SIZE } from './user-filter';
-
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-type AdminUserListResponse = Schema<'AdminUserListResponse'>;
-
-const PATH = '/api/v1/admin/users';
 
 export function useAllUsersQuery() {
   const query = useInfiniteQuery({
     queryKey: ['users', 'all'] as const,
     queryFn: ({ pageParam }) =>
-      api.get<AdminUserListResponse>(
-        `${PATH}?page=${pageParam}&size=${USERS_FETCH_SIZE}`,
+      fetchUserPage(
+        new URLSearchParams({
+          page: String(pageParam),
+          size: String(USERS_FETCH_SIZE),
+        }),
       ),
     initialPageParam: 0,
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
@@ -34,7 +34,7 @@ export function useAllUsersQuery() {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const users: AdminUserListItem[] = (query.data?.pages ?? []).flatMap(
+  const users: UserListItem[] = (query.data?.pages ?? []).flatMap(
     (page) => page.items ?? [],
   );
 

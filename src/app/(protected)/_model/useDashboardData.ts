@@ -7,12 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAppVersionsQuery } from '@/features/app-version/model/useAppVersionsQuery';
 import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
 import { fetchLetterPage } from '@/features/letter/api/letter-list';
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
-
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-
-type UserListResponse = { items?: AdminUserListItem[] };
+import { fetchUserPage } from '@/features/user/api/user-list';
 
 /** 차트는 7일치다. BE가 한 번에 최대 50건까지만 준다(51부터 400, 실 서버 확인) — 7일 접수가 50건을
  * 넘으면 막대와 카운트가 실제보다 작게 나온다. 그때는 페이지를 이어 받도록 바꿔야 한다 */
@@ -55,8 +50,8 @@ export function useDashboardData(now: Date) {
   const users = useQuery({
     queryKey: ['dashboard', 'recent-users'] as const,
     queryFn: () =>
-      api.get<UserListResponse>(
-        `/api/v1/admin/users?page=0&size=${USERS_SIZE}`,
+      fetchUserPage(
+        new URLSearchParams({ page: '0', size: String(USERS_SIZE) }),
       ),
   });
 
