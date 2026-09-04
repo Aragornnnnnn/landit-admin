@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/shared/ui/shadcn/alert-dialog';
 
-import { replyConfirmTitle } from '../_model/reply-draft';
+import { replyConfirmTitle } from '../../_model/reply/reply-draft';
 
 interface ReplyConfirmDialogProps {
   open: boolean;

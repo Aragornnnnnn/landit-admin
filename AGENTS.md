@@ -26,9 +26,11 @@ src/
 ├── app/
 │   ├── (public)/login/           로그인 (+ 관리자 아님)         ← _ui/ _model/ 콜로케이션
 │   ├── (protected)/              셸(사이드바) 레이아웃 아래 모든 화면
-│   │   ├── _ui/                  셸 컴포넌트(사이드바·드로어·상단바)
-│   │   ├── page.tsx              대시보드
-│   │   ├── feedbacks/{_ui,_model}/  letters/  letters/[id]/  users/  users/[id]/  app-versions/  scenario-test/
+│   │   ├── _ui/ _model/          셸(사이드바·상단바·내비) — 화면 코드는 두지 않는다
+│   │   ├── (dashboard)/          대시보드(/) — page.tsx · _ui/ · _model/
+│   │   ├── feedbacks/            _ui/{list,reply}/ · _model/{list,reply}/ — 목록과 답장을 구역으로
+│   │   ├── letters/              목록 · (editor)/{new,[id]}/ — 편집기는 두 라우트만 쓰므로 중첩 그룹
+│   │   ├── users/  users/[id]/  app-versions/  scenario-test/
 │   └── api/
 │       ├── auth/                 social-login · logout — BE 토큰을 httpOnly 쿠키로
 │       └── proxy/[...path]/      쿠키의 토큰을 Bearer로 붙여 BE로 전달 (유일한 BE 통로)
