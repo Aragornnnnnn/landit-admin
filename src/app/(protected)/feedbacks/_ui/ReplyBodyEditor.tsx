@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { uploadContentImage } from '@/features/content-image/api/upload-content-image';
 import { cn } from '@/shared/lib/cn';
 import { reportError } from '@/shared/monitoring/report';
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Textarea } from '@/shared/ui/textarea';
 
 import {
@@ -104,13 +105,19 @@ export function ReplyBodyEditor({
 
   return (
     <div className={cn('flex flex-col gap-2', variant === 'sheet' && 'flex-1')}>
-      <div role="tablist" className="flex items-center gap-1.5">
-        <ModeTab mode="write" current={mode} onSelect={setMode}>
-          쓰기
-        </ModeTab>
-        <ModeTab mode="preview" current={mode} onSelect={setMode}>
-          미리보기
-        </ModeTab>
+      {/* 라벨은 왼쪽, 전환은 오른쪽 — 위 "템플릿 · 관리" 줄과 같은 리듬. 세그먼트 토글이라 템플릿 칩(고르는 것)과 헷갈리지 않는다 */}
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] text-subtle">본문</span>
+        <Tabs value={mode} onValueChange={(next) => setMode(next as Mode)}>
+          <TabsList className="h-7 bg-chip">
+            <TabsTrigger value="write" className="px-3 text-[12px]">
+              쓰기
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="px-3 text-[12px]">
+              미리보기
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {mode === 'write' ? (
@@ -148,35 +155,5 @@ export function ReplyBodyEditor({
         마크다운 지원. 줄바꿈은 엔터, 링크는 [글자](주소), 이미지는 붙여넣기.
       </p>
     </div>
-  );
-}
-
-function ModeTab({
-  mode,
-  current,
-  onSelect,
-  children,
-}: {
-  mode: Mode;
-  current: Mode;
-  onSelect: (mode: Mode) => void;
-  children: React.ReactNode;
-}) {
-  const selected = mode === current;
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={selected}
-      onClick={() => onSelect(mode)}
-      className={cn(
-        'rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors',
-        selected
-          ? 'bg-foreground text-background'
-          : 'bg-chip text-chip-foreground hover:bg-hairline',
-      )}
-    >
-      {children}
-    </button>
   );
 }

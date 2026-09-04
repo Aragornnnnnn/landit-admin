@@ -1,6 +1,7 @@
 // 답장 본문 에디터 — 붙여넣기·드롭한 이미지가 올라가 커서 자리에 마크다운으로 들어가는지, 실패·거절이 알려지는지
 import { useState } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -126,10 +127,10 @@ describe('ReplyBodyEditor', () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
-  it('미리보기 탭을 누르면 쓴 글이 마크다운으로 보인다', () => {
+  it('미리보기 탭을 누르면 쓴 글이 마크다운으로 보인다', async () => {
     render(<Harness initial="**굵게**" />);
 
-    fireEvent.click(screen.getByRole('tab', { name: '미리보기' }));
+    await userEvent.click(screen.getByRole('tab', { name: '미리보기' }));
 
     expect(screen.getByText('굵게').tagName).toBe('STRONG');
   });
