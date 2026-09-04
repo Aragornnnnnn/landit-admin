@@ -5,13 +5,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import {
+  LETTERS_PATH,
+  type LetterItem,
+} from '@/features/letter/api/letter-list';
 import { api } from '@/shared/api/client';
 import { reportError } from '@/shared/monitoring/report';
 
 import { toLetterRequest, type LetterDraft } from './letter-draft';
-import type { LetterItem } from './useLetterGroupQuery';
-
-const PATH = '/api/v1/admin/mailbox/letters';
 
 export function useSaveLetterMutation() {
   const queryClient = useQueryClient();
@@ -26,8 +27,8 @@ export function useSaveLetterMutation() {
     }) => {
       const body = toLetterRequest(draft);
       return letterId
-        ? api.patch<LetterItem>(`${PATH}/${letterId}`, body)
-        : api.post<LetterItem>(PATH, body);
+        ? api.patch<LetterItem>(`${LETTERS_PATH}/${letterId}`, body)
+        : api.post<LetterItem>(LETTERS_PATH, body);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['letters'] }),
     onError: (error) => {

@@ -1,13 +1,10 @@
 // 목록 필터 ↔ 쿼리스트링 — 편지는 탭(공개 상태)과 타입 둘뿐이다. 새로고침·공유에 살아남게 URL이 진실이다
 // (docs/screens/letters.md, docs/admin-spec.md "공통 상태")
-import type { Schema } from '@/shared/api/schema-patch';
+import type {
+  LetterStatus,
+  LetterType,
+} from '@/features/letter/api/letter-list';
 
-export type LetterType = NonNullable<
-  Schema<'AdminMailboxLetterResponse'>['type']
->;
-export type LetterStatus = NonNullable<
-  Schema<'AdminMailboxLetterResponse'>['publicationStatus']
->;
 /** 목록 상단 탭 — 공개 상태 하나를 고르거나 전체 */
 export type LetterTab = 'ALL' | LetterStatus;
 

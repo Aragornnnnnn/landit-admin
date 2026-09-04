@@ -1,6 +1,8 @@
 'use client';
 
 // 기본 정보 카드 — 타입 · 고정 · 제목 · 미리보기 문구 (Figma 1050:10361)
+import type { LetterType } from '@/features/letter/api/letter-list';
+import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 import { cn } from '@/shared/lib/cn';
 import { Input } from '@/shared/ui/input';
 import { Switch } from '@/shared/ui/switch';
@@ -12,8 +14,6 @@ import {
   withType,
   type LetterDraft,
 } from '../_model/letter-draft';
-import type { LetterType } from '../_model/letter-filter';
-import { LETTER_TYPE_LABEL } from '../_model/letter-label';
 
 interface LetterBasicFieldsProps {
   draft: LetterDraft;

@@ -4,6 +4,7 @@
 // 레이아웃은 이 값을 그리기만 하고, 무엇을 보낼 수 있는지·무엇이 선택됐는지는 전부 여기서 정한다
 import { useState } from 'react';
 
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { reportError } from '@/shared/monitoring/report';
 
 import {
@@ -16,7 +17,6 @@ import {
   fillTemplate,
   type ReplyTemplate,
 } from './reply-templates';
-import type { FeedbackItem } from './useFeedbackListQuery';
 import { useReplyTemplates } from './useReplyTemplates';
 import { useSendReplyMutation } from './useSendReplyMutation';
 import { useUserPendingFeedbacksQuery } from './useUserPendingFeedbacksQuery';

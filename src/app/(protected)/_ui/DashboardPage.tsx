@@ -2,6 +2,7 @@
 
 // 대시보드 — 들어오자마자 "오늘 처리할 게 있나"를 본다 (Figma 1050:7662 · 7905).
 // 집계 API가 없어 목록으로 받아 세므로, 숫자가 무엇을 센 것인지 카드마다 보조 문구로 밝힌다
+import { FEEDBACK_TYPE_LABEL } from '@/features/feedback/model/feedback-label';
 import { cn } from '@/shared/lib/cn';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
@@ -15,7 +16,6 @@ import {
   todayLabel,
 } from '../_model/dashboard-metrics';
 import { useDashboardData } from '../_model/useDashboardData';
-import { FEEDBACK_TYPE_LABEL } from '../feedbacks/_model/feedback-label';
 import {
   AppVersionSummaryCard,
   MailboxSummaryCard,

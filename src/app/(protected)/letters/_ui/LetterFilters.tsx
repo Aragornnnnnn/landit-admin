@@ -3,6 +3,7 @@
 // 목록 상단 줄 — 탭(공개 상태) · 타입 Select · 새 편지 쓰기 (Figma 1050:10110)
 import Link from 'next/link';
 
+import type { LetterType } from '@/features/letter/api/letter-list';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
 import {
@@ -17,7 +18,6 @@ import {
   LETTER_TABS,
   type LetterFilter,
   type LetterTab,
-  type LetterType,
 } from '../_model/letter-filter';
 import { LETTER_TYPE_OPTIONS } from '../_model/letter-label';
 

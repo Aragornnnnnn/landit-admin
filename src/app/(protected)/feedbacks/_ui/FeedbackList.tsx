@@ -1,6 +1,7 @@
 'use client';
 
 // 목록 본체 — 상태(로딩·오류·빈·데이터)를 가르고, 폭에 따라 표/카드만 바꾼다. 라우트는 나누지 않는다 (docs/admin-spec.md "반응형")
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 import { useDelayedPending } from '@/shared/lib/useDelayedPending';
 import { Button } from '@/shared/ui/button';
@@ -12,7 +13,6 @@ import {
   hasActiveFeedbackFilter,
   type FeedbackFilter,
 } from '../_model/feedback-filter';
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import { FeedbackCardList } from './FeedbackCardList';
 import { FeedbackTable } from './FeedbackTable';
 

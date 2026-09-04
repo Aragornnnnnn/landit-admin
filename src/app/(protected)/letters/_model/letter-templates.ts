@@ -1,7 +1,8 @@
 // 공지·업데이트 공식 템플릿 — 팀이 확정한 문구(2026-08-26)를 마크다운 본문으로 둔다.
 // OO·(괄호)·X 표시는 채워 넣는 자리다 — 적용한 뒤 에디터에서 직접 고친다
+import type { LetterType } from '@/features/letter/api/letter-list';
+
 import type { LetterDraft } from './letter-draft';
-import type { LetterType } from './letter-filter';
 
 export interface LetterTemplate {
   id: string;

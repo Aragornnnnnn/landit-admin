@@ -5,6 +5,13 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
+import {
+  FEEDBACK_STATUS_DOT,
+  FEEDBACK_STATUS_LABEL,
+  FEEDBACK_TYPE_LABEL,
+} from '@/features/feedback/model/feedback-label';
+import { feedbackOpenPath } from '@/features/feedback/model/feedback-open-path';
 import { formatDateDot, formatDateTime } from '@/shared/lib/format-time';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
@@ -23,13 +30,6 @@ import {
   useUserDetailQuery,
   useUserFeedbacksQuery,
 } from '../_model/useUserDetailQuery';
-import { feedbackOpenPath } from '../../feedbacks/_model/feedback-filter';
-import {
-  FEEDBACK_STATUS_DOT,
-  FEEDBACK_STATUS_LABEL,
-  FEEDBACK_TYPE_LABEL,
-} from '../../feedbacks/_model/feedback-label';
-import type { FeedbackItem } from '../../feedbacks/_model/useFeedbackListQuery';
 
 export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
   const user = useUserDetailQuery(userProfileId);

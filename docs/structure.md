@@ -50,12 +50,12 @@ app/
 
 - `features/markdown-editor/` — 마크다운 본문 에디터(쓰기/미리보기 토글·이미지 붙여넣기·문법 도움말)와 붙여넣기 규칙. 피드백 답장과 편지 편집기가 같이 쓴다
 - `features/content-image/api/` — 본문 이미지 presigned 업로드. 편지 에디터와 피드백 답장(이미지 붙여넣기)이 같이 쓴다. 파일 형식·크기 규칙은 각 라우트의 `_model/`에 남아 있다(편지는 형식 허용 목록, 답장은 `image/*`)
+- `features/feedback/` — `api/` 목록 경로·응답 타입·`fetchFeedbackPage`, `model/` 유형·상태 라벨과 상세 열기 주소. `/feedbacks`·대시보드·사용자 상세·사이드바 배지가 같이 쓴다. 목록 필터·선택지·답장 흐름은 `/feedbacks`만 쓰므로 라우트에 있다
+- `features/letter/` — `api/` 목록 경로·응답 타입·`fetchLetterPage`, `model/` 타입·상태 라벨. `/letters`와 대시보드 편지함 카드가 같이 쓴다. 탭·요약 문구·초안 규칙·편집기는 라우트에 있다
+- `features/app-version/` — `api/` 경로·타입·`fetchAppVersions`, `model/` 플랫폼 순서·라벨과 `useAppVersionsQuery`(대시보드와 화면이 같은 키를 쓰고, 저장이 둘 다 무효화한다). 초안 검증·저장 뮤테이션은 라우트에 있다
+- `features/user/` — `api/` 목록 경로·응답 타입·`fetchUserPage`. `/users`와 대시보드 가입 수가 같이 쓴다. 상세·필터 규칙은 라우트에 있다
 
-예상되는 후보 —
-
-- `features/feedback/` — 대시보드(미답변 수·최근 피드백)와 `/feedbacks`가 같이 쓰는 api·쿼리 키·상태 칩 매핑
-- `features/letter/` — 대시보드(임시저장 수)와 `/letters`
-- `features/app-version/` — 대시보드(앱 버전 2건)와 `/app-versions`
+라우트끼리는 서로의 `_ui/`·`_model/`을 import하지 않는다 — `../feedbacks/_model/…` 같은 상대경로가 생기면 그 코드가 features로 내려갈 때다.
 
 세그먼트.
 

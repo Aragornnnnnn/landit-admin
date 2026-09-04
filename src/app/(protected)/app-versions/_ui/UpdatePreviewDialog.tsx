@@ -4,15 +4,13 @@
 // 문구를 저장하기 전에 "그래서 앱에 뭐라고 뜨는데?"를 눈으로 확인하는 자리다
 import { X } from 'lucide-react';
 
+import type { Platform } from '@/features/app-version/api/app-version';
+import { PLATFORM_LABEL } from '@/features/app-version/model/platform';
 import { cn } from '@/shared/lib/cn';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
 
-import {
-  PLATFORM_LABEL,
-  type AppVersionDraft,
-  type Platform,
-} from '../_model/app-version-draft';
+import type { AppVersionDraft } from '../_model/app-version-draft';
 import {
   previewRangeLabel,
   previewReason,

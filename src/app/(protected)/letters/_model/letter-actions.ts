@@ -1,7 +1,9 @@
 // 행 ⋯ 메뉴에 무엇이 뜨고 무엇을 보내는지 — 상태·타입만 보고 정한다 (docs/screens/letters.md "행 ⋯ 메뉴").
 // 화면은 이 목록을 그리기만 한다. 무엇이 되돌릴 수 없는 일인지도 여기서 말한다
-import type { LetterStatus } from './letter-filter';
-import type { LetterItem } from './useLetterGroupQuery';
+import type {
+  LetterItem,
+  LetterStatus,
+} from '@/features/letter/api/letter-list';
 
 export type LetterAction = 'publish' | 'hide' | 'unhide' | 'pin' | 'unpin';
 

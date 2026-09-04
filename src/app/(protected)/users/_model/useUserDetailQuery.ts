@@ -3,9 +3,9 @@
 // 사용자 한 명 + 그 사람이 보낸 피드백 (docs/screens/users.md "상세")
 import { useQuery } from '@tanstack/react-query';
 
+import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
 import { api } from '@/shared/api/client';
 
-import type { FeedbackListResponse } from '../../feedbacks/_model/useFeedbackListQuery';
 import type { UserDetail } from './user-detail';
 
 export function useUserDetailQuery(userProfileId: number) {
@@ -20,8 +20,8 @@ export function useUserFeedbacksQuery(email: string | null | undefined) {
   return useQuery({
     queryKey: ['feedbacks', 'byUser', email] as const,
     queryFn: () =>
-      api.get<FeedbackListResponse>(
-        `/api/v1/admin/mailbox/feedbacks?keyword=${encodeURIComponent(email!)}&size=50&sort=NEWEST`,
+      fetchFeedbackPage(
+        new URLSearchParams({ keyword: email!, size: '50', sort: 'NEWEST' }),
       ),
     enabled: Boolean(email),
   });

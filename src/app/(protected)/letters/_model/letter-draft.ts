@@ -1,9 +1,7 @@
 // 편지 초안의 규칙 — 무엇을 담고, 무엇이 있어야 발행할 수 있고, 서버 블록과 마크다운 본문을 어떻게 오가는지.
 // 화면은 이 함수들을 부르기만 한다 (docs/screens/letters.md "새 편지 / 편집")
+import type { LetterItem, LetterType } from '@/features/letter/api/letter-list';
 import { imageMarkdown } from '@/features/markdown-editor/model/markdown-image-paste';
-
-import type { LetterType } from './letter-filter';
-import type { LetterItem } from './useLetterGroupQuery';
 
 /**
  * 사용자 웹(letter-blocks.ts)이 아는 블록은 이 셋뿐이다. 모르는 블록은 사용자 화면에서 통째로 버려지므로
