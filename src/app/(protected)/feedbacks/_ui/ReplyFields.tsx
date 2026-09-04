@@ -114,22 +114,34 @@ export function ReplyFields({
 
       <TogetherSection draft={draft} />
 
-      <TemplateRow draft={draft} feedbackType={feedback.type} />
+      {/* 위는 "무엇에 대한 답인가"(원문·함께 답장), 아래는 "무엇을 보내나"(템플릿·제목·본문) — 구분선과 소제목으로 경계를 준다 (운영자 결정) */}
+      <section
+        aria-label="답장 작성"
+        className="flex flex-1 flex-col gap-4 border-t border-hairline pt-4"
+      >
+        <h3 className="text-[15px] font-bold text-foreground">답장</h3>
 
-      <Input
-        value={draft.title}
-        maxLength={REPLY_TITLE_MAX}
-        onChange={(event) => draft.setTitle(event.target.value)}
-        placeholder="제목"
-        aria-label="답장 제목"
-        className={cn('h-auto', fieldClassName)}
-      />
-      <ReplyBodyEditor
-        value={draft.bodyText}
-        onChange={draft.setBodyText}
-        maxLength={REPLY_BODY_MAX}
-        variant={variant}
-      />
+        <TemplateRow draft={draft} feedbackType={feedback.type} />
+
+        <div className="flex flex-col gap-2">
+          <span className="text-[12px] text-subtle">제목</span>
+          <Input
+            value={draft.title}
+            maxLength={REPLY_TITLE_MAX}
+            onChange={(event) => draft.setTitle(event.target.value)}
+            placeholder="제목"
+            aria-label="답장 제목"
+            className={cn('h-auto', fieldClassName)}
+          />
+        </div>
+
+        <ReplyBodyEditor
+          value={draft.bodyText}
+          onChange={draft.setBodyText}
+          maxLength={REPLY_BODY_MAX}
+          variant={variant}
+        />
+      </section>
     </>
   );
 }
