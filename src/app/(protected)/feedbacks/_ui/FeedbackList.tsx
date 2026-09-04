@@ -4,10 +4,10 @@
 import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 import { useDelayedPending } from '@/shared/lib/useDelayedPending';
-import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
+import { Button } from '@/shared/ui/shadcn/button';
 
 import {
   hasActiveFeedbackFilter,

@@ -1,14 +1,14 @@
 'use client';
 
 // 목록 필터 줄 — 검색·유형·상태·기간·정렬, 우측에 건수 (Figma 1050:8193)
-import { Input } from '@/shared/ui/input';
+import { Input } from '@/shared/ui/shadcn/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui/select';
+} from '@/shared/ui/shadcn/select';
 
 import type { FeedbackFilter } from '../_model/feedback-filter';
 import {

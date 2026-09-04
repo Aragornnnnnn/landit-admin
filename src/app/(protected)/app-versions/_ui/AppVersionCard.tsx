@@ -5,9 +5,9 @@
 import type { Platform } from '@/features/app-version/api/app-version';
 import { PLATFORM_LABEL } from '@/features/app-version/model/platform';
 import { cn } from '@/shared/lib/cn';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Textarea } from '@/shared/ui/textarea';
+import { Button } from '@/shared/ui/shadcn/button';
+import { Input } from '@/shared/ui/shadcn/input';
+import { Textarea } from '@/shared/ui/shadcn/textarea';
 
 import type { AppVersionDraft } from '../_model/app-version-draft';
 import type { UpdateKind } from '../_model/update-preview';

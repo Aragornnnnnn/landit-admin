@@ -4,8 +4,8 @@
 import type { LetterType } from '@/features/letter/api/letter-list';
 import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 import { cn } from '@/shared/lib/cn';
-import { Input } from '@/shared/ui/input';
-import { Switch } from '@/shared/ui/switch';
+import { Input } from '@/shared/ui/shadcn/input';
+import { Switch } from '@/shared/ui/shadcn/switch';
 
 import {
   canPinDraft,
