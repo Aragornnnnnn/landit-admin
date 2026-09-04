@@ -5,13 +5,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
+import { fetchLetterPage } from '@/features/letter/api/letter-list';
 import { api } from '@/shared/api/client';
 import type { Schema } from '@/shared/api/schema-patch';
 
 type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 type UserListResponse = { items?: AdminUserListItem[] };
-type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
 type AppVersion = Schema<'AdminAppVersionResponse'>;
 
 /** 차트는 7일치다. BE가 한 번에 최대 50건까지만 준다(51부터 400, 실 서버 확인) — 7일 접수가 50건을
@@ -64,16 +64,24 @@ export function useDashboardData(now: Date) {
   const letters = useQuery({
     queryKey: ['dashboard', 'published-letters'] as const,
     queryFn: () =>
-      api.get<LetterListResponse>(
-        '/api/v1/admin/mailbox/letters?publicationStatus=PUBLISHED&page=0&size=20',
+      fetchLetterPage(
+        new URLSearchParams({
+          publicationStatus: 'PUBLISHED',
+          page: '0',
+          size: '20',
+        }),
       ),
   });
 
   const drafts = useQuery({
     queryKey: ['dashboard', 'draft-letters'] as const,
     queryFn: () =>
-      api.get<LetterListResponse>(
-        '/api/v1/admin/mailbox/letters?publicationStatus=DRAFT&page=0&size=20',
+      fetchLetterPage(
+        new URLSearchParams({
+          publicationStatus: 'DRAFT',
+          page: '0',
+          size: '20',
+        }),
       ),
   });
 

@@ -4,16 +4,14 @@
 // 둘 다 "지금 사용자에게 나가 있는 것"을 보여 준다. 고치러 가는 링크가 카드마다 붙는다
 import Link from 'next/link';
 
-import type { Schema } from '@/shared/api/schema-patch';
+import type { LetterItem } from '@/features/letter/api/letter-list';
+import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 
 import {
   PLATFORM_LABEL,
   PLATFORMS,
   type AppVersion,
 } from '../app-versions/_model/app-version-draft';
-import { LETTER_TYPE_LABEL } from '../letters/_model/letter-label';
-
-type Letter = Schema<'AdminMailboxLetterResponse'>;
 
 export function AppVersionSummaryCard({
   versions,
@@ -57,7 +55,7 @@ export function MailboxSummaryCard({
   draftCount,
   error = false,
 }: {
-  letters: Letter[];
+  letters: LetterItem[];
   draftCount: number;
   error?: boolean;
 }) {

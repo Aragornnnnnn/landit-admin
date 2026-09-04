@@ -7,6 +7,11 @@ import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+import type { LetterItem } from '@/features/letter/api/letter-list';
+import {
+  LETTER_STATUS_DOT,
+  LETTER_STATUS_LABEL,
+} from '@/features/letter/model/letter-label';
 import { Button } from '@/shared/ui/button';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
@@ -25,9 +30,7 @@ import {
   editorNotice,
   type EditorStatus,
 } from '../_model/letter-editor-buttons';
-import { LETTER_STATUS_DOT, LETTER_STATUS_LABEL } from '../_model/letter-label';
 import { useLetterActions } from '../_model/useLetterActions';
-import type { LetterItem } from '../_model/useLetterGroupQuery';
 import { useLetterQuery } from '../_model/useLetterQuery';
 import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { LeaveEditorDialog } from './LeaveEditorDialog';

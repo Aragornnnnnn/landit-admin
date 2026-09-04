@@ -5,11 +5,12 @@
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
+import type { LetterItem } from '@/features/letter/api/letter-list';
+import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 import { formatShortDate } from '@/shared/lib/format-time';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
-import { LETTER_TYPE_LABEL } from '../_model/letter-label';
-import { letterEventAt, type LetterItem } from '../_model/useLetterGroupQuery';
+import { letterEventAt } from '../_model/useLetterGroupQuery';
 
 export function LetterCardList({ items }: { items: LetterItem[] }) {
   return (

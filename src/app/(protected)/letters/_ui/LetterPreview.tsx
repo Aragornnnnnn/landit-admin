@@ -2,11 +2,11 @@
 
 // 사용자 편지함 미리보기 — 쓰는 대로 사용자가 볼 화면을 그린다 (Figma 1050:10361 우측).
 // 발행하면 되돌릴 수 없으니, 보내기 전에 사용자 눈으로 한 번 보는 자리다
+import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 import { MarkdownPreview } from '@/features/markdown-editor/ui/MarkdownPreview';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 import type { LetterDraft } from '../_model/letter-draft';
-import { LETTER_TYPE_LABEL } from '../_model/letter-label';
 
 export function LetterPreview({
   draft,

@@ -1,27 +1,10 @@
-// 편지 화면의 말과 점 색 — 화면 문구는 전부 여기서 나온다 (docs/screens/letters.md "정확한 카피")
-import type { LetterStatus, LetterType } from './letter-filter';
-
-export const LETTER_TYPE_LABEL: Record<LetterType, string> = {
-  NOTICE: '공지',
-  UPDATE: '업데이트',
-  REPLY: '답장',
-};
-
-export const LETTER_STATUS_LABEL: Record<LetterStatus, string> = {
-  DRAFT: '임시저장',
-  PUBLISHED: '발행됨',
-  UNPUBLISHED: '숨김',
-};
-
-/** 상태 점 — 발행됨은 끝난 일(초록), 임시저장은 아직 진행 중(오렌지). 숨김은 점이 없다 */
-export const LETTER_STATUS_DOT: Record<
+// 편지 목록 화면의 말 — 타입 선택지와 요약 문구 (docs/screens/letters.md "정확한 카피").
+// 타입·상태 라벨 자체는 대시보드도 쓰므로 features/letter에 있다
+import type {
   LetterStatus,
-  'progress' | 'done' | undefined
-> = {
-  DRAFT: 'progress',
-  PUBLISHED: 'done',
-  UNPUBLISHED: undefined,
-};
+  LetterType,
+} from '@/features/letter/api/letter-list';
+import { LETTER_STATUS_LABEL } from '@/features/letter/model/letter-label';
 
 export const LETTER_TYPE_OPTIONS: {
   value: LetterType | 'ALL';
