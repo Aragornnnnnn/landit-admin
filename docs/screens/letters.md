@@ -135,10 +135,9 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 | 폼 라벨                    | 타입 · 고정 · 제목 · 미리보기 문구 (목록 한 줄)                                                      |
 | 고정 토글 라벨             | 리스트 상단 고정                                                                                     |
 | 고정 비활성 툴팁           | 공지만 고정할 수 있어요                                                                              |
-| 본문 블록 헤더             | 본문 블록 · contentBlocks 그대로 저장돼요                                                            |
-| 블록 칩                    | PARAGRAPH · IMAGE · ORDERED_LIST                                                                     |
-| 블록 액션                  | ↑ ↓ 삭제                                                                                             |
-| 블록 추가                  | + 문단 · + 이미지 · + 번호 목록                                                                      |
+| 본문 라벨 · 전환           | 본문 · (물음표 도움말) · 쓰기 \| 미리보기                                                            |
+| 본문 placeholder           | 본문 — 이미지는 붙여넣거나 끌어다 놓으세요                                                           |
+| 업로드 거절 토스트         | PNG · JPG · WEBP · GIF만 올릴 수 있어요 · 10MB 이하 이미지만 올릴 수 있어요                          |
 | 미리보기 라벨              | 사용자 편지함 미리보기                                                                               |
 | 미리보기 폰 상단           | ‹ 편지함                                                                                             |
 | 토스트 (발행)              | 발행했어요                                                                                           |
@@ -232,6 +231,6 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 - "다시 보이기"는 프레임에 확인 창이 없지만 발행과 같은 일(사용자 편지함에 바로 나타남)이라 같은 창을 띄운다.
 - 고정 비활성 사유는 툴팁 대신 항목 안 오른쪽에 적는다 — 비활성 메뉴 항목은 hover가 안 잡혀 툴팁이 뜨지 않는다.
 - 모바일 프레임의 행에는 ⋯가 없다. 좁은 화면에서는 편지를 열어 바꾸는 것이 프레임의 흐름이다.
-- 본문 이미지는 `image/*` 10MB 이하만 올린다(답장과 같은 규칙). 10MB는 presigned-url이 받는 fileSize 상한(10485760). 업로드 함수는 `features/content-image/api/`, 에디터는 `features/markdown-editor/`에 있다.
+- 본문 이미지는 PNG·JPG·WEBP·GIF, 10MB 이하만 올린다(답장과 같은 규칙, `features/markdown-editor` `ALLOWED_IMAGE_TYPES`). 10MB는 presigned-url이 받는 fileSize 상한(10485760). 업로드 함수는 `features/content-image/api/`, 에디터는 `features/markdown-editor/`에 있다.
 - 에디터 자동 저장(마지막 입력 3초 후·이탈 시)은 아직 없다. 지금은 수동 저장이고, ← 목록에서 저장 안 된 변경이 있으면 물어본다. 자동 저장은 새 편지에서 POST가 여러 번 나가지 않게 하는 규칙이 필요해 따로 붙인다.
 - 편집 화면 상단바 제목은 `/letters/new`만 "공지·업데이트 / 새 편지"다. `/letters/{id}`의 "공지·업데이트 / {제목}"은 상단바가 편지 제목을 알아야 해서 아직 붙이지 않았다.
