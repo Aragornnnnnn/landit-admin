@@ -15,8 +15,6 @@ export interface UserFilter {
 }
 
 export const USERS_PAGE_SIZE = 20;
-/** 한 번에 받아 오는 크기 — hasNext가 false일 때까지 이어서 받는다 */
-export const USERS_FETCH_SIZE = 50;
 
 export const DEFAULT_USER_FILTER: UserFilter = { keyword: '', page: 0 };
 
