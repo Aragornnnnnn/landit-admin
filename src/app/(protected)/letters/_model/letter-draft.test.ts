@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  blocksToMarkdown,
   canPublishDraft,
   EMPTY_LETTER_DRAFT,
   isSameDraft,
-  moveBlock,
   readBlocks,
   toLetterRequest,
   withType,
-  type LetterBlock,
   type LetterDraft,
 } from './letter-draft';
 
@@ -44,24 +43,12 @@ describe('canPublishDraft', () => {
     expect(canPublishDraft(EMPTY_LETTER_DRAFT)).toBe(false);
     expect(canPublishDraft(draft({ title: '점검 안내' }))).toBe(false);
     expect(
-      canPublishDraft(
-        draft({
-          title: '점검 안내',
-          contentBlocks: [{ type: 'PARAGRAPH', text: '오늘 새벽에' }],
-        }),
-      ),
+      canPublishDraft(draft({ title: '점검 안내', body: '오늘 새벽에' })),
     ).toBe(true);
   });
 
   it('공백만 있는 건 내용이 아니다', () => {
-    expect(
-      canPublishDraft(
-        draft({
-          title: '  ',
-          contentBlocks: [{ type: 'PARAGRAPH', text: ' ' }],
-        }),
-      ),
-    ).toBe(false);
+    expect(canPublishDraft(draft({ title: '  ', body: ' ' }))).toBe(false);
   });
 });
 
@@ -75,40 +62,44 @@ describe('withType', () => {
   });
 });
 
-describe('moveBlock', () => {
-  const blocks: LetterBlock[] = [
-    { type: 'PARAGRAPH', text: '첫' },
-    { type: 'PARAGRAPH', text: '둘' },
-  ];
+describe('blocksToMarkdown', () => {
+  it('블록 편집기 시절 편지를 마크다운 하나로 편다 — 문단은 빈 줄, 목록은 번호, 이미지는 ![캡션](주소)', () => {
+    const markdown = blocksToMarkdown([
+      { type: 'PARAGRAPH', text: '안녕하세요' },
+      { type: 'ORDERED_LIST', items: ['하나', '  ', '둘'] },
+      { type: 'IMAGE', url: 'https://img/a.png', caption: '설정 화면 (완료]' },
+      { type: 'IMAGE', url: 'https://img/b.png' },
+    ]);
 
-  it('자리를 바꾼다', () => {
-    expect(moveBlock(blocks, 0, 1).map((block) => block.type)).toHaveLength(2);
-    expect((moveBlock(blocks, 0, 1)[0] as { text: string }).text).toBe('둘');
+    expect(markdown).toBe(
+      '안녕하세요\n\n1. 하나\n2. 둘\n\n![설정 화면 완료](https://img/a.png)\n\n![](https://img/b.png)',
+    );
   });
 
-  it('끝에서 더 밀면 그대로 둔다', () => {
-    expect(moveBlock(blocks, 0, -1)).toBe(blocks);
-    expect(moveBlock(blocks, 1, 1)).toBe(blocks);
+  it('빈 블록은 건너뛴다 — 빈 줄만 늘어난다', () => {
+    expect(
+      blocksToMarkdown([
+        { type: 'PARAGRAPH', text: ' ' },
+        { type: 'PARAGRAPH', text: '본문' },
+      ]),
+    ).toBe('본문');
   });
 });
 
 describe('toLetterRequest', () => {
-  it('빈 블록은 보내지 않는다 — 사용자 화면에 빈 줄로 남는다', () => {
+  it('마크다운 전체를 PARAGRAPH 블록 하나에 담는다 — 앱이 그 안을 마크다운으로 그린다', () => {
     const body = toLetterRequest(
-      draft({
-        title: ' 점검 안내 ',
-        contentBlocks: [
-          { type: 'PARAGRAPH', text: '' },
-          { type: 'PARAGRAPH', text: '오늘 새벽' },
-          { type: 'ORDERED_LIST', items: ['하나', '  '] },
-        ],
-      }),
+      draft({ title: ' 점검 안내 ', body: '## 안내\n\n1. 하나\n' }),
     );
+
     expect(body.title).toBe('점검 안내');
     expect(body.contentBlocks).toEqual([
-      { type: 'PARAGRAPH', text: '오늘 새벽' },
-      { type: 'ORDERED_LIST', items: ['하나'] },
+      { type: 'PARAGRAPH', text: '## 안내\n\n1. 하나' },
     ]);
+  });
+
+  it('본문이 비면 블록을 보내지 않는다 — 사용자 화면에 빈 줄로 남는다', () => {
+    expect(toLetterRequest(draft({ body: '  ' })).contentBlocks).toEqual([]);
   });
 });
 

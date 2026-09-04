@@ -63,7 +63,7 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 ### 새 편지 / 편집 (/letters/new · /letters/[id] — `1050:10361`)
 
 - 상단바 제목: `공지·업데이트 / 새 편지` (편집 시에는 `공지·업데이트 / {제목}`, 예: "공지·업데이트 / 랜딧 서비스 점검 안내")
-- **공지 템플릿 (운영자 결정 · 2026-08-26, 프레임에 없음)** — 편집 폼 맨 위에 "템플릿" 칩 줄(일반 공지 · 기능 업데이트 · 점검 공지). 팀이 확정한 공식 문구로 유형·제목·미리보기·본문 블록이 채워지고, `OO`·괄호·X 자리는 적용 후 직접 채운다. 이미 입력한 내용이 있으면 "쓰던 내용을 지우고 템플릿을 적용할까요?" 확인 창을 거친다. 문구 수정은 `_model/letter-templates.ts` 배열. Figma 갱신 필요.
+- **공지 템플릿 (운영자 결정 · 2026-08-26, 프레임에 없음)** — 편집 폼 맨 위에 "템플릿" 칩 줄(일반 공지 · 기능 업데이트 · 점검 공지). 팀이 확정한 공식 문구로 유형·제목·미리보기·본문(마크다운)이 채워지고, `OO`·괄호·X 자리는 적용 후 직접 채운다. 이미 입력한 내용이 있으면 "쓰던 내용을 지우고 템플릿을 적용할까요?" 확인 창을 거친다. 문구 수정은 `_model/letter-templates.ts` 배열. Figma 갱신 필요.
 - 에디터 상단 액션바 (한 줄)
   - `← 목록`
   - 상태 칩 `임시저장`
@@ -76,21 +76,17 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
   - `고정` — 토글 스위치 + 라벨 `리스트 상단 고정`
   - `제목` — 텍스트 입력 (예시값: "1.4.3 업데이트 — 마이크 오류 수정")
   - `미리보기 문구 (목록 한 줄)` — 텍스트 입력 (예시값: "녹음이 안 되던 문제를 고쳤어요. 업데이트하고 다시 시도해 주세요")
-- 왼쪽 편집 컬럼 — 카드 `본문 블록`
-  - 카드 헤더: `본문 블록` + 우측 안내 `contentBlocks 그대로 저장돼요`
-  - 블록 공통 헤더: 드래그 핸들 `⋮⋮` + 타입 칩 + 우측 액션 `↑  ↓  삭제`
-  - 블록 종류 3가지 (칩 텍스트 그대로)
-    - `PARAGRAPH` — 여러 줄 텍스트 (예시: "안녕하세요, 랜딧 팀이에요." / "일부 기기에서 마이크 권한을 허용해도 녹음이 시작되지 않던 문제를 고쳤어요.")
-    - `IMAGE` — 썸네일(96×64) + 파일명·용량(예시: "mic-fix.png · 240KB") + `캡션: 설정 > 마이크 권한`
-    - `ORDERED_LIST` — 번호 항목 (예시: "1. 앱스토어에서 1.4.3으로 업데이트해요" / "2. 앱을 완전히 종료했다가 다시 열어요" / "3. 그래도 안 되면 편지함에서 알려주세요")
-  - 블록 추가 버튼 행: `+ 문단` · `+ 이미지` · `+ 번호 목록`
+- 왼쪽 편집 컬럼 — 카드 `본문` **(LAN-440 · 2026-09-04, 프레임과 다름)**
+  - 프레임의 블록 편집기(`본문 블록` 카드 · PARAGRAPH/IMAGE/ORDERED_LIST 블록 · `+ 문단 / + 이미지 / + 번호 목록`)는 앱이 공지 본문을 마크다운으로 그리게 되면서 걷어냈다. 지금은 피드백 답장과 같은 마크다운 에디터 하나다 — "쓰기 | 미리보기" 세그먼트 토글, 물음표 문법 도움말, 이미지 붙여넣기·드롭 업로드(`![파일명](주소)`), 동작 규칙은 [feedbacks.md](feedbacks.md) "답장 본문 마크다운"과 같다.
+  - 저장할 때 마크다운 전체를 `contentBlocks: [{ type: 'PARAGRAPH', text }]` 하나로 감싼다. 블록 편집기 시절 저장된 편지(문단·이미지·번호 목록 블록)는 열 때 마크다운 하나로 펴서 보여 주고(`blocksToMarkdown`), 다시 저장하면 PARAGRAPH 하나가 된다. 이미지 블록의 캡션은 `![캡션](주소)`의 설명 자리로 들어가 화면에는 따로 보이지 않는다.
+  - Figma 갱신 필요.
 - 오른쪽 미리보기 컬럼
   - 라벨 `사용자 편지함 미리보기`
   - 폰 목업(300×560, 라운드 28) 안에 사용자 웹 편지 상세를 렌더
     - 상단 `‹ 편지함`
     - 타입 칩(예: `업데이트`) + 날짜(예: `8월 18일`)
     - 제목
-    - 블록 순서대로: 문단 텍스트 → 이미지(268×140) + 캡션 → 번호 목록
+    - 본문을 앱과 같은 마크다운 렌더(`.letter-markdown`)로
 
 ### 발행된 편지 편집 (`1050:11122`)
 
@@ -139,10 +135,9 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 | 폼 라벨                    | 타입 · 고정 · 제목 · 미리보기 문구 (목록 한 줄)                                                      |
 | 고정 토글 라벨             | 리스트 상단 고정                                                                                     |
 | 고정 비활성 툴팁           | 공지만 고정할 수 있어요                                                                              |
-| 본문 블록 헤더             | 본문 블록 · contentBlocks 그대로 저장돼요                                                            |
-| 블록 칩                    | PARAGRAPH · IMAGE · ORDERED_LIST                                                                     |
-| 블록 액션                  | ↑ ↓ 삭제                                                                                             |
-| 블록 추가                  | + 문단 · + 이미지 · + 번호 목록                                                                      |
+| 본문 라벨 · 전환           | 본문 · (물음표 도움말) · 쓰기 \| 미리보기                                                            |
+| 본문 placeholder           | 본문 — 이미지는 붙여넣거나 끌어다 놓으세요                                                           |
+| 업로드 거절 토스트         | PNG · JPG · WEBP · GIF만 올릴 수 있어요 · 10MB 이하 이미지만 올릴 수 있어요                          |
 | 미리보기 라벨              | 사용자 편지함 미리보기                                                                               |
 | 미리보기 폰 상단           | ‹ 편지함                                                                                             |
 | 토스트 (발행)              | 발행했어요                                                                                           |
@@ -153,14 +148,14 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 
 ## 데이터
 
-| 항목   | 내용                                                                                                                                                               |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 목록   | GET admin/mailbox/letters — page, size, type(NOTICE\|UPDATE\|REPLY), publicationStatus(DRAFT\|PUBLISHED\|UNPUBLISHED), pinned → items[], totalElements, totalPages |
-| 항목   | letterId, type, title, contentBlocks[], preview, publicationStatus, pinned, publishedAt, createdAt, updatedAt                                                      |
-| 생성   | POST admin/mailbox/letters {type, title, contentBlocks, preview} → DRAFT                                                                                           |
-| 수정   | PATCH admin/mailbox/letters/{id} — 부분 수정(publicationStatus·pinned만 보내도 됨)                                                                                 |
-| 이미지 | POST admin/content-images/presigned-url {fileName, contentType, fileSize} → uploadUrl·method·headers·imageUrl → 브라우저가 직접 PUT                                |
-| 블록   | PARAGRAPH{text} · IMAGE{url, caption?} · ORDERED_LIST{items[]} 만. 사용자 웹(letter-blocks.ts)이 모르는 블록은 버리므로 이 셋만 만든다                             |
+| 항목   | 내용                                                                                                                                                                                                       |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 목록   | GET admin/mailbox/letters — page, size, type(NOTICE\|UPDATE\|REPLY), publicationStatus(DRAFT\|PUBLISHED\|UNPUBLISHED), pinned → items[], totalElements, totalPages                                         |
+| 항목   | letterId, type, title, contentBlocks[], preview, publicationStatus, pinned, publishedAt, createdAt, updatedAt                                                                                              |
+| 생성   | POST admin/mailbox/letters {type, title, contentBlocks, preview} → DRAFT                                                                                                                                   |
+| 수정   | PATCH admin/mailbox/letters/{id} — 부분 수정(publicationStatus·pinned만 보내도 됨)                                                                                                                         |
+| 이미지 | POST admin/content-images/presigned-url {fileName, contentType, fileSize} → uploadUrl·method·headers·imageUrl → 브라우저가 직접 PUT                                                                        |
+| 블록   | 읽을 땐 PARAGRAPH{text} · IMAGE{url, caption?} · ORDERED_LIST{items[]} 셋만 안다(모르는 블록은 버린다). 새로 저장할 땐 마크다운 전체를 PARAGRAPH 하나에 담는다 — 앱이 PARAGRAPH text를 마크다운으로 그린다 |
 
 ## 인터랙션
 
@@ -177,16 +172,15 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 
 ### 에디터 인터랙션
 
-| 요소                            | 동작 · API                                                                | 결과                                                                       |
-| ------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 타입 세그먼트                   | type 변경                                                                 | 미리보기 칩 색 바뀜. 업데이트면 고정 토글 비활성+off                       |
-| 제목 / 미리보기 문구            | 입력                                                                      | 미리보기 즉시 반영. 미리보기 문구 60자 제한(넘으면 카운터 빨강)            |
-| + 문단 / + 이미지 / + 번호 목록 | 블록 추가(맨 아래). 이미지는 presigned-url → PUT                          | 업로드 중 진행 표시, 실패 시 블록 유지 + 다시 시도                         |
-| 블록 ↑ ↓ 삭제 · 드래그          | 순서 변경·삭제                                                            | 삭제는 즉시 + 되돌리기 토스트 5초                                          |
-| 임시저장                        | new면 POST, 기존이면 PATCH. 자동 저장: 마지막 입력 3초 후, 페이지 이탈 시 | "마지막 저장 14:20". 실패 시 빨간 "저장 안 됨 · 다시 시도"                 |
-| 발행하기                        | AlertDialog "지금 발행할까요?" → PATCH {publicationStatus: PUBLISHED}     | 토스트 "발행했어요" · 칩 발행됨 · 버튼이 "숨기기"로. 제목·본문 비면 비활성 |
-| 숨기기                          | Destructive AlertDialog → PATCH UNPUBLISHED                               | 사용자 편지함에서 사라짐 안내                                              |
-| ← 목록                          | 저장 안 된 변경 있으면 "저장하지 않고 나갈까요?"                          | —                                                                          |
+| 요소                 | 동작 · API                                                                | 결과                                                                       |
+| -------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 타입 세그먼트        | type 변경                                                                 | 미리보기 칩 색 바뀜. 업데이트면 고정 토글 비활성+off                       |
+| 제목 / 미리보기 문구 | 입력                                                                      | 미리보기 즉시 반영. 미리보기 문구 60자 제한(넘으면 카운터 빨강)            |
+| 본문 마크다운 에디터 | 쓰기/미리보기 토글 · 이미지 붙여넣기·드롭은 presigned-url → PUT           | 자리표시 `![업로드 중...]()` → 주소 교체, 실패 시 자리표시 제거 + 토스트   |
+| 임시저장             | new면 POST, 기존이면 PATCH. 자동 저장: 마지막 입력 3초 후, 페이지 이탈 시 | "마지막 저장 14:20". 실패 시 빨간 "저장 안 됨 · 다시 시도"                 |
+| 발행하기             | AlertDialog "지금 발행할까요?" → PATCH {publicationStatus: PUBLISHED}     | 토스트 "발행했어요" · 칩 발행됨 · 버튼이 "숨기기"로. 제목·본문 비면 비활성 |
+| 숨기기               | Destructive AlertDialog → PATCH UNPUBLISHED                               | 사용자 편지함에서 사라짐 안내                                              |
+| ← 목록               | 저장 안 된 변경 있으면 "저장하지 않고 나갈까요?"                          | —                                                                          |
 
 ### 화면 프레임 주석에서 보강되는 규칙
 
@@ -212,7 +206,7 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 - 발행하기는 제목·본문이 비면 비활성.
 - 새 편지는 첫 저장 전 발행 비활성.
 - 고정(pinned)은 공지(NOTICE)만 가능. 업데이트는 토글 비활성 + off, 툴팁 "공지만 고정할 수 있어요".
-- contentBlocks는 PARAGRAPH · IMAGE · ORDERED_LIST 세 종류만 만든다.
+- 저장하는 contentBlocks는 PARAGRAPH 하나(마크다운 전체). 읽을 땐 PARAGRAPH · IMAGE · ORDERED_LIST 세 종류만 안다.
 
 ## BE 확인 사항 / 열린 질문
 
@@ -237,7 +231,6 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 - "다시 보이기"는 프레임에 확인 창이 없지만 발행과 같은 일(사용자 편지함에 바로 나타남)이라 같은 창을 띄운다.
 - 고정 비활성 사유는 툴팁 대신 항목 안 오른쪽에 적는다 — 비활성 메뉴 항목은 hover가 안 잡혀 툴팁이 뜨지 않는다.
 - 모바일 프레임의 행에는 ⋯가 없다. 좁은 화면에서는 편지를 열어 바꾸는 것이 프레임의 흐름이다.
-- 본문 이미지는 PNG·JPG·WEBP·GIF, 5MB 이하만 고를 수 있다(FE 규칙). BE의 허용 contentType·최대 fileSize가 확정되면 그 값에 맞춘다.
+- 본문 이미지는 PNG·JPG·WEBP·GIF, 10MB 이하만 올린다(답장과 같은 규칙, `features/markdown-editor` `ALLOWED_IMAGE_TYPES`). 10MB는 presigned-url이 받는 fileSize 상한(10485760). 업로드 함수는 `features/content-image/api/`, 에디터는 `features/markdown-editor/`에 있다.
 - 에디터 자동 저장(마지막 입력 3초 후·이탈 시)은 아직 없다. 지금은 수동 저장이고, ← 목록에서 저장 안 된 변경이 있으면 물어본다. 자동 저장은 새 편지에서 POST가 여러 번 나가지 않게 하는 규칙이 필요해 따로 붙인다.
-- 에디터의 드래그 핸들(⋮⋮)은 그리지 않았다. 실제로 끌 수 없는 손잡이는 없는 것만 못하다 — 순서는 ↑ ↓로 바꾼다.
 - 편집 화면 상단바 제목은 `/letters/new`만 "공지·업데이트 / 새 편지"다. `/letters/{id}`의 "공지·업데이트 / {제목}"은 상단바가 편지 제목을 알아야 해서 아직 붙이지 않았다.
