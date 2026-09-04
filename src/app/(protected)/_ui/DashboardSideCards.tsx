@@ -4,14 +4,13 @@
 // 둘 다 "지금 사용자에게 나가 있는 것"을 보여 준다. 고치러 가는 링크가 카드마다 붙는다
 import Link from 'next/link';
 
-import type { LetterItem } from '@/features/letter/api/letter-list';
-import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
-
+import type { AppVersion } from '@/features/app-version/api/app-version';
 import {
   PLATFORM_LABEL,
   PLATFORMS,
-  type AppVersion,
-} from '../app-versions/_model/app-version-draft';
+} from '@/features/app-version/model/platform';
+import type { LetterItem } from '@/features/letter/api/letter-list';
+import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
 
 export function AppVersionSummaryCard({
   versions,

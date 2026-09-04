@@ -2,6 +2,8 @@
 
 // 저장 확인 — 저장하는 순간 앱이 바뀌므로, 무슨 일이 일어나는지 한 문장으로 말한다
 // (docs/screens/app-versions.md "저장 확인 창에 영향 문장")
+import type { Platform } from '@/features/app-version/api/app-version';
+import { PLATFORM_LABEL } from '@/features/app-version/model/platform';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,10 +15,8 @@ import {
 } from '@/shared/ui/alert-dialog';
 
 import {
-  PLATFORM_LABEL,
   saveImpactSentence,
   type AppVersionDraft,
-  type Platform,
 } from '../_model/app-version-draft';
 
 interface SaveVersionDialogProps {
