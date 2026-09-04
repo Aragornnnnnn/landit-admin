@@ -1,4 +1,4 @@
-// 답장 본문 에디터 — 붙여넣기·드롭한 이미지가 올라가 커서 자리에 마크다운으로 들어가는지, 실패·거절이 알려지는지
+// 마크다운 본문 에디터 — 붙여넣기·드롭한 이미지가 올라가 커서 자리에 마크다운으로 들어가는지, 실패·거절이 알려지는지
 import { useState } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,8 +8,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MAX_IMAGE_BYTES } from '@/features/content-image/api/upload-content-image';
 import { api } from '@/shared/api/client';
 
-import { UPLOAD_PLACEHOLDER } from '../_model/markdown-image-paste';
-import { ReplyBodyEditor } from './ReplyBodyEditor';
+import { UPLOAD_PLACEHOLDER } from '../model/markdown-image-paste';
+import { MarkdownEditor } from './MarkdownEditor';
 
 vi.mock('@/shared/api/client', () => ({ api: { post: vi.fn() } }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
@@ -20,14 +20,15 @@ const fileOf = (name: string, type: string, size = 1000) => {
   return file;
 };
 
-/** 부모(useReplyDraft)처럼 값을 들고 있는 껍데기 */
+/** 부모(답장 초안)처럼 값을 들고 있는 껍데기 */
 function Harness({ initial = '' }: { initial?: string }) {
   const [value, setValue] = useState(initial);
   return (
-    <ReplyBodyEditor
+    <MarkdownEditor
       value={value}
       onChange={setValue}
-      variant="sheet"
+      background="card"
+      label="답장 본문"
       maxLength={1000}
     />
   );
@@ -58,7 +59,7 @@ beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true } as Response));
 });
 
-describe('ReplyBodyEditor', () => {
+describe('MarkdownEditor', () => {
   it('이미지를 붙여넣으면 커서 자리에 자리표시가 들어가고, 올라가면 그 자리가 마크다운으로 바뀐다', async () => {
     const presign = deferredPresign();
     render(<Harness initial="앞뒤" />);

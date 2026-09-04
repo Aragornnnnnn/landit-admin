@@ -2,20 +2,18 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { ReplyMarkdownPreview } from './ReplyMarkdownPreview';
+import { MarkdownPreview } from './MarkdownPreview';
 
-describe('ReplyMarkdownPreview', () => {
+describe('MarkdownPreview', () => {
   it('엔터 한 번도 줄바꿈으로 그린다 — 앱(remark-breaks)과 같다', () => {
-    const { container } = render(
-      <ReplyMarkdownPreview text={'첫 줄\n둘째 줄'} />,
-    );
+    const { container } = render(<MarkdownPreview text={'첫 줄\n둘째 줄'} />);
 
     expect(container.querySelector('br')).not.toBeNull();
   });
 
   it('![설명](주소)를 이미지로, [글자](주소)를 링크로 그린다', () => {
     render(
-      <ReplyMarkdownPreview
+      <MarkdownPreview
         text={'![캡처](https://img.landit.im/a.png)\n[랜딧](https://landit.im)'}
       />,
     );
@@ -31,7 +29,7 @@ describe('ReplyMarkdownPreview', () => {
   });
 
   it('javascript: 주소는 링크로 만들지 않는다', () => {
-    render(<ReplyMarkdownPreview text="[눌러봐](javascript:alert(1))" />);
+    render(<MarkdownPreview text="[눌러봐](javascript:alert(1))" />);
 
     expect(screen.getByText('눌러봐').getAttribute('href') ?? '').not.toContain(
       'javascript',
@@ -40,7 +38,7 @@ describe('ReplyMarkdownPreview', () => {
 
   it('본문에 적은 HTML 태그는 그리지도, 글자로 보여주지도 않는다', () => {
     const { container } = render(
-      <ReplyMarkdownPreview
+      <MarkdownPreview
         text={
           '<script>alert(1)</script><img src=x onerror=alert(1)>\n\n다음 문단'
         }
@@ -54,7 +52,7 @@ describe('ReplyMarkdownPreview', () => {
   });
 
   it('비어 있으면 미리볼 게 없다고 알린다', () => {
-    render(<ReplyMarkdownPreview text="" />);
+    render(<MarkdownPreview text="" />);
 
     expect(screen.getByText('미리볼 내용이 없어요')).toBeInTheDocument();
   });

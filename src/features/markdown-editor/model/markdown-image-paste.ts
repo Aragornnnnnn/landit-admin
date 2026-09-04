@@ -1,4 +1,5 @@
-// 답장 본문에 이미지를 붙여넣는 규칙 — 어떤 파일을 받고, 커서 자리에 무엇을 끼우고, 업로드가 끝나면 자리표시를 어떻게 바꾸는지 (docs/screens/feedbacks.md "답장 본문 마크다운")
+// 마크다운 본문에 이미지를 붙여넣는 규칙 — 어떤 파일을 받고, 커서 자리에 무엇을 끼우고, 업로드가 끝나면 자리표시를 어떻게 바꾸는지 (docs/screens/feedbacks.md "답장 본문 마크다운")
+// features 간 가로 import — 업로드 상한은 content-image가 BE 계약으로 들고 있는 값이라 여기서 다시 정하지 않는다
 import { MAX_IMAGE_BYTES } from '@/features/content-image/api/upload-content-image';
 
 /** 올라가는 동안 커서 자리를 지키는 글. 앱에서도 그려질 수 있는 정상 마크다운이라 실수로 보내져도 깨지지 않는다 */

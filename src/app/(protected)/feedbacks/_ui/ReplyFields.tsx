@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 
+import { MarkdownEditor } from '@/features/markdown-editor/ui/MarkdownEditor';
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
 import {
@@ -26,7 +27,6 @@ import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
 import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
-import { ReplyBodyEditor } from './ReplyBodyEditor';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
@@ -135,11 +135,12 @@ export function ReplyFields({
           />
         </div>
 
-        <ReplyBodyEditor
+        <MarkdownEditor
           value={draft.bodyText}
           onChange={draft.setBodyText}
           maxLength={REPLY_BODY_MAX}
-          variant={variant}
+          background={variant === 'sheet' ? 'card' : 'page'}
+          label="답장 본문"
         />
       </section>
     </>

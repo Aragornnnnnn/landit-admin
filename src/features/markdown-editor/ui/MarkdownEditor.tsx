@@ -1,7 +1,7 @@
 'use client';
 
-// 답장 본문 에디터 — 깃허브 코멘트처럼 쓰기/미리보기를 오가고, 이미지를 붙여넣거나 떨어뜨리면 올려서 커서 자리에 마크다운을 끼운다.
-// 본문 값은 부모(useReplyDraft)가 들고, 여기는 textarea와 업로드 흐름만 맡는다
+// 마크다운 본문 에디터 — 깃허브 코멘트처럼 쓰기/미리보기를 오가고, 이미지를 붙여넣거나 떨어뜨리면 올려서 커서 자리에 마크다운을 끼운다.
+// 본문 값은 부모(답장 초안·편지 초안)가 들고, 여기는 textarea와 업로드 흐름만 맡는다
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -17,26 +17,31 @@ import {
   pickImageFiles,
   replacePlaceholder,
   shiftSlots,
-} from '../_model/markdown-image-paste';
+} from '../model/markdown-image-paste';
 import { MarkdownHelpPopover } from './MarkdownHelpPopover';
-import { ReplyMarkdownPreview } from './ReplyMarkdownPreview';
+import { MarkdownPreview } from './MarkdownPreview';
 
-interface ReplyBodyEditorProps {
+interface MarkdownEditorProps {
   value: string;
   onChange: (text: string) => void;
-  maxLength: number;
-  /** 시트는 흰 배경 위라 입력이 회색, 전체화면은 회색 배경 위라 입력이 흰색 (ReplyFields와 같은 규칙) */
-  variant: 'sheet' | 'screen';
+  maxLength?: number;
+  /** 무엇 위에 놓이나 — 흰 카드 위면 입력이 회색, 회색 페이지 위면 입력이 흰색 */
+  background: 'card' | 'page';
+  /** 스크린리더용 이름 — "답장 본문", "편지 본문" */
+  label: string;
+  placeholder?: string;
 }
 
 type Mode = 'write' | 'preview';
 
-export function ReplyBodyEditor({
+export function MarkdownEditor({
   value,
   onChange,
   maxLength,
-  variant,
-}: ReplyBodyEditorProps) {
+  background,
+  label,
+  placeholder = '본문',
+}: MarkdownEditorProps) {
   const [mode, setMode] = useState<Mode>('write');
   const textarea = useRef<HTMLTextAreaElement>(null);
   // 업로드가 끝나는 시점의 최신 본문 — state 스냅샷을 보면 그 사이 타이핑한 글자가 사라진다
@@ -99,13 +104,15 @@ export function ReplyBodyEditor({
 
   const boxClassName = cn(
     'rounded-xl px-4 py-3 text-[14px]',
-    variant === 'sheet'
+    background === 'card'
       ? 'min-h-[220px] flex-1 bg-muted'
       : 'min-h-[180px] bg-card',
   );
 
   return (
-    <div className={cn('flex flex-col gap-2', variant === 'sheet' && 'flex-1')}>
+    <div
+      className={cn('flex flex-col gap-2', background === 'card' && 'flex-1')}
+    >
       {/* 라벨은 왼쪽, 전환은 오른쪽 — 위 "템플릿 · 관리" 줄과 같은 리듬. 세그먼트 토글이라 템플릿 칩(고르는 것)과 헷갈리지 않는다 */}
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1 text-[12px] text-subtle">
@@ -141,15 +148,15 @@ export function ReplyBodyEditor({
             event.preventDefault();
             void insertImages(event.dataTransfer.files);
           }}
-          placeholder="본문"
-          aria-label="답장 본문"
+          placeholder={placeholder}
+          aria-label={label}
           className={cn(
             'resize-none border-transparent shadow-none placeholder:text-subtle',
             boxClassName,
           )}
         />
       ) : (
-        <ReplyMarkdownPreview
+        <MarkdownPreview
           text={value}
           className={cn('overflow-y-auto', boxClassName)}
         />
