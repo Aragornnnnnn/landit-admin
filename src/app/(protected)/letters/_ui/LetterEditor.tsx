@@ -33,7 +33,7 @@ import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { LeaveEditorDialog } from './LeaveEditorDialog';
 import { LetterActionDialog } from './LetterActionDialog';
 import { LetterBasicFields } from './LetterBasicFields';
-import { LetterBlocksEditor } from './LetterBlocksEditor';
+import { LetterBodyCard } from './LetterBodyCard';
 import { LetterPreview } from './LetterPreview';
 import { LetterTemplateRow } from './LetterTemplateRow';
 
@@ -156,9 +156,9 @@ function Editor({
         <div className="flex flex-1 flex-col gap-4">
           <LetterTemplateRow draft={draft} onChange={setDraft} />
           <LetterBasicFields draft={draft} onChange={setDraft} />
-          <LetterBlocksEditor
-            blocks={draft.contentBlocks}
-            onChange={(contentBlocks) => setDraft({ ...draft, contentBlocks })}
+          <LetterBodyCard
+            body={draft.body}
+            onChange={(body) => setDraft({ ...draft, body })}
           />
         </div>
         <div className="hidden xl:block">
