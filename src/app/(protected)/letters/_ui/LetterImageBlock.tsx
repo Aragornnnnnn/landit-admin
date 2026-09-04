@@ -3,9 +3,10 @@
 // 본문 이미지 블록 — 파일을 고르면 바로 올리고, 실패해도 블록은 남긴다(다시 시도) (docs/screens/letters.md "에디터 인터랙션")
 import { useRef, useState } from 'react';
 
+import { uploadContentImage } from '@/features/content-image/api/upload-content-image';
 import { reportError } from '@/shared/monitoring/report';
 
-import { checkImageFile, uploadContentImage } from '../_model/content-image';
+import { checkImageFile } from '../_model/content-image';
 import type { LetterBlock } from '../_model/letter-draft';
 
 type ImageBlock = Extract<LetterBlock, { type: 'IMAGE' }>;

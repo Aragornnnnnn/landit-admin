@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { checkImageFile, MAX_IMAGE_BYTES } from './content-image';
+import { MAX_IMAGE_BYTES } from '@/features/content-image/api/upload-content-image';
+
+import { checkImageFile } from './content-image';
 
 const fileOf = (type: string, size: number) => {
   const file = new File(['x'], 'shot.png', { type });
@@ -19,7 +21,7 @@ describe('checkImageFile', () => {
 
   it('큰 파일은 올리기 전에 막는다 — 올리고 나서 거절당하면 원인을 알기 어렵다', () => {
     expect(checkImageFile(fileOf('image/png', MAX_IMAGE_BYTES + 1))).toBe(
-      '5MB 이하만 올릴 수 있어요',
+      '10MB 이하만 올릴 수 있어요',
     );
     expect(checkImageFile(fileOf('image/png', MAX_IMAGE_BYTES))).toBeNull();
   });
