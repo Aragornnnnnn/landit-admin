@@ -12,7 +12,7 @@ import {
   readPendingSocialLogin,
 } from '@/shared/auth/web-social-login';
 import { reportWarning } from '@/shared/monitoring/report';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/shadcn/button';
 
 import { completeSocialLogin } from './_model/complete-social-login';
 import { loginGateway } from './_model/login-gateway';

@@ -1,7 +1,7 @@
 // 조회 실패를 그 자리에서 알리고 다시 시도하게 한다 — 화면을 통째로 날리지 않는다 (docs/admin-spec.md "공통 상태").
 // 저장·발송 실패는 이게 아니라 토스트를 쓴다(입력을 유지해야 하므로)
 import { cn } from '@/shared/lib/cn';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/shadcn/button';
 
 interface InlineErrorProps {
   /** 사용자에게 보일 문구 — 서버가 준 메시지가 있으면 그대로, 없으면 화면이 기본 문구를 정한다 */

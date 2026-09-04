@@ -9,7 +9,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-} from '@/shared/ui/alert-dialog';
+} from '@/shared/ui/shadcn/alert-dialog';
 
 import { replyConfirmTitle } from '../_model/reply-draft';
 

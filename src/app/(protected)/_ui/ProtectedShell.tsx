@@ -1,7 +1,7 @@
 'use client';
 
 // 보호 구역 셸 — 사이드바 + 상단바 + 콘텐츠
-import { SidebarInset, SidebarProvider } from '@/shared/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '@/shared/ui/shadcn/sidebar';
 
 import { ApiHostProvider } from '../_model/api-host';
 import { AppSidebar } from './AppSidebar';
