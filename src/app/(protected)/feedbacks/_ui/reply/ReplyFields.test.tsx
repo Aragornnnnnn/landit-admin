@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
+import { type FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import { FeedbackReply } from './FeedbackReply';
 
 // 답장 화면은 "이 사용자의 다른 피드백"을 조회한다 — 경계만 목으로 막는다 (docs/testing.md)

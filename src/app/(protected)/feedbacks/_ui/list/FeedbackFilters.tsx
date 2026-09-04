@@ -10,13 +10,13 @@ import {
   SelectValue,
 } from '@/shared/ui/shadcn/select';
 
-import type { FeedbackFilter } from '../_model/feedback-filter';
+import type { FeedbackFilter } from '../../_model/list/feedback-filter';
 import {
   FEEDBACK_DAYS_OPTIONS,
   FEEDBACK_SORT_OPTIONS,
   FEEDBACK_STATUS_OPTIONS,
   FEEDBACK_TYPE_OPTIONS,
-} from '../_model/feedback-filter-options';
+} from '../../_model/list/feedback-filter-options';
 
 interface FeedbackFiltersProps {
   filter: FeedbackFilter;

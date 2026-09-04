@@ -17,8 +17,8 @@ import {
 import { Input } from '@/shared/ui/shadcn/input';
 import { Textarea } from '@/shared/ui/shadcn/textarea';
 
-import type { ReplyTemplate } from '../_model/reply-templates';
-import type { ReplyTemplatesStore } from '../_model/useReplyTemplates';
+import type { ReplyTemplate } from '../../_model/reply/reply-templates';
+import type { ReplyTemplatesStore } from '../../_model/reply/useReplyTemplates';
 
 interface TemplateManagerDialogProps {
   store: ReplyTemplatesStore;
