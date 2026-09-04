@@ -116,6 +116,18 @@ describe('MarkdownEditor', () => {
     expect(toast.error).toHaveBeenCalled();
   });
 
+  it('허용 형식이 아닌 이미지(SVG)는 올리지 않고 알린다', () => {
+    render(<Harness />);
+
+    fireEvent.paste(textarea(), {
+      clipboardData: { files: [fileOf('icon.svg', 'image/svg+xml')] },
+    });
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(textarea().value).toBe('');
+    expect(toast.error).toHaveBeenCalled();
+  });
+
   it('이미지가 아닌 파일은 조용히 무시한다', () => {
     render(<Harness />);
 

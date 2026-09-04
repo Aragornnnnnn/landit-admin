@@ -67,12 +67,12 @@ describe('blocksToMarkdown', () => {
     const markdown = blocksToMarkdown([
       { type: 'PARAGRAPH', text: '안녕하세요' },
       { type: 'ORDERED_LIST', items: ['하나', '  ', '둘'] },
-      { type: 'IMAGE', url: 'https://img/a.png', caption: '설정 화면' },
+      { type: 'IMAGE', url: 'https://img/a.png', caption: '설정 화면 (완료]' },
       { type: 'IMAGE', url: 'https://img/b.png' },
     ]);
 
     expect(markdown).toBe(
-      '안녕하세요\n\n1. 하나\n2. 둘\n\n![설정 화면](https://img/a.png)\n\n![](https://img/b.png)',
+      '안녕하세요\n\n1. 하나\n2. 둘\n\n![설정 화면 완료](https://img/a.png)\n\n![](https://img/b.png)',
     );
   });
 

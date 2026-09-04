@@ -69,7 +69,9 @@ export function MarkdownEditor({
 
   /** 이미지를 한 장씩 차례로 올린다 — 동시에 올리면 자리표시 위치 보정이 서로 꼬인다 */
   const insertImages = async (files: Iterable<File>) => {
-    const { accepted, oversized } = pickImageFiles(files);
+    const { accepted, unsupported, oversized } = pickImageFiles(files);
+    if (unsupported.length > 0)
+      toast.error('PNG · JPG · WEBP · GIF만 올릴 수 있어요');
     if (oversized.length > 0) toast.error('10MB 이하 이미지만 올릴 수 있어요');
     if (accepted.length === 0) return;
 

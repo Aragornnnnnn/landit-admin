@@ -19,14 +19,25 @@ const fileOf = (name: string, type: string, size = 1000) => {
 
 describe('pickImageFiles', () => {
   it('이미지가 아닌 파일은 조용히 거르고 이미지만 받는다', () => {
-    const { accepted, oversized } = pickImageFiles([
+    const { accepted, unsupported, oversized } = pickImageFiles([
       fileOf('a.png', 'image/png'),
       fileOf('b.pdf', 'application/pdf'),
       fileOf('c.webp', 'image/webp'),
     ]);
 
     expect(accepted.map((file) => file.name)).toEqual(['a.png', 'c.webp']);
+    expect(unsupported).toEqual([]);
     expect(oversized).toEqual([]);
+  });
+
+  it('SVG처럼 허용 형식이 아닌 이미지는 받지 않고 따로 돌려준다 — 스크립트를 품을 수 있다', () => {
+    const { accepted, unsupported } = pickImageFiles([
+      fileOf('icon.svg', 'image/svg+xml'),
+      fileOf('a.png', 'image/png'),
+    ]);
+
+    expect(accepted.map((file) => file.name)).toEqual(['a.png']);
+    expect(unsupported.map((file) => file.name)).toEqual(['icon.svg']);
   });
 
   it('10MB를 넘는 이미지는 받지 않고 따로 돌려준다 — 알려야 하는 쪽이다', () => {

@@ -1,5 +1,7 @@
 // 편지 초안의 규칙 — 무엇을 담고, 무엇이 있어야 발행할 수 있고, 서버 블록과 마크다운 본문을 어떻게 오가는지.
 // 화면은 이 함수들을 부르기만 한다 (docs/screens/letters.md "새 편지 / 편집")
+import { imageMarkdown } from '@/features/markdown-editor/model/markdown-image-paste';
+
 import type { LetterType } from './letter-filter';
 import type { LetterItem } from './useLetterGroupQuery';
 
@@ -86,7 +88,8 @@ export function blocksToMarkdown(blocks: LetterBlock[]): string {
           .filter((item) => item.trim())
           .map((item, index) => `${index + 1}. ${item}`)
           .join('\n');
-      return `![${block.caption ?? ''}](${block.url})`;
+      // 캡션에 대괄호·소괄호가 있으면 문법이 깨진다 — 붙여넣기 경로와 같은 규칙으로 뺀다
+      return imageMarkdown(block.caption ?? '', block.url);
     })
     .filter((text) => text.trim().length > 0)
     .join('\n\n');

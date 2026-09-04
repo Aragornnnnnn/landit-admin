@@ -11,18 +11,33 @@ export interface Slot {
   end: number;
 }
 
-/** 붙여넣은 것 중 이미지만 고른다. 이미지가 아닌 건 조용히 무시하고, 너무 큰 건 알려야 하니 따로 돌려준다 */
+/** 사용자 앱이 그리는 형식만. SVG는 스크립트를 품을 수 있어 관리자 업로드 경로에서 굳이 열지 않는다 */
+export const ALLOWED_IMAGE_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+];
+
+/**
+ * 붙여넣은 것 중 이미지만 고른다. 이미지가 아닌 건 조용히 무시하고,
+ * 이미지인데 허용 형식이 아니거나 너무 큰 건 알려야 하니 따로 돌려준다
+ */
 export function pickImageFiles(files: Iterable<File>): {
   accepted: File[];
+  unsupported: File[];
   oversized: File[];
 } {
   const accepted: File[] = [];
+  const unsupported: File[] = [];
   const oversized: File[] = [];
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue;
-    (file.size > MAX_IMAGE_BYTES ? oversized : accepted).push(file);
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) unsupported.push(file);
+    else if (file.size > MAX_IMAGE_BYTES) oversized.push(file);
+    else accepted.push(file);
   }
-  return { accepted, oversized };
+  return { accepted, unsupported, oversized };
 }
 
 /** 커서 자리에 자리표시를 count개 끼운다(한 장씩 줄바꿈). 커서는 끼운 글 뒤로 */
@@ -48,9 +63,9 @@ export function insertPlaceholders(
   };
 }
 
-/** 파일명의 대괄호·소괄호는 뺀다 — 마크다운 문법을 깨뜨린다 */
-export function imageMarkdown(fileName: string, url: string): string {
-  return `![${fileName.replace(/[[\]()]/g, '')}](${url})`;
+/** 설명(파일명·캡션)의 대괄호·소괄호는 뺀다 — 마크다운 이미지 문법을 깨뜨린다 */
+export function imageMarkdown(alt: string, url: string): string {
+  return `![${alt.replace(/[[\]()]/g, '')}](${url})`;
 }
 
 /**
