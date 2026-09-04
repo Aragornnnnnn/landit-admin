@@ -20,13 +20,13 @@ import { Checkbox } from '@/shared/ui/checkbox';
 import { InlineError } from '@/shared/ui/InlineError';
 import { Input } from '@/shared/ui/input';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
-import { Textarea } from '@/shared/ui/textarea';
 
 import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
 import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
 import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
+import { ReplyBodyEditor } from './ReplyBodyEditor';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
@@ -124,17 +124,11 @@ export function ReplyFields({
         aria-label="답장 제목"
         className={cn('h-auto', fieldClassName)}
       />
-      <Textarea
+      <ReplyBodyEditor
         value={draft.bodyText}
+        onChange={draft.setBodyText}
         maxLength={REPLY_BODY_MAX}
-        onChange={(event) => draft.setBodyText(event.target.value)}
-        placeholder="본문"
-        aria-label="답장 본문"
-        className={cn(
-          'resize-none',
-          variant === 'sheet' ? 'min-h-[220px] flex-1' : 'min-h-[180px]',
-          fieldClassName,
-        )}
+        variant={variant}
       />
     </>
   );
