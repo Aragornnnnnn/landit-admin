@@ -4,6 +4,7 @@ import {
   countCreatedToday,
   countsByType,
   dailyCounts,
+  formatDelta,
   oldestPending,
   signupCounts,
   startOfWeek,
@@ -115,19 +116,46 @@ describe('countsByType', () => {
 });
 
 describe('signupCounts', () => {
+  const users = [
+    { createdAt: '2026-08-18T10:00:00' },
+    { createdAt: '2026-08-17T00:30:00' },
+    { createdAt: '2026-08-16T10:00:00' },
+    { createdAt: '2026-08-11T10:00:00' },
+    { createdAt: '2026-08-01T00:00:00' },
+    { createdAt: '2026-07-31T23:59:00' },
+    { createdAt: '2026-07-01T00:00:00' },
+    { createdAt: '2026-06-30T23:59:00' },
+  ];
+
   it('이번 주와 지난주를 월요일 기준으로 가른다', () => {
+    expect(signupCounts(users, now)).toMatchObject({
+      thisWeek: 2,
+      lastWeek: 2,
+    });
+  });
+
+  it('이번 달과 지난달을 1일 기준으로 가른다', () => {
+    expect(signupCounts(users, now)).toMatchObject({
+      thisMonth: 5,
+      lastMonth: 2,
+    });
+  });
+
+  it('해가 바뀌는 1월에는 지난달이 작년 12월이다', () => {
     expect(
       signupCounts(
-        [
-          { createdAt: '2026-08-18T10:00:00' },
-          { createdAt: '2026-08-17T00:30:00' },
-          { createdAt: '2026-08-16T10:00:00' },
-          { createdAt: '2026-08-11T10:00:00' },
-          { createdAt: '2026-08-01T10:00:00' },
-        ],
-        now,
+        [{ createdAt: '2025-12-15T10:00:00' }, { createdAt: '2026-01-02' }],
+        new Date(2026, 0, 5),
       ),
-    ).toEqual({ thisWeek: 2, lastWeek: 2 });
+    ).toMatchObject({ thisMonth: 1, lastMonth: 1 });
+  });
+});
+
+describe('formatDelta', () => {
+  it('늘면 +, 줄면 −(마이너스 기호), 같으면 ±0', () => {
+    expect(formatDelta(34, 28)).toBe('+6');
+    expect(formatDelta(40, 47)).toBe('−7');
+    expect(formatDelta(3, 3)).toBe('±0');
   });
 });
 
