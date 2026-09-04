@@ -1,7 +1,7 @@
 // 페이지 버튼 접기 규칙 — 첫·끝은 항상 남기고 현재 주변만 보여준다 (Figma: 7페이지에서 "1 2 3 … 7")
 import { describe, expect, it } from 'vitest';
 
-import { visiblePages } from './FeedbackPagination';
+import { visiblePages } from './Pagination';
 
 describe('visiblePages', () => {
   it('페이지가 적으면 전부 보여준다', () => {
