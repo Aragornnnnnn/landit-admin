@@ -18,6 +18,7 @@ import {
   replacePlaceholder,
   shiftSlots,
 } from '../_model/markdown-image-paste';
+import { MarkdownHelpPopover } from './MarkdownHelpPopover';
 import { ReplyMarkdownPreview } from './ReplyMarkdownPreview';
 
 interface ReplyBodyEditorProps {
@@ -107,7 +108,10 @@ export function ReplyBodyEditor({
     <div className={cn('flex flex-col gap-2', variant === 'sheet' && 'flex-1')}>
       {/* 라벨은 왼쪽, 전환은 오른쪽 — 위 "템플릿 · 관리" 줄과 같은 리듬. 세그먼트 토글이라 템플릿 칩(고르는 것)과 헷갈리지 않는다 */}
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-subtle">본문</span>
+        <span className="flex items-center gap-1 text-[12px] text-subtle">
+          본문
+          <MarkdownHelpPopover />
+        </span>
         <Tabs value={mode} onValueChange={(next) => setMode(next as Mode)}>
           <TabsList className="h-7 bg-chip">
             <TabsTrigger value="write" className="px-3 text-[12px]">
@@ -150,10 +154,6 @@ export function ReplyBodyEditor({
           className={cn('overflow-y-auto', boxClassName)}
         />
       )}
-
-      <p className="text-[12px] text-subtle">
-        마크다운 지원. 줄바꿈은 엔터, 링크는 [글자](주소), 이미지는 붙여넣기.
-      </p>
     </div>
   );
 }
