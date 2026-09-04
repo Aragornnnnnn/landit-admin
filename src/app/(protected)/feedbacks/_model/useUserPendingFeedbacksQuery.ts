@@ -4,11 +4,8 @@
 // BE에 admin/users/{id}/feedbacks가 생기면 이 훅만 바꾸면 된다
 import { useQuery } from '@tanstack/react-query';
 
-import { api } from '@/shared/api/client';
+import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
 
-import type { FeedbackListResponse } from './useFeedbackListQuery';
-
-const PATH = '/api/v1/admin/mailbox/feedbacks';
 // 한 사람이 이보다 많이 보냈으면 접힌 목록에 다 못 담는다 — 그땐 목록 화면에서 걸러 쓴다
 const SIZE = 50;
 
@@ -26,7 +23,7 @@ export function useUserPendingFeedbacksQuery(email: string | undefined) {
         size: String(SIZE),
         sort: 'OLDEST',
       });
-      return api.get<FeedbackListResponse>(`${PATH}?${params}`);
+      return fetchFeedbackPage(params);
     },
   });
 }

@@ -5,18 +5,17 @@
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
-import { cn } from '@/shared/lib/cn';
-import { formatRelativeTime } from '@/shared/lib/format-time';
-import { useIsMobile } from '@/shared/lib/use-mobile';
-import { InlineError } from '@/shared/ui/InlineError';
-
-import { feedbackOpenPath } from '../feedbacks/_model/feedback-filter';
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import {
   FEEDBACK_STATUS_DOT,
   FEEDBACK_STATUS_LABEL,
   FEEDBACK_TYPE_LABEL,
-} from '../feedbacks/_model/feedback-label';
-import type { FeedbackItem } from '../feedbacks/_model/useFeedbackListQuery';
+} from '@/features/feedback/model/feedback-label';
+import { feedbackOpenPath } from '@/features/feedback/model/feedback-open-path';
+import { cn } from '@/shared/lib/cn';
+import { formatRelativeTime } from '@/shared/lib/format-time';
+import { useIsMobile } from '@/shared/lib/use-mobile';
+import { InlineError } from '@/shared/ui/InlineError';
 
 const RECENT_COUNT = 5;
 

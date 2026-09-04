@@ -4,12 +4,12 @@
 // 어느 목록을 얼마나 받아 오는지가 곧 숫자의 정확도라, 범위를 여기 한 곳에 적어 둔다
 import { useQuery } from '@tanstack/react-query';
 
+import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
 import { api } from '@/shared/api/client';
 import type { Schema } from '@/shared/api/schema-patch';
 
 type AdminUserListItem = Schema<'AdminUserListItem'>;
 
-type FeedbackListResponse = Schema<'AdminMailboxFeedbackListResponse'>;
 type UserListResponse = { items?: AdminUserListItem[] };
 type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
 type AppVersion = Schema<'AdminAppVersionResponse'>;
@@ -30,8 +30,12 @@ export function useDashboardData(now: Date) {
   const recent = useQuery({
     queryKey: ['dashboard', 'recent-feedbacks'] as const,
     queryFn: () =>
-      api.get<FeedbackListResponse>(
-        `/api/v1/admin/mailbox/feedbacks?size=${RECENT_SIZE}&sort=NEWEST&createdFrom=${encodeURIComponent(createdFrom)}`,
+      fetchFeedbackPage(
+        new URLSearchParams({
+          size: String(RECENT_SIZE),
+          sort: 'NEWEST',
+          createdFrom,
+        }),
       ),
   });
 
@@ -39,8 +43,12 @@ export function useDashboardData(now: Date) {
   const pending = useQuery({
     queryKey: ['dashboard', 'pending-feedbacks'] as const,
     queryFn: () =>
-      api.get<FeedbackListResponse>(
-        `/api/v1/admin/mailbox/feedbacks?status=PENDING&size=${RECENT_SIZE}&sort=OLDEST`,
+      fetchFeedbackPage(
+        new URLSearchParams({
+          status: 'PENDING',
+          size: String(RECENT_SIZE),
+          sort: 'OLDEST',
+        }),
       ),
   });
 

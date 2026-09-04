@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
+import { FEEDBACK_TYPE_LABEL } from '@/features/feedback/model/feedback-label';
 import { MarkdownEditor } from '@/features/markdown-editor/ui/MarkdownEditor';
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
@@ -22,10 +24,8 @@ import { InlineError } from '@/shared/ui/InlineError';
 import { Input } from '@/shared/ui/input';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 
-import { FEEDBACK_TYPE_LABEL } from '../_model/feedback-label';
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
 import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 

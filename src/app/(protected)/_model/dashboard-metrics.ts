@@ -1,9 +1,9 @@
 // 대시보드가 보여 주는 숫자들 — 집계 API가 없어 목록으로 받은 것을 여기서 센다 (docs/screens/dashboard.md).
 // 세는 규칙이 곧 화면의 뜻이라 순수 함수로 떼어 테스트로 고정한다
-import type { Schema } from '@/shared/api/schema-patch';
-
-type Feedback = Schema<'AdminMailboxFeedbackResponse'>;
-export type FeedbackType = NonNullable<Feedback['type']>;
+import type {
+  FeedbackItem,
+  FeedbackType,
+} from '@/features/feedback/api/feedback-list';
 
 /** 하루의 시작 — 시각이 아니라 날짜로 세기 위한 기준 */
 export function startOfDay(date: Date): Date {
@@ -21,7 +21,7 @@ export function startOfWeek(date: Date): Date {
 const DAY_MS = 86_400_000;
 
 /** 오늘 접수된 건수 — 요약 카드의 "오늘 +3" */
-export function countCreatedToday(items: Feedback[], now: Date): number {
+export function countCreatedToday(items: FeedbackItem[], now: Date): number {
   const from = startOfDay(now).getTime();
   return items.filter((item) => timeOf(item.createdAt) >= from).length;
 }
@@ -34,7 +34,7 @@ export interface OldestPending {
 
 /** 가장 오래 기다린 처리중 건 — 어드민이 가장 먼저 알아야 하는 한 건이다 */
 export function oldestPending(
-  items: Feedback[],
+  items: FeedbackItem[],
   now: Date,
 ): OldestPending | null {
   const pending = items.filter((item) => item.status === 'PENDING');
@@ -65,7 +65,11 @@ export interface DayBar {
 }
 
 /** 최근 7일 접수 막대 — 받은 목록에 없는 날도 0으로 채운다(빈 날이 빠지면 추세가 거짓말을 한다) */
-export function dailyCounts(items: Feedback[], now: Date, days = 7): DayBar[] {
+export function dailyCounts(
+  items: FeedbackItem[],
+  now: Date,
+  days = 7,
+): DayBar[] {
   const today = startOfDay(now).getTime();
   return Array.from({ length: days }, (_, index) => {
     const start = today - (days - 1 - index) * DAY_MS;
@@ -86,7 +90,7 @@ export const FEEDBACK_TYPE_ORDER: FeedbackType[] = [
 ];
 
 export function countsByType(
-  items: Feedback[],
+  items: FeedbackItem[],
 ): { type: FeedbackType; count: number }[] {
   return FEEDBACK_TYPE_ORDER.map((type) => ({
     type,
