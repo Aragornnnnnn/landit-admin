@@ -43,6 +43,15 @@ Prettier가 저장/커밋 시 자동으로 맞춰주므로 수동으로 신경 �
 - 브랜치 이름에 노션 이슈 번호를 적는다. 예시: `feat/LAN-10`
 - `main`, `develop`에 직접 커밋하지 않는다. 초기 설정도 `develop`으로 PR을 올린다.
 
+## 릴리스
+
+- `develop` → `main` PR 제목은 `release: vX.Y.Z — 한 줄 요약`, label은 `release 🚀`. 본문에 신규·수정 표와 메모를 적는다.
+- 머지되면 그 머지 커밋에 태그 `admin-vX.Y.Z`를 찍고 같은 이름으로 GitHub Release를 만든다. 본문은 GitHub 자동 생성 노트를 쓴다 — `.github/release.yml`이 PR label로 항목을 분류하므로 label 없는 PR은 "기타 변경"에 들어간다. landit-be(`be-vX.Y.Z`)와 같은 방식이다.
+
+```bash
+gh release create admin-v1.2.0 --target main --title admin-v1.2.0 --generate-notes
+```
+
 ## 커밋 컨벤션
 
 형식: `{type}: 커밋 메시지`

@@ -48,8 +48,9 @@ export function buildContentSecurityPolicy({
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''} ${KAKAO_SDK_ORIGIN}`,
     // radix·sonner가 style 속성을 쓴다 → unsafe-inline 필요. 여기에 nonce를 넣으면 브라우저가 unsafe-inline을 무시하므로 넣지 않는다
     `style-src 'self' 'unsafe-inline'`,
-    // 업로드한 콘텐츠 이미지는 우리 오리진이 아니라 스토리지에서 내려온다
-    `img-src 'self' data: blob:${extra}`,
+    // 표시는 https 어디서든 — 답장·편지 미리보기가 앱과 같아야 해서다(앱은 CSP 없이 그린다). 관리자 IP가 그 서버에 남는 정도라 감수한다 (docs/security.md "CSP")
+    // 업로드(connect-src)는 우리 스토리지로만 잠근다
+    `img-src 'self' data: blob: https:${extra}`,
     `font-src 'self'`,
     // 업로드는 발급받은 URL로 브라우저가 직접 PUT한다 — 프록시를 거치지 않는다
     `connect-src 'self'${extra}`,

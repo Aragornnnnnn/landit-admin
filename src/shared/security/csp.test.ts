@@ -88,7 +88,9 @@ describe('buildContentSecurityPolicy — 이미지 오리진', () => {
 
   it('업로드(connect-src)와 표시(img-src)에만 더한다', () => {
     const csp = policy(['https://cdn.landit.im']);
-    expect(csp).toContain("img-src 'self' data: blob: https://cdn.landit.im");
+    expect(csp).toContain(
+      "img-src 'self' data: blob: https: https://cdn.landit.im",
+    );
     expect(csp).toContain("connect-src 'self' https://cdn.landit.im");
     expect(csp).toContain("default-src 'self';");
     expect(csp).not.toContain(
@@ -98,5 +100,11 @@ describe('buildContentSecurityPolicy — 이미지 오리진', () => {
 
   it('없으면 예전 그대로다', () => {
     expect(policy()).toContain("connect-src 'self';");
+  });
+
+  it('이미지 표시는 https 어디서든 되지만 업로드 대상은 스토리지 오리진뿐이다', () => {
+    const csp = policy();
+    expect(csp).toContain("img-src 'self' data: blob: https:;");
+    expect(csp).not.toContain("connect-src 'self' https:");
   });
 });

@@ -2,6 +2,7 @@
 
 // 사용자 편지함 미리보기 — 쓰는 대로 사용자가 볼 화면을 그린다 (Figma 1050:10361 우측).
 // 발행하면 되돌릴 수 없으니, 보내기 전에 사용자 눈으로 한 번 보는 자리다
+import { MarkdownPreview } from '@/features/markdown-editor/ui/MarkdownPreview';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 import type { LetterDraft } from '../_model/letter-draft';
@@ -30,45 +31,8 @@ export function LetterPreview({
           {draft.title}
         </h3>
 
-        {draft.contentBlocks.map((block, index) => {
-          if (block.type === 'PARAGRAPH')
-            return (
-              <p
-                key={index}
-                className="text-[14px] leading-relaxed whitespace-pre-wrap text-body"
-              >
-                {block.text}
-              </p>
-            );
-          if (block.type === 'ORDERED_LIST')
-            return (
-              <ol key={index} className="flex flex-col gap-1">
-                {block.items
-                  .filter((item) => item.trim())
-                  .map((item, at) => (
-                    <li key={at} className="text-[14px] text-body">
-                      {at + 1}. {item}
-                    </li>
-                  ))}
-              </ol>
-            );
-          return (
-            <figure key={index} className="flex flex-col gap-1">
-              {/* 외부 이미지라 next/image 최적화를 쓰지 않는다 */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={block.url}
-                alt=""
-                className="w-full rounded-xl bg-muted object-cover"
-              />
-              {block.caption && (
-                <figcaption className="text-[12px] text-subtle">
-                  {block.caption}
-                </figcaption>
-              )}
-            </figure>
-          );
-        })}
+        {/* 사용자 앱과 같은 렌더 조합 — 여기서 보이는 그대로 편지함에 보인다 */}
+        <MarkdownPreview text={draft.body} className="text-[14px]" />
       </div>
     </div>
   );

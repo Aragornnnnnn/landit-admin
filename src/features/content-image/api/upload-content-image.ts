@@ -1,5 +1,5 @@
-// 편지 본문 이미지 업로드 — 발급받은 URL로 브라우저가 스토리지에 직접 올린다 (docs/screens/letters.md "데이터").
-// 파일이 우리 서버를 거치지 않으므로 프록시에 업로드 부하가 없고, 대신 CSP에 그 오리진을 열어 줘야 한다
+// 본문 이미지 업로드 — 발급받은 URL로 브라우저가 스토리지에 직접 올린다. 편지 에디터와 피드백 답장이 같이 쓴다 (docs/screens/letters.md "데이터")
+// 파일이 우리 서버를 거치지 않으므로 프록시에 업로드 부하가 없고, 대신 CSP에 그 오리진을 열어 줘야 한다 (CONTENT_IMAGE_ORIGINS)
 import { api } from '@/shared/api/client';
 import type { Schema } from '@/shared/api/schema-patch';
 
@@ -7,22 +7,8 @@ type PresignResponse = Schema<'AdminContentImagePresignResponse'>;
 
 const PRESIGN_PATH = '/api/v1/admin/content-images/presigned-url';
 
-/** 사용자 앱이 그릴 수 있는 형식만. BE 허용 목록은 미확정이라 좁게 잡는다 (docs "BE 확인 사항") */
-export const ALLOWED_IMAGE_TYPES = [
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-];
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-
-/** 고르자마자 막는다 — 올리고 나서 거절당하면 무엇이 문제인지 알기 어렵다 */
-export function checkImageFile(file: File): string | null {
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type))
-    return 'PNG · JPG · WEBP · GIF만 올릴 수 있어요';
-  if (file.size > MAX_IMAGE_BYTES) return '5MB 이하만 올릴 수 있어요';
-  return null;
-}
+/** BE presigned-url이 받는 fileSize 상한 (10 MiB) */
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 /**
  * 이미지를 올리고 사용자에게 보여 줄 주소를 돌려준다.

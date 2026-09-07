@@ -1,0 +1,36 @@
+# GitHub Release 자동 생성 노트의 분류 규칙 — PR label 기준, 첫 번째로 맞는 분류에 들어간다 (landit-be의 be-vX.Y.Z와 같은 방식)
+changelog:
+  exclude:
+    labels:
+      - 'poc 🧪'
+  categories:
+    - title: '🚀 주요 기능'
+      labels:
+        - 'feat ✨'
+    - title: '🐛 오류 수정'
+      labels:
+        - 'fix 🐛'
+        - 'hotfix 🔥'
+    - title: '🎨 디자인'
+      labels:
+        - 'design 🎨'
+    - title: '🔒 보안'
+      labels:
+        - 'security 🔒'
+    - title: '🔧 유지보수'
+      labels:
+        - 'refactor ♻️'
+        - 'chore 🔧'
+        - 'remove 🗑️'
+        - 'test ✅'
+        - 'ci ⚙️'
+        - 'deps 📦'
+    - title: '📝 문서'
+      labels:
+        - 'docs 📝'
+    - title: '🚢 배포'
+      labels:
+        - 'release 🚀'
+    - title: '📦 기타 변경'
+      labels:
+        - '*'
