@@ -2,8 +2,8 @@
 // 어떤 라벨에 어떤 점을 쓸지는 도메인이 정한다 — 이 컴포넌트는 그 결정을 모른다
 import { cn } from '@/shared/lib/cn';
 
-/** 점 색 — 진행 중은 오렌지, 끝난 것은 초록. 점이 없으면 생략한다 */
-type ChipDot = 'progress' | 'done';
+/** 점 색 — 진행 중은 오렌지, 끝난 것은 초록, 기다리는 것(예약)은 검정. 점이 없으면 생략한다 */
+export type ChipDot = 'progress' | 'done' | 'scheduled';
 
 interface StatusChipProps {
   children: React.ReactNode;
@@ -11,9 +11,10 @@ interface StatusChipProps {
   className?: string;
 }
 
-const DOT_COLOR: Record<ChipDot, string> = {
+export const DOT_COLOR: Record<ChipDot, string> = {
   progress: 'bg-primary',
   done: 'bg-success',
+  scheduled: 'bg-strong',
 };
 
 export function StatusChip({ children, dot, className }: StatusChipProps) {

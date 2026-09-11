@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react';
 import Link from 'next/link';
 
 import type { PushCampaign } from '@/features/push-campaign/api/push-campaign';
+import { formatCount } from '@/shared/lib/format-count';
 import { Button } from '@/shared/ui/shadcn/button';
 
 import { nextScheduleLabel } from '../_model/next-schedule-label';
@@ -27,7 +28,7 @@ export function NextScheduleBanner({ campaign }: { campaign: PushCampaign }) {
         </span>
         <span className="text-[12px] text-subtle">
           {campaign.userProfileIds.length > 0
-            ? `${campaign.userProfileIds.length.toLocaleString('ko-KR')}명 선택`
+            ? `${formatCount(campaign.userProfileIds.length)}명 선택`
             : '전체 사용자'}
           {campaign.audienceSql ? ' · SQL' : ''}
         </span>

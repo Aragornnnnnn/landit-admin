@@ -11,6 +11,7 @@ import {
   type AudienceSourceKind,
 } from '@/features/push-campaign/model/audience';
 import { cn } from '@/shared/lib/cn';
+import { formatCount } from '@/shared/lib/format-count';
 
 import { AudienceAddPanel, type AddTab } from './AudienceAddPanel';
 import { AudienceSourceList } from './AudienceSourceList';
@@ -25,6 +26,14 @@ const TYPES = [
   { value: 'ALL', label: '전체 사용자' },
   { value: 'SELECTED', label: '선택한 사용자' },
 ] as const;
+
+// ✕로 출처를 비울 때 되돌리는 값
+const RESET: Record<AudienceSourceKind, Partial<AudienceDraft>> = {
+  sql: { sql: '', sqlIds: [] },
+  selected: { selectedIds: [] },
+  pasted: { pastedIds: [] },
+  excluded: { excludedIds: [] },
+};
 
 const KIND_TAB: Record<AudienceSourceKind, AddTab> = {
   selected: 'users',
@@ -41,12 +50,8 @@ export function AudienceSection({
   const [tab, setTab] = useState<AddTab>('users');
   const estimate = estimateAudienceCount(audience);
 
-  const remove = (kind: AudienceSourceKind) => {
-    if (kind === 'sql') onChange({ ...audience, sql: '', sqlIds: [] });
-    if (kind === 'selected') onChange({ ...audience, selectedIds: [] });
-    if (kind === 'pasted') onChange({ ...audience, pastedIds: [] });
-    if (kind === 'excluded') onChange({ ...audience, excludedIds: [] });
-  };
+  const remove = (kind: AudienceSourceKind) =>
+    onChange({ ...audience, ...RESET[kind] });
 
   return (
     <section className="flex flex-col gap-4 rounded-[20px] bg-card p-6">
@@ -75,9 +80,7 @@ export function AudienceSection({
             예상 대상
           </span>
           <span className="text-[26px] leading-[1.2] font-bold text-strong">
-            {estimate === null
-              ? '전체'
-              : `${estimate.toLocaleString('ko-KR')}명`}
+            {estimate === null ? '전체' : `${formatCount(estimate)}명`}
           </span>
         </span>
         <span className="ml-auto text-[12px] text-subtle">

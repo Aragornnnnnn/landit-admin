@@ -1,5 +1,6 @@
 // 목록 필터 ↔ 쿼리스트링 ↔ BE 파라미터 — 탭·상태·페이지. 새로고침·공유에 살아남게 URL이 진실이다 (docs/screens/push-campaigns.md "목록")
 import type { PushCampaignStatus } from '@/features/push-campaign/api/push-campaign';
+import { PUSH_STATUS_LABEL } from '@/features/push-campaign/model/push-campaign-label';
 import type { PushCampaignPageParams } from '@/features/push-campaign/model/usePushCampaignQuery';
 
 /** 상단 탭 — 예약은 예약 시각 유무, 발송됨·초안은 상태 하나로 정해진다 */
@@ -37,16 +38,7 @@ export const CAMPAIGN_STATUS_OPTIONS: {
 ];
 
 const TABS = CAMPAIGN_TABS.map((tab) => tab.value);
-const STATUSES: PushCampaignStatus[] = [
-  'DRAFT',
-  'PENDING',
-  'SCHEDULE_PENDING',
-  'SCHEDULED',
-  'QUEUED',
-  'SENDING',
-  'COMPLETED',
-  'CANCELLED',
-];
+const STATUSES = Object.keys(PUSH_STATUS_LABEL) as PushCampaignStatus[];
 
 /** 탭이 상태를 이미 정하는 경우 — Select를 잠근다(둘이 충돌하면 어느 쪽이 이기는지 알 수 없다) */
 const TAB_STATUS: Partial<Record<CampaignTab, PushCampaignStatus>> = {
@@ -83,8 +75,7 @@ export function changeCampaignFilter(
   filter: CampaignFilter,
   patch: Partial<CampaignFilter>,
 ): CampaignFilter {
-  const onlyPage = Object.keys(patch).length === 1 && patch.page !== undefined;
-  return { ...filter, ...patch, page: onlyPage ? patch.page! : 0 };
+  return { ...filter, ...patch, page: patch.page ?? 0 };
 }
 
 export function campaignPageParams(

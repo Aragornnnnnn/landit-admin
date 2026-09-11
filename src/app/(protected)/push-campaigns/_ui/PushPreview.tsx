@@ -9,7 +9,7 @@ import { kstNow } from '@/features/push-campaign/model/schedule-time';
 import { cn } from '@/shared/lib/cn';
 import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
 
-export type PreviewPlatform = 'ios' | 'android';
+type PreviewPlatform = 'ios' | 'android';
 
 interface PushPreviewProps {
   title: string;
@@ -135,13 +135,18 @@ const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', {
   weekday: 'long',
 });
 const noop = () => () => {};
-const readClock = () => {
-  const now = new Date();
-  return `${DATE_FORMAT.format(now)}|${kstNow(now).time}`;
-};
+const SERVER_CLOCK = { date: '', time: '--:--' };
 
 function useKstClock() {
-  const snapshot = useSyncExternalStore(noop, readClock, () => '|--:--');
-  const [date, time] = snapshot.split('|');
-  return { date, time };
+  // 서버 렌더에선 false, 브라우저에선 true — 시계는 마운트 시점에 한 번만 읽는다(매 입력마다 다시 계산하지 않게)
+  const mounted = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
+  const [clock] = useState(() => {
+    const now = new Date();
+    return { date: DATE_FORMAT.format(now), time: kstNow(now).time };
+  });
+  return mounted ? clock : SERVER_CLOCK;
 }

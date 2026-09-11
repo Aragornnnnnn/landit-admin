@@ -66,7 +66,7 @@ describe('campaignTimeline', () => {
 });
 
 describe('resultShares', () => {
-  it('대상 기기 대비 성공·실패·제외·대기 비율', () => {
+  it('대상 기기 대비 성공·실패·대기 비율', () => {
     const shares = resultShares(
       campaign({
         targetTokenCount: 1000,
@@ -76,12 +76,7 @@ describe('resultShares', () => {
         pendingCount: 20,
       }),
     );
-    expect(shares).toEqual({
-      succeeded: 0.9,
-      failed: 0.05,
-      excluded: 0.03,
-      pending: 0.02,
-    });
+    expect(shares).toEqual({ succeeded: 0.9, failed: 0.05, pending: 0.02 });
   });
 
   it('대상이 0이면 전부 0 — 0으로 나누지 않는다', () => {

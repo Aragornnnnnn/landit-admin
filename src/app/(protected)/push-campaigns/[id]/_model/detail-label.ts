@@ -2,6 +2,7 @@
 import type { PushCampaign } from '@/features/push-campaign/api/push-campaign';
 import { isPushInFlight } from '@/features/push-campaign/model/push-campaign-label';
 import { formatKst } from '@/features/push-campaign/model/schedule-time';
+import { formatCount } from '@/shared/lib/format-count';
 
 export interface TimelineStep {
   label: string;
@@ -9,8 +10,6 @@ export interface TimelineStep {
   /** done 초록 · active·next 오렌지 · todo·cancelled 회색 */
   state: 'done' | 'active' | 'next' | 'todo' | 'cancelled';
 }
-
-const count = (n: number) => n.toLocaleString('ko-KR');
 
 /** 초안 생성 → 발송(또는 예약) → 완료. 만든 사람은 이름을 주는 API가 없어 번호만 적는다 */
 export function campaignTimeline(campaign: PushCampaign): TimelineStep[] {
@@ -24,7 +23,7 @@ export function campaignTimeline(campaign: PushCampaign): TimelineStep[] {
     {
       label: '완료',
       when: campaign.completedAt
-        ? `${formatKst(campaign.completedAt)} · ${count(campaign.targetTokenCount)} 기기`
+        ? `${formatKst(campaign.completedAt)} · ${formatCount(campaign.targetTokenCount)} 기기`
         : '—',
       state: campaign.completedAt ? 'done' : 'todo',
     },
@@ -46,14 +45,13 @@ function sendStep(campaign: PushCampaign): TimelineStep {
   return { label: '발송', when: '—', state: 'next' };
 }
 
-/** 분포 바 — 대상 기기 대비. 대상이 아직 고정되지 않았으면 전부 0 */
+/** 분포 바와 타일의 비율 — 대상 기기 대비. 대상이 아직 고정되지 않았으면 전부 0 */
 export function resultShares(campaign: PushCampaign) {
   const total = campaign.targetTokenCount;
   const share = (n: number) => (total > 0 ? n / total : 0);
   return {
     succeeded: share(campaign.succeededCount),
     failed: share(campaign.failedCount),
-    excluded: share(campaign.excludedCount),
     pending: share(campaign.pendingCount),
   };
 }

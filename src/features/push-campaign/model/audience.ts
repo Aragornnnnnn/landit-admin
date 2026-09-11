@@ -2,6 +2,7 @@
 // 편집기가 값을 고치고 여기 함수로 세고 검사한다. 상세는 저장된 캠페인을 이 형태로 되돌려 대상 구성 카드를 그린다
 import type {
   PushAudienceType,
+  PushCampaign,
   PushCampaignRequest,
 } from '../api/push-campaign';
 
@@ -25,6 +26,21 @@ export const EMPTY_AUDIENCE: AudienceDraft = {
   sqlIds: [],
   excludedIds: [],
 };
+
+/**
+ * 저장된 캠페인을 초안 형태로 — 상세의 대상 구성 카드와 "같은 내용으로 새 푸시"가 쓴다.
+ * 저장된 userProfileIds는 직접 선택과 붙여넣기가 합쳐진 것이라 직접 선택으로 되돌린다
+ */
+export function toAudienceDraft(campaign: PushCampaign): AudienceDraft {
+  return {
+    type: campaign.audienceType,
+    selectedIds: campaign.userProfileIds,
+    pastedIds: [],
+    sql: campaign.audienceSql ?? '',
+    sqlIds: [],
+    excludedIds: campaign.excludedUserProfileIds,
+  };
+}
 
 export interface ParsedIds {
   ids: number[];

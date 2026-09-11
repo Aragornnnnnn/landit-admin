@@ -1,10 +1,11 @@
 // 발송 결과 카드 — 대상·성공·실패·대기·제외 타일과 분포 바 (Figma 2177:423). 발송 중에도 같은 카드가 채워져 간다
 import type { PushCampaign } from '@/features/push-campaign/api/push-campaign';
 import { cn } from '@/shared/lib/cn';
+import { formatCount } from '@/shared/lib/format-count';
 
 import { resultShares } from '../_model/detail-label';
+import { StatTile } from './StatTile';
 
-const count = (n: number) => n.toLocaleString('ko-KR');
 const percent = (ratio: number) => `${(ratio * 100).toFixed(1)}%`;
 
 export function ResultCard({ campaign }: { campaign: PushCampaign }) {
@@ -13,25 +14,25 @@ export function ResultCard({ campaign }: { campaign: PushCampaign }) {
     <section className="flex flex-col gap-4 rounded-[20px] bg-card p-6">
       <h2 className="text-[16px] font-bold text-strong">발송 결과</h2>
       <div className="flex flex-wrap gap-2.5">
-        <Tile
+        <StatTile
           label="대상"
-          value={count(campaign.targetTokenCount)}
-          sub={`${count(campaign.targetUserCount)}명`}
+          value={formatCount(campaign.targetTokenCount)}
+          sub={`${formatCount(campaign.targetUserCount)}명`}
         />
-        <Tile
+        <StatTile
           label="성공"
-          value={count(campaign.succeededCount)}
+          value={formatCount(campaign.succeededCount)}
           sub={percent(shares.succeeded)}
           tone="text-success"
         />
-        <Tile
+        <StatTile
           label="실패"
-          value={count(campaign.failedCount)}
+          value={formatCount(campaign.failedCount)}
           sub={percent(shares.failed)}
           tone={campaign.failedCount > 0 ? 'text-destructive' : undefined}
         />
-        <Tile label="대기" value={count(campaign.pendingCount)} />
-        <Tile label="제외" value={count(campaign.excludedCount)} />
+        <StatTile label="대기" value={formatCount(campaign.pendingCount)} />
+        <StatTile label="제외" value={formatCount(campaign.excludedCount)} />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -54,46 +55,22 @@ export function ResultCard({ campaign }: { campaign: PushCampaign }) {
         </div>
         <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-[12px] text-body">
           <Legend color="bg-success">
-            성공 {count(campaign.succeededCount)}
+            성공 {formatCount(campaign.succeededCount)}
           </Legend>
           <Legend color="bg-destructive">
-            실패 {count(campaign.failedCount)}
+            실패 {formatCount(campaign.failedCount)}
           </Legend>
           {campaign.pendingCount > 0 && (
             <Legend color="bg-primary">
-              대기 {count(campaign.pendingCount)}
+              대기 {formatCount(campaign.pendingCount)}
             </Legend>
           )}
           <Legend color="bg-hairline">
-            제외 {count(campaign.excludedCount)}
+            제외 {formatCount(campaign.excludedCount)}
           </Legend>
         </div>
       </div>
     </section>
-  );
-}
-
-function Tile({
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: string;
-}) {
-  return (
-    <div className="flex min-w-[100px] flex-1 flex-col gap-1 rounded-[12px] bg-background px-4 py-3.5">
-      <span className="text-[12px] font-medium text-subtle">{label}</span>
-      <span
-        className={cn('text-[22px] leading-[1.2] font-bold text-strong', tone)}
-      >
-        {value}
-      </span>
-      {sub && <span className="text-[11px] text-subtle">{sub}</span>}
-    </div>
   );
 }
 

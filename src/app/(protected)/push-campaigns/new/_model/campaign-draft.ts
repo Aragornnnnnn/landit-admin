@@ -7,6 +7,7 @@ import type {
 import {
   canSaveAudience,
   EMPTY_AUDIENCE,
+  toAudienceDraft,
   toAudienceRequest,
   type AudienceDraft,
 } from '@/features/push-campaign/model/audience';
@@ -96,8 +97,7 @@ export function toCampaignRequest(draft: CampaignDraft): PushCampaignRequest {
 
 /**
  * "같은 내용으로 새 푸시" — 보낸 캠페인의 내용·대상을 새 초안에 옮긴다.
- * 저장된 딥 링크엔 UTM이 이미 붙어 있으므로 스위치를 끈 채 그대로 둔다(두 번 붙지 않게).
- * 저장된 userProfileIds는 직접 선택과 붙여넣기가 합쳐진 것이라 직접 선택으로 되돌린다
+ * 저장된 딥 링크엔 UTM이 이미 붙어 있으므로 스위치를 끈 채 그대로 둔다(두 번 붙지 않게)
  */
 export function fromCampaign(campaign: PushCampaign): CampaignDraft {
   return {
@@ -107,14 +107,7 @@ export function fromCampaign(campaign: PushCampaign): CampaignDraft {
     utmEnabled: false,
     utmCampaign: '',
     utmEdited: false,
-    audience: {
-      type: campaign.audienceType,
-      selectedIds: campaign.userProfileIds,
-      pastedIds: [],
-      sql: campaign.audienceSql ?? '',
-      sqlIds: [],
-      excludedIds: campaign.excludedUserProfileIds,
-    },
+    audience: toAudienceDraft(campaign),
   };
 }
 
