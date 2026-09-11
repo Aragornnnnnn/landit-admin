@@ -22,8 +22,9 @@ const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 // 전달해도 되는 경로 — 이 밖은 전부 404. 로그인은 전용 route handler(/api/auth/social-login)가 따로 처리한다
 const ALLOWED_PREFIXES = ['api/v1/admin/'];
 const ALLOWED_EXACT = new Set(['api/v1/auth/logout']);
-// BE에 그대로 넘기는 요청 헤더. 쿠키·호스트·기타는 넘기지 않는다
-const FORWARDED_REQUEST_HEADERS = ['content-type', 'accept'];
+// BE에 그대로 넘기는 요청 헤더. 쿠키·호스트·기타는 넘기지 않는다.
+// idempotency-key는 푸시 캠페인 변경 요청(생성·테스트·발송·예약)이 요구한다 — 값은 클라이언트가 만든 UUID라 비밀이 아니다
+const FORWARDED_REQUEST_HEADERS = ['content-type', 'accept', 'idempotency-key'];
 const REFRESH_PATH = '/api/v1/auth/token/refresh';
 // 갱신 결과를 옛 토큰 기준으로 잠시 기억한다 — BE refresh는 회전형이라, 브라우저가 새 쿠키를 받기 전에 옛 토큰으로 들어온
 // 형제 요청이 다시 갱신을 시도하면 실패해 세션이 끊긴다. 이 창 안에서는 같은 결과를 돌려준다 (같은 인스턴스 안에서만)

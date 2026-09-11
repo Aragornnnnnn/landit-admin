@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 
 import { reportError } from '@/shared/monitoring/report';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/shadcn/button';
 
 export default function Error({
   error,

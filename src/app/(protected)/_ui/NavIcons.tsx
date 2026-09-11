@@ -85,3 +85,15 @@ export function ScenarioTestIcon(props: NavIconProps) {
     </svg>
   );
 }
+
+/** 푸시 알림 — 채움형 벨 (Figma 아이콘/푸시 알림 2184:582) */
+export function PushIcon(props: NavIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
+      <path
+        d="M12 22c1.2 0 2.2-1 2.2-2.2H9.8C9.8 21 10.8 22 12 22Zm6.5-6.2v-5.3c0-3.3-1.8-6.1-4.9-6.8v-.6a1.6 1.6 0 0 0-3.2 0v.6C7.3 4.4 5.5 7.2 5.5 10.5v5.3l-1.7 1.7c-.5.5-.1 1.3.6 1.3h15.2c.7 0 1.1-.8.6-1.3l-1.7-1.7Z"
+        fill="#F2785C"
+      />
+    </svg>
+  );
+}

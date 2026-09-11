@@ -1,15 +1,6 @@
 // 앱 버전 정책의 규칙 — 무엇을 고치면 앱이 어떻게 바뀌는지 (docs/screens/app-versions.md).
 // 필드는 API 이름이 아니라 "앱에서 일어나는 결과"로 묶는다 — 강제 업데이트 / 업데이트 권유 / 기록
-import type { Schema } from '@/shared/api/schema-patch';
-
-export type AppVersion = Schema<'AdminAppVersionResponse'>;
-export type Platform = NonNullable<AppVersion['platform']>;
-
-export const PLATFORMS: Platform[] = ['IOS', 'ANDROID'];
-export const PLATFORM_LABEL: Record<Platform, string> = {
-  IOS: 'iOS',
-  ANDROID: 'Android',
-};
+import type { AppVersion } from '@/features/app-version/api/app-version';
 
 export interface AppVersionDraft {
   /** 강제 업데이트 */

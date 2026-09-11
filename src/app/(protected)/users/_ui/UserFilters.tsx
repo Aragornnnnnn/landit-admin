@@ -4,14 +4,14 @@
 // 검색은 지금까지 불러온 범위에서만 되므로, 그 사실을 진행 표시가 계속 말해 준다
 import { useEffect, useState } from 'react';
 
-import { Input } from '@/shared/ui/input';
+import { Input } from '@/shared/ui/shadcn/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui/select';
+} from '@/shared/ui/shadcn/select';
 
 import type { UserFilter, UserRole, UserStatus } from '../_model/user-filter';
 import {

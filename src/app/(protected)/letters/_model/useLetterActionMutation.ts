@@ -5,6 +5,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { LETTERS_PATH } from '@/features/letter/api/letter-list';
 import { api } from '@/shared/api/client';
 import { reportError } from '@/shared/monitoring/report';
 
@@ -24,11 +25,7 @@ export function useLetterActionMutation() {
     }: {
       letterId: number;
       action: LetterAction;
-    }) =>
-      api.patch(
-        `/api/v1/admin/mailbox/letters/${letterId}`,
-        letterActionPatch(action),
-      ),
+    }) => api.patch(`${LETTERS_PATH}/${letterId}`, letterActionPatch(action)),
     onSuccess: (_data, { action }) => {
       toast.success(LETTER_ACTION_DONE[action]);
       queryClient.invalidateQueries({ queryKey: ['letters'] });

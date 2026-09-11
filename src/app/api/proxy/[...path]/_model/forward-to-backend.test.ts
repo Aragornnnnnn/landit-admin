@@ -196,6 +196,25 @@ describe('전달', () => {
     expect(sent.has('cookie')).toBe(false);
   });
 
+  it('Idempotency-Key는 BE로 넘기고, 그 밖의 임의 헤더는 넘기지 않는다', async () => {
+    const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
+
+    await forwardToBackend(
+      incoming('api/v1/admin/push-campaigns', {
+        method: 'POST',
+        body: '{}',
+        headers: { 'idempotency-key': 'key-1', 'x-forwarded-host': 'evil' },
+      }),
+      ['api', 'v1', 'admin', 'push-campaigns'],
+      deps(fetchMock),
+    );
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sent = new Headers(init.headers);
+    expect(sent.get('idempotency-key')).toBe('key-1');
+    expect(sent.has('x-forwarded-host')).toBe(false);
+  });
+
   it('세션 쿠키가 아예 없으면 BE를 부르지 않고 401을 준다', async () => {
     const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
 

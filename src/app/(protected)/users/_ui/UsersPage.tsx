@@ -1,21 +1,21 @@
 'use client';
 
-// 사용자 목록 화면 조립 — 필터 줄(진행 표시 포함) · 표 · 로컬 페이징 (docs/screens/users.md)
+// 사용자 목록 화면 조립 — 필터 줄(진행 표시 포함) · 표 · 로컬 페이징(숫자 페이지 버튼) (docs/screens/users.md)
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import type { Schema } from '@/shared/api/schema-patch';
+import type { UserListItem } from '@/features/user/api/user-list';
+import { useAllUsersQuery } from '@/features/user/model/useAllUsersQuery';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
-import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
+import { Pagination } from '@/shared/ui/Pagination';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
-import { useAllUsersQuery } from '../_model/useAllUsersQuery';
 import {
   changeUserFilter,
   filterUsers,
@@ -35,8 +35,6 @@ import {
 import { UserFilters } from './UserFilters';
 import { UserTable } from './UserTable';
 
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-
 export function UsersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -47,7 +45,7 @@ export function UsersPage() {
 
   const matched = filterUsers(users, filter);
   const shown = pageOfUsers(matched, filter.page);
-  const lastPage = Math.max(0, Math.ceil(matched.length / USERS_PAGE_SIZE) - 1);
+  const totalPages = Math.ceil(matched.length / USERS_PAGE_SIZE);
 
   const change = (patch: Partial<UserFilter>) => {
     const query = writeUserFilter(changeUserFilter(filter, patch));
@@ -91,36 +89,25 @@ export function UsersPage() {
       )}
 
       {shown.length > 0 && (
-        <div className="flex items-center gap-3">
-          <span className="text-[13px] text-subtle">
-            {usersRangeLabel(filter.page, USERS_PAGE_SIZE, matched.length)}
-          </span>
-          <span className="ml-auto flex gap-2">
-            <Button
-              variant="outline"
-              disabled={filter.page === 0}
-              onClick={() => change({ page: filter.page - 1 })}
-              className="h-9 px-3.5 text-[13px]"
-            >
-              이전
-            </Button>
-            <Button
-              variant="outline"
-              disabled={filter.page >= lastPage}
-              onClick={() => change({ page: filter.page + 1 })}
-              className="h-9 px-3.5 text-[13px]"
-            >
-              다음
-            </Button>
-          </span>
-        </div>
+        <Pagination
+          page={filter.page}
+          size={USERS_PAGE_SIZE}
+          totalElements={matched.length}
+          totalPages={totalPages}
+          summary={usersRangeLabel(
+            filter.page,
+            USERS_PAGE_SIZE,
+            matched.length,
+          )}
+          onChangePage={(next) => change({ page: next })}
+        />
       )}
     </div>
   );
 }
 
 // 모바일 프레임은 없다 — 다른 화면의 카드 목록과 같은 규칙으로 둔다 (docs/screens/users.md "상태")
-function UserCardList({ users }: { users: AdminUserListItem[] }) {
+function UserCardList({ users }: { users: UserListItem[] }) {
   return (
     <ul className="flex flex-col overflow-hidden rounded-[18px] bg-card">
       {users.map((user) => (

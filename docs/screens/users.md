@@ -10,7 +10,7 @@ API: GET admin/users?page&size · GET admin/users/{userProfileId} · GET admin/m
 
 | 프레임                       | node         | 설명                                                                                                                                                     |
 | ---------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 데스크톱/사용자              | `1050:11383` | 목록. 검색·역할·상태 필터 줄 + 로드 진행 표시 + 테이블(ID·이메일·닉네임·역할·상태·가입) + 로컬 페이징(이전/다음).                                        |
+| 데스크톱/사용자              | `1050:11383` | 목록. 검색·역할·상태 필터 줄 + 로드 진행 표시 + 테이블(ID·이메일·닉네임·역할·상태·가입) + 로컬 페이징(페이지 번호 + ‹ ›).                                |
 | 데스크톱/사용자 / #1281 민호 | `1050:11654` | 상세. 상단 헤더(← 목록 · 아바타 · 닉네임 + 상태·역할 칩 · 이메일/ID/가입일) + 프로필 카드 · 학습 요약 카드(2단) + 이 사용자가 보낸 피드백 카드(전체 폭). |
 
 모바일 프레임은 없음. 스펙 상태 그룹의 "모바일" 항목만 있음(아래 상태 참조).
@@ -33,7 +33,7 @@ API: GET admin/users?page&size · GET admin/users/{userProfileId} · GET admin/m
   - 역할 칩: "사용자" / "관리자"(점 포함). 상태 칩: "활성"(점) / "탈퇴" / "정지"(점).
   - 닉네임 없는 사용자는 "—"로 표시(예: `#1278 old***@gmail.com — 사용자 탈퇴`, `#1276 spam***@gmail.com — 사용자 정지`).
   - 관리자 행 예시: `#12 · b3397340@gmail.com · 준서 · [칩/관리자] · [칩/활성] · 2026.06.20`
-- 페이징 줄: 왼쪽 "1–20 / 1,284 (로컬 페이징)" · 오른쪽 버튼 "이전" · "다음"
+- 페이징 줄: 왼쪽 "1–20 / 1,284 (로컬 페이징)" · 오른쪽 페이지 번호 "1 2 3 … 7" + ‹ › — 피드백 목록과 같은 `shared/ui/Pagination`. 페이지가 1장이면 줄 전체를 그리지 않는다
 
 ### 상세 (1050:11654)
 
@@ -70,7 +70,7 @@ API: GET admin/users?page&size · GET admin/users/{userProfileId} · GET admin/m
 | 테이블 헤더           | ID · 이메일 · 닉네임 · 역할 · 상태 · 가입                                                                                                                      |
 | 역할 칩               | 사용자 · 관리자                                                                                                                                                |
 | 상태 칩               | 활성 · 탈퇴 · 정지                                                                                                                                             |
-| 페이징                | {from}–{to} / {total} (로컬 페이징) · 이전 · 다음                                                                                                              |
+| 페이징                | {from}–{to} / {total} (로컬 페이징) · 1 2 3 … 7 · ‹ ›                                                                                                          |
 | 상세 제목             | 사용자 / #{userProfileId} {nickname}                                                                                                                           |
 | 뒤로 링크             | ← 목록                                                                                                                                                         |
 | 상세 헤더 칩          | 활성 · USER (역할은 API 값 그대로)                                                                                                                             |
@@ -92,11 +92,11 @@ API: GET admin/users?page&size · GET admin/users/{userProfileId} · GET admin/m
 
 ## 데이터
 
-| 항목        | 내용                                                                                                                                                                                                                                                                                                                 |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 목록        | GET admin/users?page&size(1~50) → items[], page, size, hasNext (총 개수 없음)                                                                                                                                                                                                                                        |
-| 상세        | GET admin/users/{userProfileId} → email, nickname, role(USER\|ADMIN), status(ACTIVE\|WITHDRAWN\|BANNED), targetLocale, baseLocale, learningLevel, currentLevel, aiTutorId, pushPermissionStatus, createdAt, updatedAt, learningSummary{completedScenarioCount, currentScenario, currentStreakDays, lastLearningDate} |
-| 보낸 피드백 | GET admin/mailbox/feedbacks?keyword={email} — 전용 API 없어 이메일을 검색어로                                                                                                                                                                                                                                        |
+| 항목        | 내용                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 목록        | GET admin/users?page&size(1~50)&active&pushConsent → items[](pushPermissionStatus 포함), page, size, hasNext, totalCount, totalPages. `active=true`는 ACTIVE, `false`는 WITHDRAWN·BANNED. `pushConsent=true`는 저장된 푸시 권한 GRANTED(실제 기기 권한·활성 토큰과 다르다). 두 필터·전체 수는 LAN-462(landit-be #174)에서 추가 — 배포 전. 화면은 아직 로컬 필터·로컬 페이징 그대로(아래 열린 질문) |
+| 상세        | GET admin/users/{userProfileId} → email, nickname, role(USER\|ADMIN), status(ACTIVE\|WITHDRAWN\|BANNED), targetLocale, baseLocale, learningLevel, currentLevel, aiTutorId, pushPermissionStatus, createdAt, updatedAt, learningSummary{completedScenarioCount, currentScenario, currentStreakDays, lastLearningDate}                                                                               |
+| 보낸 피드백 | GET admin/mailbox/feedbacks?keyword={email} — 전용 API 없어 이메일을 검색어로                                                                                                                                                                                                                                                                                                                      |
 
 ## 인터랙션
 
@@ -134,6 +134,7 @@ API: GET admin/users?page&size · GET admin/users/{userProfileId} · GET admin/m
 
 - 스웨거 버그: AdminUserListResponse.items가 Item 이름 충돌로 피드백 스키마로 표시됨 → 실제 필드 확정 후 컬럼 조정(시안은 이메일·닉네임·상태·레벨·완료 시나리오·푸시·가입일로 가정)
 - 나중에: 이메일·닉네임 검색, 정지/해제, 세션·대화 기록
+- LAN-462로 `active`·`pushConsent` 서버 필터와 `totalCount`·`totalPages`가 생긴다. 푸시 알림 편집기의 사용자 목록 탭([push-campaigns.md](push-campaigns.md))이 먼저 쓰고, 이 화면의 로컬 필터·로컬 페이징을 서버 값으로 바꾸는 건 BE 배포 후 별도 PR
 
 스펙 텍스트와 화면 프레임 사이 차이(참고).
 

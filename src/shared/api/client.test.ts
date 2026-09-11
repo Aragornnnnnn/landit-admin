@@ -53,6 +53,21 @@ describe('api', () => {
     );
   });
 
+  it('headers 옵션을 주면 content-type과 함께 그 헤더를 보낸다 — Idempotency-Key 같은 요청별 헤더', async () => {
+    fetchMock.mockResolvedValueOnce(json({ success: true, data: null }));
+
+    await api.post(
+      '/api/v1/admin/push-campaigns',
+      { title: 't' },
+      { headers: { 'Idempotency-Key': 'key-1' } },
+    );
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sent = new Headers(init.headers);
+    expect(sent.get('idempotency-key')).toBe('key-1');
+    expect(sent.get('content-type')).toBe('application/json');
+  });
+
   it('401이면 현재 위치를 next로 붙여 /login으로 보내고 ApiError를 던진다', async () => {
     fetchMock.mockResolvedValueOnce(json({ success: false }, 401));
 

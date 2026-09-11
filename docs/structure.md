@@ -23,11 +23,11 @@ app/
 │   └── auth/[provider]/callback/   page.tsx(조립) · _model/complete-social-login.ts(흐름, 순수) · _model/login-gateway.ts(HTTP 배선)
 ├── (protected)/
 │   ├── layout.tsx            셸 — SidebarProvider·사이드바·상단바. 인증 판단은 proxy.ts가 이미 했다
-│   ├── _ui/                  셸 컴포넌트(AppSidebar·MobileDrawer·TopBar·AccountMenu·ServerCard)
-│   ├── _model/               내비 정의(경로·라벨·아이콘·배지 쿼리)
-│   ├── page.tsx              대시보드 → _ui/ _model/
-│   ├── feedbacks/            page.tsx · _ui/(테이블·카드·필터·상세 시트·답장 폼·일괄 답장 다이얼로그) · _model/(필터 파싱·선택 상태·쿼리 훅)
-│   ├── letters/              page.tsx · new/page.tsx · [id]/page.tsx · _ui/ · _model/
+│   ├── _ui/                  셸 컴포넌트(AppSidebar·TopBar·ProtectedShell·NavIcons·ServerBadge) — 화면 코드는 여기 두지 않는다
+│   ├── _model/               셸 로직(내비 정의·배지 쿼리·계정 메뉴)
+│   ├── (dashboard)/          대시보드(/) — page.tsx · _ui/ · _model/. 셸과 같은 폴더에 섞이지 않게 그룹으로 감쌌다
+│   ├── feedbacks/            page.tsx · _ui/FeedbackListPage.tsx(조립) · _ui/{list,reply}/ · _model/{list,reply}/ — 목록과 답장(상세 시트)이 한 라우트라 구역으로 가른다
+│   ├── letters/              page.tsx · _ui/ _model/(목록 + 두 화면이 같이 쓰는 상태 변경·라벨) · (editor)/{new,[id]}/page.tsx · (editor)/_ui/ _model/(편집기)
 │   ├── users/                page.tsx · [id]/page.tsx · _ui/ · _model/
 │   ├── app-versions/         page.tsx · _ui/ · _model/
 │   └── scenario-test/        page.tsx · _ui/ · _model/
@@ -40,7 +40,8 @@ app/
 
 - 라우트 그룹은 **접근 조건**으로 가른다 — `(public)` 비로그인 접근 가능, `(protected)` 세션 쿠키 필요(`proxy.ts`가 리다이렉트).
 - `_ui/` `_model/`(필요하면 `_api/`)는 그 라우트 전용. `_` 접두사라 라우팅에서 빠진다.
-- 몇 개 라우트만 공유하면 그들을 감싸는 중첩 그룹의 `_ui/`, `(protected)` 전체면 `(protected)/_ui/`.
+- 몇 개 라우트만 공유하면 그들을 감싸는 중첩 그룹의 `_ui/`, `(protected)` 전체면 `(protected)/_ui/`. 편지 편집기가 그 예 — `letters/new`와 `letters/[id]`만 쓰므로 `letters/(editor)/_ui/`에 있고, 목록과 편집기가 같이 쓰는 상태 변경·라벨은 한 단계 위 `letters/_model/`에 있다.
+- 한 라우트 안에 독립된 구역이 있고 `_ui/`가 열 개를 넘으면 구역 이름의 하위 폴더로 가른다(피드백의 `list/`·`reply/`). 구역을 조립하는 컴포넌트(`FeedbackListPage`)는 `_ui/` 바로 아래. 라우트 그룹은 URL이 없는 화면(대시보드 `/`)을 셸 폴더와 분리할 때도 쓴다.
 - `page.tsx`는 searchParams·params 해석과 조립만. 로직은 `_model/`로.
 - `app/api`는 요청을 **받는** 쪽(route handler는 해석·위임만), features의 `api`는 요청을 **보내는** 코드.
 
@@ -50,12 +51,13 @@ app/
 
 - `features/markdown-editor/` — 마크다운 본문 에디터(쓰기/미리보기 토글·이미지 붙여넣기·문법 도움말)와 붙여넣기 규칙. 피드백 답장과 편지 편집기가 같이 쓴다
 - `features/content-image/api/` — 본문 이미지 presigned 업로드. 편지 에디터와 피드백 답장(이미지 붙여넣기)이 같이 쓴다. 파일 형식·크기 규칙은 각 라우트의 `_model/`에 남아 있다(편지는 형식 허용 목록, 답장은 `image/*`)
+- `features/feedback/` — `api/` 목록 경로·응답 타입·`fetchFeedbackPage`, `model/` 유형·상태 라벨과 상세 열기 주소. `/feedbacks`·대시보드·사용자 상세·사이드바 배지가 같이 쓴다. 목록 필터·선택지·답장 흐름은 `/feedbacks`만 쓰므로 라우트에 있다
+- `features/letter/` — `api/` 목록 경로·응답 타입·`fetchLetterPage`, `model/` 타입·상태 라벨. `/letters`와 대시보드 편지함 카드가 같이 쓴다. 탭·요약 문구·초안 규칙·편집기는 라우트에 있다
+- `features/app-version/` — `api/` 경로·타입·`fetchAppVersions`, `model/` 플랫폼 순서·라벨과 `useAppVersionsQuery`(대시보드와 화면이 같은 키를 쓰고, 저장이 둘 다 무효화한다). 초안 검증·저장 뮤테이션은 라우트에 있다
+- `features/user/` — `api/` 목록 경로·응답 타입·`fetchUserPage`. `/users`와 대시보드 가입 수가 같이 쓴다. 상세·필터 규칙은 라우트에 있다
+- `features/push-campaign/` — `api/` 경로·타입·조회/변경 함수(멱등성 키 포함), `model/` 조회·변경 훅과 도메인 규칙(상태 라벨·딥 링크/UTM·대상 합산·예약 시각). `/push-campaigns` 목록·편집기·상세 세 라우트가 같이 쓴다. 필터·초안 상태·화면 조립은 라우트에 있다
 
-예상되는 후보 —
-
-- `features/feedback/` — 대시보드(미답변 수·최근 피드백)와 `/feedbacks`가 같이 쓰는 api·쿼리 키·상태 칩 매핑
-- `features/letter/` — 대시보드(임시저장 수)와 `/letters`
-- `features/app-version/` — 대시보드(앱 버전 2건)와 `/app-versions`
+라우트끼리는 서로의 `_ui/`·`_model/`을 import하지 않는다 — `../feedbacks/_model/…` 같은 상대경로가 생기면 그 코드가 features로 내려갈 때다.
 
 세그먼트.
 
@@ -74,14 +76,14 @@ app/
 shared/
 ├── api/         client.ts(api.get/post/…) · parse.ts(BE 응답 봉투) · api-error.ts · schema.d.ts(생성) · schema-patch.ts · query-client.ts
 ├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · route-guard.ts · forbidden-notice.ts · account-display.ts
-├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(StatusChip·EmptyState·InlineError·ListSkeleton)
+├── ui/          우리 프리미티브(StatusChip·EmptyState·InlineError·ListSkeleton·LanditLogo) · shadcn/ 생성물(button·dialog·…)
 ├── security/    csp.ts · same-origin.ts(CSRF 판정 — 프록시·auth 공용)
 ├── monitoring/  report.ts(reportError·reportWarning — 지금은 콘솔)
 └── lib/         cn.ts · use-mobile.ts · useDelayedPending.ts(로딩 200ms 규칙) — 이름 붙일 주제가 없는 범용 유틸·훅만
 ```
 
 - 파일이 3개 이상 모이는 주제는 형제 폴더로 독립시킨다(`auth`·`monitoring`처럼). `shared/lib`은 최후의 자리.
-- `shared/ui`의 shadcn 생성물은 리뷰 대상이 아니다(CodeRabbit path_filters 제외). 손대면 커밋 메시지에 이유를 적는다. shadcn 별칭(`components.json`)은 `ui`·`components`→`@/shared/ui`, `utils`→`@/shared/lib/cn`, `lib`·`hooks`→`@/shared/lib`. `shared/lib/use-mobile.ts`는 shadcn이 정한 이름이라 훅 파일명 규칙(`useCamel.ts`)의 예외다.
+- shadcn 생성물은 `shared/ui/shadcn/`에만 둔다 — 리뷰 대상이 아니고(CodeRabbit path_filters 제외), 손대면 커밋 메시지에 이유를 적는다. 우리가 쓴 프리미티브는 `shared/ui/` 바로 아래(PascalCase). shadcn 별칭(`components.json`)은 `ui`→`@/shared/ui/shadcn`, `components`→`@/shared/ui`, `utils`→`@/shared/lib/cn`, `lib`·`hooks`→`@/shared/lib`. `shared/lib/use-mobile.ts`는 shadcn이 정한 이름이라 훅 파일명 규칙(`useCamel.ts`)의 예외다.
 - 서버 전용 모듈(쿠키·프록시 헬퍼)은 `import 'server-only'`를 첫 줄에 둔다 — 클라이언트 번들에 섞이면 빌드가 깨지게.
 
 ## 파일 이름

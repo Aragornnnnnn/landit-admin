@@ -2,6 +2,7 @@
 
 // 그룹 카드 하나 — 제목·건수 + 그 안의 목록. 로딩·오류·빈 상태를 여기서 가른다.
 // 폭에 따라 갈리는 건 두 가지다 — 표/카드 목록, 그리고 제목이 카드 안(데스크톱)이냐 밖(모바일)이냐 (Figma 1050:10110 · 10503)
+import type { LetterItem } from '@/features/letter/api/letter-list';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
@@ -12,7 +13,6 @@ import type { LetterGroup } from '../_model/letter-filter';
 import { letterGroupCountLabel } from '../_model/letter-label';
 import {
   sortLetters,
-  type LetterItem,
   type useLetterGroupQuery,
 } from '../_model/useLetterGroupQuery';
 import { LetterCardList } from './LetterCardList';

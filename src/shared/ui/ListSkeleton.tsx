@@ -1,7 +1,7 @@
 // 목록을 불러오는 동안의 자리 — 기본 5행 (docs/admin-spec.md "공통 상태").
 // 언제 그릴지는 useDelayedPending이 정한다 — 200ms 안에 오는 응답엔 이게 아예 안 그려진다
 import { cn } from '@/shared/lib/cn';
-import { Skeleton } from '@/shared/ui/skeleton';
+import { Skeleton } from '@/shared/ui/shadcn/skeleton';
 
 interface ListSkeletonProps {
   rows?: number;

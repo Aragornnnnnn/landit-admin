@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { uploadContentImage } from '@/features/content-image/api/upload-content-image';
 import { cn } from '@/shared/lib/cn';
 import { reportError } from '@/shared/monitoring/report';
-import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { Textarea } from '@/shared/ui/textarea';
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tabs';
+import { Textarea } from '@/shared/ui/shadcn/textarea';
 
 import {
   imageMarkdown,
