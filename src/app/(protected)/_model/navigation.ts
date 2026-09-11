@@ -42,6 +42,12 @@ export const NAV_GROUPS: NavGroup[] = [
         badge: 'pendingFeedbacks',
       },
       { href: '/letters', label: '공지·업데이트', icon: LettersIcon },
+    ],
+  },
+  {
+    // 편지함은 사용자가 보내고 운영이 답하는 자리, 알림은 운영이 밀어 보내는 자리 — 성격이 달라 그룹을 가른다
+    label: '알림',
+    items: [
       {
         href: '/push-campaigns',
         label: '푸시 알림',
