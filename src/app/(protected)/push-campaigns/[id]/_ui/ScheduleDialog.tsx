@@ -13,6 +13,7 @@ import {
   type ScheduleInput,
 } from '@/features/push-campaign/model/schedule-time';
 import { cn } from '@/shared/lib/cn';
+import { formatCount } from '@/shared/lib/format-count';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
   Dialog,
@@ -56,8 +57,9 @@ function ScheduleForm({
   const [input, setInput] = useState<ScheduleInput>(() =>
     defaultScheduleInput(),
   );
+  // 열린 순간 기준으로 한 번만 — 창은 열 때마다 새로 마운트된다
+  const [picks] = useState(() => quickSchedulePicks());
   const error = scheduleError(input);
-  const picks = quickSchedulePicks();
 
   return (
     <DialogContent className="w-[calc(100%-4rem)] gap-4 rounded-2xl p-6 sm:max-w-[520px]">
@@ -133,7 +135,7 @@ function ScheduleForm({
           >
             {error ??
               (preview
-                ? `예상 ${preview.estimatedUserCount.toLocaleString('ko-KR')}명`
+                ? `예상 ${formatCount(preview.estimatedUserCount)}명`
                 : '')}
           </span>
         </span>

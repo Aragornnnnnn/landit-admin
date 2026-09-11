@@ -66,7 +66,6 @@ function Detail({ campaign }: { campaign: PushCampaign }) {
   const preview = usePushAudiencePreviewQuery(
     beforeSend ? campaign.id : undefined,
   );
-  const dot = PUSH_STATUS_DOT[campaign.status];
 
   return (
     <div className="flex flex-col gap-4 pt-1 pb-12">
@@ -78,9 +77,7 @@ function Detail({ campaign }: { campaign: PushCampaign }) {
           <ArrowLeft className="size-4" aria-hidden />
           목록
         </Link>
-        <StatusChip
-          dot={dot === 'done' ? 'done' : dot ? 'progress' : undefined}
-        >
+        <StatusChip dot={PUSH_STATUS_DOT[campaign.status]}>
           {PUSH_STATUS_LABEL[campaign.status]}
         </StatusChip>
         <span className="text-[13px] text-subtle">

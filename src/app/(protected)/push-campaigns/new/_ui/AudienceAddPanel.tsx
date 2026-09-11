@@ -11,6 +11,7 @@ import {
 } from '@/features/push-campaign/model/audience';
 import { usePushAudienceQueryMutation } from '@/features/push-campaign/model/usePushCampaignMutation';
 import { cn } from '@/shared/lib/cn';
+import { formatCount } from '@/shared/lib/format-count';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Checkbox } from '@/shared/ui/shadcn/checkbox';
 import { Input } from '@/shared/ui/shadcn/input';
@@ -134,9 +135,15 @@ function UserPickTab({
   const from = page * USER_PICK_PAGE_SIZE + 1;
   const to = page * USER_PICK_PAGE_SIZE + (users.data?.items.length ?? 0);
 
+  const selectedSet = new Set(selected);
+  const pendingSet = new Set(pending);
   const toggle = (id: number, checked: boolean) =>
     setPending((ids) =>
-      checked ? unionIds(ids, [id]) : ids.filter((v) => v !== id),
+      checked
+        ? ids.includes(id)
+          ? ids
+          : [...ids, id]
+        : ids.filter((v) => v !== id),
     );
 
   return (
@@ -173,8 +180,8 @@ function UserPickTab({
           </li>
         ) : (
           rows.map((user) => {
-            const already = selected.includes(user.userProfileId);
-            const checked = already || pending.includes(user.userProfileId);
+            const already = selectedSet.has(user.userProfileId);
+            const checked = already || pendingSet.has(user.userProfileId);
             return (
               <li key={user.userProfileId}>
                 <label className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-hairline">
@@ -204,7 +211,7 @@ function UserPickTab({
       <div className="flex items-center gap-2">
         <span className="text-[12px] text-subtle">
           {users.data
-            ? `${from}–${to}${total !== undefined ? ` / ${total.toLocaleString('ko-KR')}` : ''}`
+            ? `${from}–${to}${total !== undefined ? ` / ${formatCount(total)}` : ''}`
             : ''}
         </span>
         <span className="ml-auto flex items-center gap-1.5">
@@ -318,7 +325,7 @@ function SqlTab({
         </Button>
         {fresh && (
           <span className="text-[12px] font-medium text-success">
-            {result.ids.length.toLocaleString('ko-KR')}명
+            {formatCount(result.ids.length)}명
           </span>
         )}
         <Button

@@ -5,6 +5,7 @@ import type {
   PushAudiencePreview,
   PushCampaign,
 } from '@/features/push-campaign/api/push-campaign';
+import { formatCount } from '@/shared/lib/format-count';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +26,6 @@ interface SendDialogProps {
   onConfirm: () => void;
 }
 
-const count = (n: number) => n.toLocaleString('ko-KR');
-
 export function SendDialog({
   open,
   campaign,
@@ -40,12 +39,12 @@ export function SendDialog({
       <AlertDialogContent className="w-[calc(100%-4rem)] gap-3.5 rounded-2xl p-6 sm:w-[500px] sm:max-w-[500px]">
         <AlertDialogTitle className="text-[17px] font-bold text-foreground">
           {preview
-            ? `지금 ${count(preview.estimatedUserCount)}명에게 보낼까요?`
+            ? `지금 ${formatCount(preview.estimatedUserCount)}명에게 보낼까요?`
             : '지금 보낼까요?'}
         </AlertDialogTitle>
         <AlertDialogDescription className="text-[14px] text-muted-foreground">
           {preview
-            ? `${count(preview.estimatedTokenCount)}개 기기로 보내요. `
+            ? `${formatCount(preview.estimatedTokenCount)}개 기기로 보내요. `
             : ''}
           보낸 푸시는 되돌릴 수 없어요.
         </AlertDialogDescription>

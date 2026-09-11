@@ -5,18 +5,10 @@ import {
   PUSH_STATUS_DOT,
   PUSH_STATUS_LABEL,
   pushProgressRatio,
-  type PushStatusDot,
 } from '@/features/push-campaign/model/push-campaign-label';
 import { cn } from '@/shared/lib/cn';
-
-// 예약은 기다리는 상태(검정), 발송 중은 진행 중(오렌지), 완료는 끝난 일(초록) — docs/screens/push-campaigns.md "상태 배지"
-const DOT_COLOR: Record<PushStatusDot, string> = {
-  scheduled: 'bg-strong',
-  progress: 'bg-primary',
-  done: 'bg-success',
-};
-
-const count = (n: number) => n.toLocaleString('ko-KR');
+import { formatCount } from '@/shared/lib/format-count';
+import { DOT_COLOR } from '@/shared/ui/StatusChip';
 
 export function CampaignStatus({
   campaign,
@@ -71,7 +63,7 @@ export function CampaignResult({
           />
         </span>
         <span className="text-[12px] font-medium text-primary">
-          {Math.round(ratio * 100)}% · {count(processed)}
+          {Math.round(ratio * 100)}% · {formatCount(processed)}
         </span>
       </span>
     );
@@ -80,7 +72,7 @@ export function CampaignResult({
     return (
       <span className={cn('flex items-center gap-1 text-[13px]', className)}>
         <span className="text-strong">
-          성공 {count(campaign.succeededCount)}
+          성공 {formatCount(campaign.succeededCount)}
         </span>
         <span className="text-subtle">·</span>
         <span
@@ -88,7 +80,7 @@ export function CampaignResult({
             campaign.failedCount > 0 ? 'text-destructive' : 'text-subtle'
           }
         >
-          실패 {count(campaign.failedCount)}
+          실패 {formatCount(campaign.failedCount)}
         </span>
       </span>
     );

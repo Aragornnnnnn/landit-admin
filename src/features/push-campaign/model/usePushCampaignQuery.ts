@@ -9,16 +9,11 @@ import {
   fetchPushCampaignPage,
   type PushCampaignStatus,
 } from '../api/push-campaign';
+import { isPushInFlight } from './push-campaign-label';
 
 export const PUSH_CAMPAIGNS_KEY = ['push-campaigns'] as const;
 
-/** 발송이 끝나지 않은 상태 — 상세를 열어 두면 이 동안만 주기적으로 다시 읽는다 */
-const IN_FLIGHT: ReadonlySet<PushCampaignStatus> = new Set([
-  'PENDING',
-  'SCHEDULE_PENDING',
-  'QUEUED',
-  'SENDING',
-]);
+// 발송이 끝나지 않은 동안만 상세를 주기적으로 다시 읽는다
 const IN_FLIGHT_REFETCH_MS = 10_000;
 
 export interface PushCampaignPageParams {
@@ -70,7 +65,7 @@ export function usePushCampaignQuery(campaignId: string | undefined) {
     queryFn: () => fetchPushCampaign(campaignId!),
     enabled: Boolean(campaignId),
     refetchInterval: (query) =>
-      query.state.data && IN_FLIGHT.has(query.state.data.status)
+      query.state.data && isPushInFlight(query.state.data.status)
         ? IN_FLIGHT_REFETCH_MS
         : false,
   });

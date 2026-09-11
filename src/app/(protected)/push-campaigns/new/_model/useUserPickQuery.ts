@@ -4,9 +4,7 @@
 // 사용자 화면의 useAllUsersQuery(전부 이어받기)는 고르는 자리엔 무겁다 (docs/screens/push-campaigns.md "사용자 목록 탭")
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { USERS_PATH } from '@/features/user/api/user-list';
-import { api } from '@/shared/api/client';
-import type { AdminUserListPagePatched } from '@/shared/api/schema-patch';
+import { fetchUserPage } from '@/features/user/api/user-list';
 
 export const USER_PICK_PAGE_SIZE = 20;
 
@@ -28,7 +26,7 @@ export function useUserPickQuery(params: UserPickParams) {
       });
       if (params.activeOnly) query.set('active', 'true');
       if (params.pushConsentOnly) query.set('pushConsent', 'true');
-      return api.get<AdminUserListPagePatched>(`${USERS_PATH}?${query}`);
+      return fetchUserPage(query);
     },
     placeholderData: keepPreviousData,
   });

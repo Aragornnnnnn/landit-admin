@@ -18,6 +18,8 @@ export interface NavItem {
   developOnly?: boolean;
   /** 배지 — 피드백 처리중 건수 */
   badge?: 'pendingFeedbacks';
+  /** 하위 한 단계(상세) 화면의 제목 — 번호를 제목에 넣지 않는 화면만 적는다 */
+  detailTitle?: string;
 }
 
 export interface NavGroup {
@@ -40,7 +42,13 @@ export const NAV_GROUPS: NavGroup[] = [
         badge: 'pendingFeedbacks',
       },
       { href: '/letters', label: '공지·업데이트', icon: LettersIcon },
-      { href: '/push-campaigns', label: '푸시 알림', icon: PushIcon },
+      {
+        href: '/push-campaigns',
+        label: '푸시 알림',
+        icon: PushIcon,
+        // 캠페인 ID는 UUID라 제목에 넣지 않는다
+        detailTitle: '상세',
+      },
     ],
   },
   {
@@ -74,7 +82,7 @@ export function pageTitleFor(pathname: string): string {
   );
   if (!match) return '';
   // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
-  const sub = SUB_TITLES[pathname] ?? subTitleByPattern(pathname);
+  const sub = SUB_TITLES[pathname] ?? detailTitleFor(match, pathname);
   return sub ? `${match.label} / ${sub}` : match.label;
 }
 
@@ -83,13 +91,11 @@ const SUB_TITLES: Record<string, string> = {
   '/push-campaigns/new': '새 푸시',
 };
 
-// 번호가 붙는 하위 화면 — 캠페인 ID는 UUID라 제목에 넣지 않고 "상세"로 부른다
-const SUB_TITLE_PATTERNS: { test: RegExp; sub: string }[] = [
-  { test: /^\/push-campaigns\/(?!new$)[^/]+$/, sub: '상세' },
-];
-
-function subTitleByPattern(pathname: string): string | undefined {
-  return SUB_TITLE_PATTERNS.find((entry) => entry.test.test(pathname))?.sub;
+// 메뉴 바로 아래 한 단계(`/push-campaigns/{id}`)만 상세로 본다
+function detailTitleFor(item: NavItem, pathname: string): string | undefined {
+  if (!item.detailTitle) return undefined;
+  const rest = pathname.slice(item.href.length);
+  return /^\/[^/]+$/.test(rest) ? item.detailTitle : undefined;
 }
 
 /** 현재 BE 호스트가 develop인지 — 시나리오 테스트 메뉴 노출 기준 */

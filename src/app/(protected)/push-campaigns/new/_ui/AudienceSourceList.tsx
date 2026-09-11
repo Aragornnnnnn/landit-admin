@@ -12,6 +12,7 @@ import {
   audienceSourceSummary,
 } from '@/features/push-campaign/model/audience-source-label';
 import { cn } from '@/shared/lib/cn';
+import { formatCount } from '@/shared/lib/format-count';
 
 interface AudienceSourceListProps {
   audience: AudienceDraft;
@@ -45,7 +46,7 @@ export function AudienceSourceList({
                 exclude ? 'text-destructive' : 'text-primary',
               )}
             >
-              {count.toLocaleString('ko-KR')}명
+              {formatCount(count)}명
             </span>
             <span
               className={cn(
