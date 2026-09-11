@@ -63,10 +63,12 @@ export function useNextScheduledCampaignQuery() {
   });
 }
 
-export function usePushCampaignQuery(campaignId: string) {
+/** 캠페인 하나 — ID가 없으면(새 푸시) 부르지 않는다 */
+export function usePushCampaignQuery(campaignId: string | undefined) {
   return useQuery({
     queryKey: [...PUSH_CAMPAIGNS_KEY, 'detail', campaignId] as const,
-    queryFn: () => fetchPushCampaign(campaignId),
+    queryFn: () => fetchPushCampaign(campaignId!),
+    enabled: Boolean(campaignId),
     refetchInterval: (query) =>
       query.state.data && IN_FLIGHT.has(query.state.data.status)
         ? IN_FLIGHT_REFETCH_MS
