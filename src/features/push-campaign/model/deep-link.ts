@@ -4,8 +4,10 @@
 /** BE deepLink 최대 길이 — UTM을 붙인 최종 문자열 기준 */
 export const DEEP_LINK_MAX = 1000;
 
+// BE 서버 푸시(학습 알림·답장 알림)와 같은 값 — 앱·Amplitude의 푸시 유입 집계에 같이 잡히게. 어드민 발송은 campaign의 admin_ 접두사로 가른다
 export const UTM_SOURCE = 'push';
-export const UTM_MEDIUM = 'admin';
+export const UTM_MEDIUM = 'notification';
+const CAMPAIGN_PREFIX = 'admin_';
 
 /** 저장을 막을 이유. 없으면 null. 최종(UTM 포함) 링크를 넘긴다 */
 export function deepLinkError(link: string): string | null {
@@ -30,7 +32,7 @@ const FORMAT_ERROR = '/로 시작하거나 https://로 시작해야 해요';
 const SLUG_MAX = 40;
 
 /**
- * utm_campaign 기본값 — 제목의 글자·숫자만 남긴 슬러그 + 날짜(MMDD).
+ * utm_campaign 기본값 — admin_ + 제목의 글자·숫자만 남긴 슬러그 + 날짜(MMDD).
  * 한글은 그대로 둔다(URL에서 인코딩된다). 분석 도구에서 캠페인을 알아보기 쉬운 쪽이 우선이다
  */
 export function campaignSlug(title: string, date: Date): string {
@@ -43,7 +45,7 @@ export function campaignSlug(title: string, date: Date): string {
     .replace(/^_|_$/g, '')
     .slice(0, SLUG_MAX);
   const mmdd = `${two(date.getMonth() + 1)}${two(date.getDate())}`;
-  return `${slug || 'push'}_${mmdd}`;
+  return `${CAMPAIGN_PREFIX}${slug || 'push'}_${mmdd}`;
 }
 
 /** 링크 뒤에 utm_source·utm_medium·utm_campaign을 붙인다. 캠페인 값이 비면(스위치 off) 원본 그대로 */

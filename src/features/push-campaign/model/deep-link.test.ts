@@ -28,38 +28,40 @@ describe('deepLinkError', () => {
 describe('campaignSlug', () => {
   const date = new Date('2026-09-12T10:00:00+09:00');
 
-  it('제목의 글자·숫자만 남기고 띄어쓰기는 _로, 끝에 MMDD를 붙인다', () => {
+  it('admin_ 접두사 + 제목의 글자·숫자만 남기고 띄어쓰기는 _로, 끝에 MMDD', () => {
     expect(campaignSlug('설문에 답하고  프리미엄 미리 써보기!', date)).toBe(
-      '설문에_답하고_프리미엄_미리_써보기_0912',
+      'admin_설문에_답하고_프리미엄_미리_써보기_0912',
     );
     expect(campaignSlug('1.4.3 Update — Mic Fix', date)).toBe(
-      '143_update_mic_fix_0912',
+      'admin_143_update_mic_fix_0912',
     );
   });
 
-  it('제목이 비었거나 기호뿐이면 push로 대신한다', () => {
-    expect(campaignSlug('', date)).toBe('push_0912');
-    expect(campaignSlug('!!!', date)).toBe('push_0912');
+  it('제목이 비었거나 기호뿐이면 push로 대신한다 — 접두사는 그대로', () => {
+    expect(campaignSlug('', date)).toBe('admin_push_0912');
+    expect(campaignSlug('!!!', date)).toBe('admin_push_0912');
   });
 
   it('길면 40자에서 자른다 — utm 값이 끝없이 길어지지 않게', () => {
-    expect(campaignSlug('가'.repeat(60), date)).toBe('가'.repeat(40) + '_0912');
+    expect(campaignSlug('가'.repeat(60), date)).toBe(
+      'admin_' + '가'.repeat(40) + '_0912',
+    );
   });
 });
 
 describe('withUtm', () => {
   it('쿼리가 없으면 ?로, 이미 있으면 &로 잇는다', () => {
     expect(withUtm('/survey', 'survey_0912')).toBe(
-      '/survey?utm_source=push&utm_medium=admin&utm_campaign=survey_0912',
+      '/survey?utm_source=push&utm_medium=notification&utm_campaign=survey_0912',
     );
     expect(withUtm('https://landit.im/e?x=1', 'e')).toBe(
-      'https://landit.im/e?x=1&utm_source=push&utm_medium=admin&utm_campaign=e',
+      'https://landit.im/e?x=1&utm_source=push&utm_medium=notification&utm_campaign=e',
     );
   });
 
   it('한글 캠페인 값은 URL 인코딩한다', () => {
     expect(withUtm('/a', '설문_0912')).toBe(
-      '/a?utm_source=push&utm_medium=admin&utm_campaign=%EC%84%A4%EB%AC%B8_0912',
+      '/a?utm_source=push&utm_medium=notification&utm_campaign=%EC%84%A4%EB%AC%B8_0912',
     );
   });
 
