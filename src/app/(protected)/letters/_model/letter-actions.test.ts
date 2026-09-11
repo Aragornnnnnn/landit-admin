@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import type { LetterItem } from '@/features/letter/api/letter-list';
+
 import {
   LETTER_CONFIRM,
   letterActionPatch,
   letterMenuItems,
 } from './letter-actions';
-import type { LetterItem } from './useLetterGroupQuery';
 
 const letter = (patch: Partial<LetterItem> = {}): LetterItem => ({
   letterId: 1,

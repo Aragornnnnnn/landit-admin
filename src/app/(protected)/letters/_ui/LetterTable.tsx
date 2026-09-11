@@ -4,16 +4,16 @@
 // 타입·상태는 배경 없는 텍스트다. 행 오른쪽 ⋯로 상태를 바꾼다
 import Link from 'next/link';
 
-import { cn } from '@/shared/lib/cn';
-import { formatDateTime } from '@/shared/lib/format-time';
-
-import type { LetterAction } from '../_model/letter-actions';
+import type { LetterItem } from '@/features/letter/api/letter-list';
 import {
   LETTER_STATUS_DOT,
   LETTER_STATUS_LABEL,
   LETTER_TYPE_LABEL,
-} from '../_model/letter-label';
-import type { LetterItem } from '../_model/useLetterGroupQuery';
+} from '@/features/letter/model/letter-label';
+import { cn } from '@/shared/lib/cn';
+import { formatDateTime } from '@/shared/lib/format-time';
+
+import type { LetterAction } from '../_model/letter-actions';
 import { LetterRowMenu } from './LetterRowMenu';
 
 // Figma 셀 너비 — 타입 90 / 제목 flex / 상태 100 / 발행일 120 / 수정 120

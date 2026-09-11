@@ -3,15 +3,9 @@
 // 피드백 목록 조회 — 필터가 바뀌어도 이전 결과를 지우지 않는다(placeholderData). 빈 화면이 깜빡이는 대신 진행만 보이게
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
+import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
 
 import { toFeedbackQuery, type FeedbackFilter } from './feedback-filter';
-
-export type FeedbackListResponse = Schema<'AdminMailboxFeedbackListResponse'>;
-export type FeedbackItem = Schema<'AdminMailboxFeedbackResponse'>;
-
-const PATH = '/api/v1/admin/mailbox/feedbacks';
 
 export const feedbackListKey = (filter: FeedbackFilter) =>
   ['feedbacks', 'list', filter] as const;
@@ -26,7 +20,7 @@ export function useFeedbackListQuery(filter: FeedbackFilter) {
       for (const [key, value] of Object.entries(query)) {
         if (value !== undefined) params.set(key, String(value));
       }
-      return api.get<FeedbackListResponse>(`${PATH}?${params}`);
+      return fetchFeedbackPage(params);
     },
     placeholderData: keepPreviousData,
   });

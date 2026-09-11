@@ -2,16 +2,14 @@
 
 // 플랫폼 한 장 — 앱에서 일어나는 결과별로 묶는다 (Figma 1050:11871).
 // 헤더 점이 "지금 앱에 반영 중"과 "저장하지 않은 변경 있음"을 가른다
+import type { Platform } from '@/features/app-version/api/app-version';
+import { PLATFORM_LABEL } from '@/features/app-version/model/platform';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Textarea } from '@/shared/ui/textarea';
 
-import {
-  PLATFORM_LABEL,
-  type AppVersionDraft,
-  type Platform,
-} from '../_model/app-version-draft';
+import type { AppVersionDraft } from '../_model/app-version-draft';
 import type { UpdateKind } from '../_model/update-preview';
 import { AndroidIcon, AppleIcon } from './PlatformIcons';
 

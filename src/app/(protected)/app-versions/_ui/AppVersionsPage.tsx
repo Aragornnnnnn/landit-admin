@@ -4,6 +4,15 @@
 // 저장하면 앱에 바로 반영되므로 저장 전에 무슨 일이 일어나는지 한 문장으로 묻는다
 import { useState } from 'react';
 
+import type {
+  AppVersion,
+  Platform,
+} from '@/features/app-version/api/app-version';
+import {
+  PLATFORM_LABEL,
+  PLATFORMS,
+} from '@/features/app-version/model/platform';
+import { useAppVersionsQuery } from '@/features/app-version/model/useAppVersionsQuery';
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
@@ -13,19 +22,12 @@ import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 import {
   EMPTY_APP_VERSION_DRAFT,
   isSameVersionDraft,
-  PLATFORM_LABEL,
-  PLATFORMS,
   toAppVersionDraft,
   validateAppVersionDraft,
-  type AppVersion,
   type AppVersionDraft,
-  type Platform,
 } from '../_model/app-version-draft';
 import type { UpdateKind } from '../_model/update-preview';
-import {
-  useAppVersionsQuery,
-  useSaveAppVersionMutation,
-} from '../_model/useAppVersions';
+import { useSaveAppVersionMutation } from '../_model/useSaveAppVersionMutation';
 import { AppVersionCard } from './AppVersionCard';
 import { AndroidIcon, AppleIcon } from './PlatformIcons';
 import { SaveVersionDialog } from './SaveVersionDialog';

@@ -5,10 +5,10 @@
 // 시트와 같은 Radix Dialog 위에 얹는다 — 포커스 가둠·Esc·바깥 스크롤 잠금을 직접 만들지 않으려고
 import { ChevronLeft } from 'lucide-react';
 
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { Button } from '@/shared/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet';
 
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
 import { ServerBadge } from '../../_ui/ServerBadge';
 import { ReplyConfirmDialog } from './ReplyConfirmDialog';

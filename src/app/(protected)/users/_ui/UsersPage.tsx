@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import type { Schema } from '@/shared/api/schema-patch';
+import type { UserListItem } from '@/features/user/api/user-list';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
@@ -34,8 +34,6 @@ import {
 } from '../_model/user-label';
 import { UserFilters } from './UserFilters';
 import { UserTable } from './UserTable';
-
-type AdminUserListItem = Schema<'AdminUserListItem'>;
 
 export function UsersPage() {
   const router = useRouter();
@@ -120,7 +118,7 @@ export function UsersPage() {
 }
 
 // 모바일 프레임은 없다 — 다른 화면의 카드 목록과 같은 규칙으로 둔다 (docs/screens/users.md "상태")
-function UserCardList({ users }: { users: AdminUserListItem[] }) {
+function UserCardList({ users }: { users: UserListItem[] }) {
   return (
     <ul className="flex flex-col overflow-hidden rounded-[18px] bg-card">
       {users.map((user) => (

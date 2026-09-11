@@ -1,11 +1,9 @@
 // 사용자 목록 필터 — BE에 검색·필터가 없어 불러온 목록에서 우리가 거른다 (docs/screens/users.md).
 // 그래서 이 파일이 곧 "검색 기능"이다. BE 검색이 생기면 여기를 서버 쿼리로 바꾼다
-import type { Schema } from '@/shared/api/schema-patch';
+import type { UserListItem } from '@/features/user/api/user-list';
 
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-
-export type UserRole = NonNullable<AdminUserListItem['role']>;
-export type UserStatus = NonNullable<AdminUserListItem['status']>;
+export type UserRole = NonNullable<UserListItem['role']>;
+export type UserStatus = NonNullable<UserListItem['status']>;
 
 export interface UserFilter {
   keyword: string;
@@ -61,9 +59,9 @@ export function changeUserFilter(
 
 /** 이메일·닉네임을 대소문자 없이 부분 일치로 찾는다 — 어드민이 아는 건 보통 이메일 앞부분이다 */
 export function filterUsers(
-  users: AdminUserListItem[],
+  users: UserListItem[],
   filter: UserFilter,
-): AdminUserListItem[] {
+): UserListItem[] {
   const keyword = filter.keyword.trim().toLowerCase();
   return users.filter((user) => {
     if (filter.role && user.role !== filter.role) return false;
@@ -78,9 +76,9 @@ export function filterUsers(
 
 /** 로컬 페이징 — 지금 페이지에 그릴 몫만 자른다 */
 export function pageOfUsers(
-  users: AdminUserListItem[],
+  users: UserListItem[],
   page: number,
-): AdminUserListItem[] {
+): UserListItem[] {
   const from = page * USERS_PAGE_SIZE;
   return users.slice(from, from + USERS_PAGE_SIZE);
 }

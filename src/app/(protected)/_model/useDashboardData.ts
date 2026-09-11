@@ -4,15 +4,10 @@
 // 어느 목록을 얼마나 받아 오는지가 곧 숫자의 정확도라, 범위를 여기 한 곳에 적어 둔다
 import { useQuery } from '@tanstack/react-query';
 
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
-
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-
-type FeedbackListResponse = Schema<'AdminMailboxFeedbackListResponse'>;
-type UserListResponse = { items?: AdminUserListItem[] };
-type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
-type AppVersion = Schema<'AdminAppVersionResponse'>;
+import { useAppVersionsQuery } from '@/features/app-version/model/useAppVersionsQuery';
+import { fetchFeedbackPage } from '@/features/feedback/api/feedback-list';
+import { fetchLetterPage } from '@/features/letter/api/letter-list';
+import { fetchUserPage } from '@/features/user/api/user-list';
 
 /** 차트는 7일치다. BE가 한 번에 최대 50건까지만 준다(51부터 400, 실 서버 확인) — 7일 접수가 50건을
  * 넘으면 막대와 카운트가 실제보다 작게 나온다. 그때는 페이지를 이어 받도록 바꿔야 한다 */
@@ -30,8 +25,12 @@ export function useDashboardData(now: Date) {
   const recent = useQuery({
     queryKey: ['dashboard', 'recent-feedbacks'] as const,
     queryFn: () =>
-      api.get<FeedbackListResponse>(
-        `/api/v1/admin/mailbox/feedbacks?size=${RECENT_SIZE}&sort=NEWEST&createdFrom=${encodeURIComponent(createdFrom)}`,
+      fetchFeedbackPage(
+        new URLSearchParams({
+          size: String(RECENT_SIZE),
+          sort: 'NEWEST',
+          createdFrom,
+        }),
       ),
   });
 
@@ -39,16 +38,20 @@ export function useDashboardData(now: Date) {
   const pending = useQuery({
     queryKey: ['dashboard', 'pending-feedbacks'] as const,
     queryFn: () =>
-      api.get<FeedbackListResponse>(
-        `/api/v1/admin/mailbox/feedbacks?status=PENDING&size=${RECENT_SIZE}&sort=OLDEST`,
+      fetchFeedbackPage(
+        new URLSearchParams({
+          status: 'PENDING',
+          size: String(RECENT_SIZE),
+          sort: 'OLDEST',
+        }),
       ),
   });
 
   const users = useQuery({
     queryKey: ['dashboard', 'recent-users'] as const,
     queryFn: () =>
-      api.get<UserListResponse>(
-        `/api/v1/admin/users?page=0&size=${USERS_SIZE}`,
+      fetchUserPage(
+        new URLSearchParams({ page: '0', size: String(USERS_SIZE) }),
       ),
   });
 
@@ -56,23 +59,29 @@ export function useDashboardData(now: Date) {
   const letters = useQuery({
     queryKey: ['dashboard', 'published-letters'] as const,
     queryFn: () =>
-      api.get<LetterListResponse>(
-        '/api/v1/admin/mailbox/letters?publicationStatus=PUBLISHED&page=0&size=20',
+      fetchLetterPage(
+        new URLSearchParams({
+          publicationStatus: 'PUBLISHED',
+          page: '0',
+          size: '20',
+        }),
       ),
   });
 
   const drafts = useQuery({
     queryKey: ['dashboard', 'draft-letters'] as const,
     queryFn: () =>
-      api.get<LetterListResponse>(
-        '/api/v1/admin/mailbox/letters?publicationStatus=DRAFT&page=0&size=20',
+      fetchLetterPage(
+        new URLSearchParams({
+          publicationStatus: 'DRAFT',
+          page: '0',
+          size: '20',
+        }),
       ),
   });
 
-  const appVersions = useQuery({
-    queryKey: ['app-versions'] as const,
-    queryFn: () => api.get<AppVersion[]>('/api/v1/admin/app-versions'),
-  });
+  // 앱 버전 화면과 같은 키 — 거기서 저장하면 여기도 함께 갱신된다
+  const appVersions = useAppVersionsQuery();
 
   return {
     recentFeedbacks: recent.data?.items ?? [],

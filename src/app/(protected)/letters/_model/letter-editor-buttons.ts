@@ -1,7 +1,8 @@
 // 에디터 상단 버튼 조합 — 편지 상태가 정한다 (docs/screens/letters.md "화면 프레임 주석에서 보강되는 규칙").
 // 임시저장: [임시저장 · 발행하기] / 발행됨: [저장 · 숨기기] / 숨김: [저장 · 다시 보이기]
+import type { LetterStatus } from '@/features/letter/api/letter-list';
+
 import type { LetterAction } from './letter-actions';
-import type { LetterStatus } from './letter-filter';
 
 /** 아직 한 번도 저장하지 않은 새 편지 */
 export type EditorStatus = LetterStatus | 'NEW';

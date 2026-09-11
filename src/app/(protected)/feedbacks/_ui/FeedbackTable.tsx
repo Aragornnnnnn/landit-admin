@@ -1,15 +1,14 @@
 'use client';
 
 // 데스크톱 목록 — 흰 카드 안 표. 행 구분은 hover만(Figma 1050:8193에서 운영자 결정으로 변경). 유형·상태는 배경 없는 텍스트다
-import { cn } from '@/shared/lib/cn';
-import { formatDateTime } from '@/shared/lib/format-time';
-
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import {
   FEEDBACK_STATUS_DOT,
   FEEDBACK_STATUS_LABEL,
   FEEDBACK_TYPE_LABEL,
-} from '../_model/feedback-label';
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
+} from '@/features/feedback/model/feedback-label';
+import { cn } from '@/shared/lib/cn';
+import { formatDateTime } from '@/shared/lib/format-time';
 
 interface FeedbackTableProps {
   items: FeedbackItem[];

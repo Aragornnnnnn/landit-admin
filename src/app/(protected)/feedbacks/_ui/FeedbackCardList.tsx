@@ -4,15 +4,14 @@
 // 처리중 행에는 상태 칩이 없고 처리완료에만 붙는다 — 할 일이 기본이라 굳이 말하지 않는다
 import { ChevronRight } from 'lucide-react';
 
-import { formatRelativeTime } from '@/shared/lib/format-time';
-import { StatusChip } from '@/shared/ui/StatusChip';
-
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import {
   FEEDBACK_STATUS_DOT,
   FEEDBACK_STATUS_LABEL,
   FEEDBACK_TYPE_LABEL,
-} from '../_model/feedback-label';
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
+} from '@/features/feedback/model/feedback-label';
+import { formatRelativeTime } from '@/shared/lib/format-time';
+import { StatusChip } from '@/shared/ui/StatusChip';
 
 interface FeedbackCardListProps {
   items: FeedbackItem[];

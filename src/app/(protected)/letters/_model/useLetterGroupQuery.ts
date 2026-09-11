@@ -4,19 +4,13 @@
 // 상태를 섞어 한 번에 받으면 그룹마다 몇 건인지 알 수 없고 잘림도 그룹별로 다르게 나타난다
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
-
 import {
-  LETTER_FETCH_SIZE,
-  type LetterFilter,
+  fetchLetterPage,
+  type LetterItem,
   type LetterStatus,
-} from './letter-filter';
+} from '@/features/letter/api/letter-list';
 
-export type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
-export type LetterItem = Schema<'AdminMailboxLetterResponse'>;
-
-const PATH = '/api/v1/admin/mailbox/letters';
+import { LETTER_FETCH_SIZE, type LetterFilter } from './letter-filter';
 
 export const letterListKey = (status: LetterStatus, type: string | undefined) =>
   ['letters', 'list', status, type ?? 'ALL'] as const;
@@ -35,7 +29,7 @@ export function useLetterGroupQuery(
         size: String(LETTER_FETCH_SIZE),
       });
       if (filter.type) params.set('type', filter.type);
-      const page = await api.get<LetterListResponse>(`${PATH}?${params}`);
+      const page = await fetchLetterPage(params);
       // 답장은 피드백 화면에서 만들어지는 편지라 기본 목록에서 뺀다 — 타입으로 콕 집었을 때만 보인다
       const items = (page.items ?? []).filter(
         (item) => filter.type === 'REPLY' || item.type !== 'REPLY',

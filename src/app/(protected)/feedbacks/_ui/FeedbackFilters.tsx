@@ -16,7 +16,7 @@ import {
   FEEDBACK_SORT_OPTIONS,
   FEEDBACK_STATUS_OPTIONS,
   FEEDBACK_TYPE_OPTIONS,
-} from '../_model/feedback-label';
+} from '../_model/feedback-filter-options';
 
 interface FeedbackFiltersProps {
   filter: FeedbackFilter;

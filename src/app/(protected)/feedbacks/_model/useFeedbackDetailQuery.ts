@@ -4,6 +4,7 @@
 // 처리완료 건의 최신 답장(reply)도 이 응답에 실려 온다
 import { useQuery } from '@tanstack/react-query';
 
+import { FEEDBACKS_PATH } from '@/features/feedback/api/feedback-list';
 import { api } from '@/shared/api/client';
 import type { Schema } from '@/shared/api/schema-patch';
 
@@ -15,13 +16,11 @@ export type FeedbackDetail = Omit<
   reply?: Schema<'Reply'> | null;
 };
 
-const PATH = '/api/v1/admin/mailbox/feedbacks';
-
 export function useFeedbackDetailQuery(feedbackId: number | undefined) {
   return useQuery({
     // 'feedbacks' 프리픽스를 지킨다 — 답장 전송이 이 키까지 한 번에 무효화한다
     queryKey: ['feedbacks', 'detail', feedbackId] as const,
-    queryFn: () => api.get<FeedbackDetail>(`${PATH}/${feedbackId}`),
+    queryFn: () => api.get<FeedbackDetail>(`${FEEDBACKS_PATH}/${feedbackId}`),
     enabled: feedbackId !== undefined,
   });
 }

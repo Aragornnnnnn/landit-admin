@@ -3,10 +3,10 @@
 // 데스크톱 답장 — 목록을 덮지 않고 오른쪽에서 열리는 시트 (Figma 1050:8441 · 9683)
 import { X } from 'lucide-react';
 
+import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { Button } from '@/shared/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet';
 
-import type { FeedbackItem } from '../_model/useFeedbackListQuery';
 import type { ReplyDraft } from '../_model/useReplyDraft';
 import { ReplyConfirmDialog } from './ReplyConfirmDialog';
 import { ReplyFields } from './ReplyFields';

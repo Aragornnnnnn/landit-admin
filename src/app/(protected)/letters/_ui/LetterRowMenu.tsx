@@ -5,6 +5,7 @@
 import { Fragment } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 
+import type { LetterItem } from '@/features/letter/api/letter-list';
 import { cn } from '@/shared/lib/cn';
 import {
   DropdownMenu,
@@ -15,7 +16,6 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { letterMenuItems, type LetterAction } from '../_model/letter-actions';
-import type { LetterItem } from '../_model/useLetterGroupQuery';
 
 interface LetterRowMenuProps {
   item: LetterItem;

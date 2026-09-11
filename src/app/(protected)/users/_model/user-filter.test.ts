@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Schema } from '@/shared/api/schema-patch';
+import type { UserListItem } from '@/features/user/api/user-list';
 
 import {
   changeUserFilter,
@@ -12,9 +12,7 @@ import {
   writeUserFilter,
 } from './user-filter';
 
-type AdminUserListItem = Schema<'AdminUserListItem'>;
-
-const user = (patch: Partial<AdminUserListItem>): AdminUserListItem => ({
+const user = (patch: Partial<UserListItem>): UserListItem => ({
   userProfileId: 1,
   email: 'sujin@gmail.com',
   nickname: '수진',

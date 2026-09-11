@@ -1,12 +1,9 @@
 // 목록 필터 ↔ 쿼리스트링 변환 — 새로고침·공유·뒤로가기에 필터가 살아남게 URL이 진실이다 (docs/admin-spec.md "공통 상태")
-import type { Schema } from '@/shared/api/schema-patch';
+import type {
+  FeedbackStatus,
+  FeedbackType,
+} from '@/features/feedback/api/feedback-list';
 
-export type FeedbackType = NonNullable<
-  Schema<'AdminMailboxFeedbackResponse'>['type']
->;
-export type FeedbackStatus = NonNullable<
-  Schema<'AdminMailboxFeedbackResponse'>['status']
->;
 export type FeedbackSort = 'NEWEST' | 'OLDEST';
 
 export interface FeedbackFilter {
@@ -85,17 +82,6 @@ export function writeFeedbackFilter(filter: FeedbackFilter): string {
   }
   if (filter.page > 0) params.set('page', String(filter.page));
   return params.toString();
-}
-
-/**
- * 다른 화면(대시보드·사용자 상세)에서 이 피드백의 상세를 여는 주소.
- * 상세는 단건 조회(BE LAN-374)로 열리므로 목록 필터와 무관하다 — open만 싣는다
- */
-export function feedbackOpenPath(feedback: {
-  feedbackId?: number;
-  status?: FeedbackStatus;
-}): string {
-  return `/feedbacks?open=${feedback.feedbackId}`;
 }
 
 /** 필터를 바꾸면 첫 페이지로 돌아간다 — 3페이지를 보다 조건을 바꾸면 결과가 3페이지보다 적을 수 있다 */
