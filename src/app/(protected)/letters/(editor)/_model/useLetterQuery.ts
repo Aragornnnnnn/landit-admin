@@ -9,7 +9,7 @@ import {
   type LetterItem,
 } from '@/features/letter/api/letter-list';
 
-import { LETTER_FETCH_SIZE } from './letter-filter';
+import { LETTER_FETCH_SIZE } from '../../_model/letter-filter';
 
 export function useLetterQuery(letterId: number | undefined) {
   return useQuery({

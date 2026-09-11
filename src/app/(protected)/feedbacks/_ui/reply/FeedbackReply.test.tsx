@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
+import { type FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import { FeedbackReply } from './FeedbackReply';
 
 const completed: FeedbackDetail = {

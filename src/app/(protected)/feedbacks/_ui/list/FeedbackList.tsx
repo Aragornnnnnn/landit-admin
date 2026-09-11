@@ -12,7 +12,7 @@ import { Button } from '@/shared/ui/shadcn/button';
 import {
   hasActiveFeedbackFilter,
   type FeedbackFilter,
-} from '../_model/feedback-filter';
+} from '../../_model/list/feedback-filter';
 import { FeedbackCardList } from './FeedbackCardList';
 import { FeedbackTable } from './FeedbackTable';
 

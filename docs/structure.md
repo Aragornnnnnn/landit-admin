@@ -23,11 +23,11 @@ app/
 │   └── auth/[provider]/callback/   page.tsx(조립) · _model/complete-social-login.ts(흐름, 순수) · _model/login-gateway.ts(HTTP 배선)
 ├── (protected)/
 │   ├── layout.tsx            셸 — SidebarProvider·사이드바·상단바. 인증 판단은 proxy.ts가 이미 했다
-│   ├── _ui/                  셸 컴포넌트(AppSidebar·MobileDrawer·TopBar·AccountMenu·ServerCard)
-│   ├── _model/               내비 정의(경로·라벨·아이콘·배지 쿼리)
-│   ├── page.tsx              대시보드 → _ui/ _model/
-│   ├── feedbacks/            page.tsx · _ui/(테이블·카드·필터·상세 시트·답장 폼·일괄 답장 다이얼로그) · _model/(필터 파싱·선택 상태·쿼리 훅)
-│   ├── letters/              page.tsx · new/page.tsx · [id]/page.tsx · _ui/ · _model/
+│   ├── _ui/                  셸 컴포넌트(AppSidebar·TopBar·ProtectedShell·NavIcons·ServerBadge) — 화면 코드는 여기 두지 않는다
+│   ├── _model/               셸 로직(내비 정의·배지 쿼리·계정 메뉴)
+│   ├── (dashboard)/          대시보드(/) — page.tsx · _ui/ · _model/. 셸과 같은 폴더에 섞이지 않게 그룹으로 감쌌다
+│   ├── feedbacks/            page.tsx · _ui/FeedbackListPage.tsx(조립) · _ui/{list,reply}/ · _model/{list,reply}/ — 목록과 답장(상세 시트)이 한 라우트라 구역으로 가른다
+│   ├── letters/              page.tsx · _ui/ _model/(목록 + 두 화면이 같이 쓰는 상태 변경·라벨) · (editor)/{new,[id]}/page.tsx · (editor)/_ui/ _model/(편집기)
 │   ├── users/                page.tsx · [id]/page.tsx · _ui/ · _model/
 │   ├── app-versions/         page.tsx · _ui/ · _model/
 │   └── scenario-test/        page.tsx · _ui/ · _model/
@@ -40,7 +40,8 @@ app/
 
 - 라우트 그룹은 **접근 조건**으로 가른다 — `(public)` 비로그인 접근 가능, `(protected)` 세션 쿠키 필요(`proxy.ts`가 리다이렉트).
 - `_ui/` `_model/`(필요하면 `_api/`)는 그 라우트 전용. `_` 접두사라 라우팅에서 빠진다.
-- 몇 개 라우트만 공유하면 그들을 감싸는 중첩 그룹의 `_ui/`, `(protected)` 전체면 `(protected)/_ui/`.
+- 몇 개 라우트만 공유하면 그들을 감싸는 중첩 그룹의 `_ui/`, `(protected)` 전체면 `(protected)/_ui/`. 편지 편집기가 그 예 — `letters/new`와 `letters/[id]`만 쓰므로 `letters/(editor)/_ui/`에 있고, 목록과 편집기가 같이 쓰는 상태 변경·라벨은 한 단계 위 `letters/_model/`에 있다.
+- 한 라우트 안에 독립된 구역이 있고 `_ui/`가 열 개를 넘으면 구역 이름의 하위 폴더로 가른다(피드백의 `list/`·`reply/`). 구역을 조립하는 컴포넌트(`FeedbackListPage`)는 `_ui/` 바로 아래. 라우트 그룹은 URL이 없는 화면(대시보드 `/`)을 셸 폴더와 분리할 때도 쓴다.
 - `page.tsx`는 searchParams·params 해석과 조립만. 로직은 `_model/`로.
 - `app/api`는 요청을 **받는** 쪽(route handler는 해석·위임만), features의 `api`는 요청을 **보내는** 코드.
 

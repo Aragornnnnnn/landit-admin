@@ -6,8 +6,8 @@ import { useState } from 'react';
 
 import { useIsMobile } from '@/shared/lib/use-mobile';
 
-import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
-import { useReplyDraft } from '../_model/useReplyDraft';
+import { type FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
+import { useReplyDraft } from '../../_model/reply/useReplyDraft';
 import { FeedbackReplyScreen } from './FeedbackReplyScreen';
 import { FeedbackReplySheet } from './FeedbackReplySheet';
 import { SentReplyView } from './SentReplyView';

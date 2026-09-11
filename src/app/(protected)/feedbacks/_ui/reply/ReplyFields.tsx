@@ -24,9 +24,15 @@ import {
 import { Checkbox } from '@/shared/ui/shadcn/checkbox';
 import { Input } from '@/shared/ui/shadcn/input';
 
-import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
-import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';
-import type { ReplyDraft } from '../_model/useReplyDraft';
+import {
+  REPLY_BODY_MAX,
+  REPLY_TITLE_MAX,
+} from '../../_model/reply/reply-draft';
+import {
+  templatesFor,
+  type ReplyTemplate,
+} from '../../_model/reply/reply-templates';
+import type { ReplyDraft } from '../../_model/reply/useReplyDraft';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
