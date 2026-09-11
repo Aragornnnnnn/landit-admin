@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { EMPTY_AUDIENCE } from '@/features/push-campaign/model/audience';
-
+import { EMPTY_AUDIENCE } from './audience';
 import { audienceSourceSummary, idsSummary } from './audience-source-label';
 
 describe('idsSummary', () => {

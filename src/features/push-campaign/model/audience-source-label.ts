@@ -1,8 +1,5 @@
-// 대상 목록 한 줄의 말 — 출처 이름과 요약 (Figma 2177:285 "대상 목록")
-import type {
-  AudienceDraft,
-  AudienceSourceKind,
-} from '@/features/push-campaign/model/audience';
+// 대상 출처의 말 — 이름과 ID·SQL 요약. 편집기의 대상 목록과 상세의 대상 구성 카드가 같이 쓴다
+import type { AudienceDraft, AudienceSourceKind } from './audience';
 
 export const AUDIENCE_SOURCE_LABEL: Record<AudienceSourceKind, string> = {
   sql: 'SQL',
