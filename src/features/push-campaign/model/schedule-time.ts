@@ -67,7 +67,7 @@ export function scheduleSummary(input: ScheduleInput): string {
   const hour24 = Number(p.hour);
   const meridiem = hour24 < 12 ? '오전' : '오후';
   const hour12 = hour24 % 12 || 12;
-  return `${Number(p.month)}월 ${Number(p.day)}일 (${WEEKDAY[Number(p.weekday)]}) ${meridiem} ${hour12}:${p.minute}에 발송`;
+  return `${Number(p.month)}월 ${Number(p.day)}일 (${kstWeekdayLabel(at)}) ${meridiem} ${hour12}:${p.minute}에 발송`;
 }
 
 /**
@@ -80,6 +80,11 @@ export function formatKst(iso: string): string {
   if (Number.isNaN(at.getTime())) return '';
   const p = kstParts(at);
   return `${p.month}.${p.day} ${p.hour}:${p.minute}`;
+}
+
+/** "토" — 한국 시간 기준 요일 한 글자 */
+export function kstWeekdayLabel(date: Date): string {
+  return WEEKDAY[Number(kstParts(date).weekday)] ?? '';
 }
 
 const WEEKDAY = ['', '월', '화', '수', '목', '금', '토', '일'];

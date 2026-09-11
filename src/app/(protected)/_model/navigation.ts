@@ -5,6 +5,7 @@ import {
   DashboardIcon,
   FeedbackIcon,
   LettersIcon,
+  PushIcon,
   ScenarioTestIcon,
   UsersIcon,
 } from '../_ui/NavIcons';
@@ -39,6 +40,7 @@ export const NAV_GROUPS: NavGroup[] = [
         badge: 'pendingFeedbacks',
       },
       { href: '/letters', label: '공지·업데이트', icon: LettersIcon },
+      { href: '/push-campaigns', label: '푸시 알림', icon: PushIcon },
     ],
   },
   {
@@ -72,13 +74,23 @@ export function pageTitleFor(pathname: string): string {
   );
   if (!match) return '';
   // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
-  const sub = SUB_TITLES[pathname];
+  const sub = SUB_TITLES[pathname] ?? subTitleByPattern(pathname);
   return sub ? `${match.label} / ${sub}` : match.label;
 }
 
 const SUB_TITLES: Record<string, string> = {
   '/letters/new': '새 편지',
+  '/push-campaigns/new': '새 푸시',
 };
+
+// 번호가 붙는 하위 화면 — 캠페인 ID는 UUID라 제목에 넣지 않고 "상세"로 부른다
+const SUB_TITLE_PATTERNS: { test: RegExp; sub: string }[] = [
+  { test: /^\/push-campaigns\/(?!new$)[^/]+$/, sub: '상세' },
+];
+
+function subTitleByPattern(pathname: string): string | undefined {
+  return SUB_TITLE_PATTERNS.find((entry) => entry.test.test(pathname))?.sub;
+}
 
 /** 현재 BE 호스트가 develop인지 — 시나리오 테스트 메뉴 노출 기준 */
 export function isDevelopServer(apiHost: string | undefined): boolean {
