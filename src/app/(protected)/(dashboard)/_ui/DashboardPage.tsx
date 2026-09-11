@@ -11,6 +11,7 @@ import {
   countCreatedToday,
   countsByType,
   dailyCounts,
+  formatDelta,
   oldestPending,
   signupCounts,
   todayLabel,
@@ -71,9 +72,25 @@ export function DashboardPage() {
           label="이번 주 가입"
           value={data.usersError ? '—' : String(signups.thisWeek)}
           hint={
-            data.usersError
-              ? '불러오지 못했어요'
-              : `명 · 지난주 ${signups.lastWeek}`
+            data.usersError ? (
+              '불러오지 못했어요'
+            ) : (
+              <>
+                명 · 지난주 {signups.lastWeek}{' '}
+                <Delta current={signups.thisWeek} previous={signups.lastWeek} />
+              </>
+            )
+          }
+          footer={
+            data.usersError ? undefined : (
+              <>
+                이번 달 {signups.thisMonth} · 지난달 {signups.lastMonth}{' '}
+                <Delta
+                  current={signups.thisMonth}
+                  previous={signups.lastMonth}
+                />
+              </>
+            )
           }
         />
       </div>
@@ -197,11 +214,14 @@ function SummaryCard({
   label,
   value,
   hint,
+  footer,
   className,
 }: {
   label: string;
   value: string;
-  hint: string;
+  hint: React.ReactNode;
+  /** 큰 숫자 아래 한 줄 더 — 가입 카드의 월 비교 */
+  footer?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -218,7 +238,24 @@ function SummaryCard({
         </span>
         <span className="text-[12px] text-subtle">{hint}</span>
       </span>
+      {footer && <span className="text-[12px] text-subtle">{footer}</span>}
     </section>
+  );
+}
+
+// 늘면 초록, 줄면 빨강 — 어드민 색 규칙(빨강은 오류·파괴적 행동)의 예외다. 증감은 한눈에 방향이 보여야 한다
+function Delta({ current, previous }: { current: number; previous: number }) {
+  const diff = current - previous;
+  return (
+    <span
+      className={cn(
+        'font-medium',
+        diff > 0 && 'text-success',
+        diff < 0 && 'text-destructive',
+      )}
+    >
+      {formatDelta(current, previous)}
+    </span>
   );
 }
 

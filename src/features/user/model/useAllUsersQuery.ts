@@ -1,16 +1,14 @@
 'use client';
 
-// 사용자 전체를 순차로 받아 둔다 — BE에 검색·필터가 없어 우리가 걸러야 하고, 거르려면 다 있어야 한다.
-// 50명씩 hasNext가 false일 때까지 이어 받고, 그동안 화면은 받은 만큼으로 먼저 동작한다 (docs/screens/users.md)
+// 사용자 전체를 순차로 받아 둔다 — BE에 검색·필터·기간 집계가 없어 우리가 걸러야 하고, 거르려면 다 있어야 한다.
+// 50명씩 hasNext가 false일 때까지 이어 받는다. 사용자 목록(검색·필터)과 대시보드(가입 수)가 같이 쓴다
 import { useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import {
-  fetchUserPage,
-  type UserListItem,
-} from '@/features/user/api/user-list';
+import { fetchUserPage, type UserListItem } from '../api/user-list';
 
-import { USERS_FETCH_SIZE } from './user-filter';
+/** 한 번에 받아 오는 크기 — BE 최대(50). hasNext가 false일 때까지 이어서 받는다 */
+export const USERS_FETCH_SIZE = 50;
 
 export function useAllUsersQuery() {
   const query = useInfiniteQuery({

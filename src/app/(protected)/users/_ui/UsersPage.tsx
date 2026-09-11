@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import type { UserListItem } from '@/features/user/api/user-list';
+import { useAllUsersQuery } from '@/features/user/model/useAllUsersQuery';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
@@ -15,7 +16,6 @@ import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 import { Pagination } from '@/shared/ui/Pagination';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
-import { useAllUsersQuery } from '../_model/useAllUsersQuery';
 import {
   changeUserFilter,
   filterUsers,

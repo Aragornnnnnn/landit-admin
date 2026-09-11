@@ -98,19 +98,49 @@ export function countsByType(
   }));
 }
 
-/** 이번 주·지난주 가입 수 — 가입 시각만 보면 되므로 사용자 전체 타입을 요구하지 않는다 */
+/** 이번 달 시작(1일 00:00). 가입 수를 "이번 달"로 묶는 기준이다 */
+export function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+export interface SignupCounts {
+  thisWeek: number;
+  lastWeek: number;
+  thisMonth: number;
+  lastMonth: number;
+}
+
+/** 주·월별 가입 수 — 달력 기준(월요일·1일 시작)이라 "이번 주"는 진행 중인 몫이다.
+ * 가입 시각만 보면 되므로 사용자 전체 타입을 요구하지 않는다 */
 export function signupCounts(
   users: { createdAt?: string }[],
   now: Date,
-): { thisWeek: number; lastWeek: number } {
+): SignupCounts {
   const weekStart = startOfWeek(now).getTime();
   const lastWeekStart = weekStart - 7 * DAY_MS;
+  const monthStart = startOfMonth(now).getTime();
+  const lastMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  ).getTime();
   const joined = users.map((user) => timeOf(user.createdAt));
+  const between = (from: number, to: number) =>
+    joined.filter((at) => at >= from && at < to).length;
   return {
-    thisWeek: joined.filter((at) => at >= weekStart).length,
-    lastWeek: joined.filter((at) => at >= lastWeekStart && at < weekStart)
-      .length,
+    thisWeek: between(weekStart, Infinity),
+    lastWeek: between(lastWeekStart, weekStart),
+    thisMonth: between(monthStart, Infinity),
+    lastMonth: between(lastMonthStart, monthStart),
   };
+}
+
+/** 전 기간 대비 증감 — "+6" "−7" "±0". 하이픈이 아니라 마이너스 기호라 숫자 폭이 맞는다 */
+export function formatDelta(current: number, previous: number): string {
+  const diff = current - previous;
+  if (diff > 0) return `+${diff}`;
+  if (diff < 0) return `−${-diff}`;
+  return '±0';
 }
 
 /** "2026년 8월 18일 (화)" — 화면 맨 위 한 줄 */
