@@ -15,21 +15,29 @@ const PROXY_PREFIX = '/api/proxy';
  */
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
-  post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>('POST', path, body, options),
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T>(path: string) => request<T>('DELETE', path),
 };
 
+interface RequestOptions {
+  /** 요청별 추가 헤더 — 예: 푸시 캠페인의 `Idempotency-Key`. 프록시가 넘기는 헤더만 BE에 닿는다 */
+  headers?: Record<string, string>;
+}
+
 async function request<T>(
   method: string,
   path: string,
   body?: unknown,
+  options: RequestOptions = {},
 ): Promise<T> {
+  const headers = new Headers(options.headers);
+  if (body !== undefined) headers.set('content-type', 'application/json');
   const response = await fetch(`${PROXY_PREFIX}${path}`, {
     method,
-    headers:
-      body === undefined ? undefined : { 'content-type': 'application/json' },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     // 브라우저 캐시도 쓰지 않는다 — 프록시가 no-store를 주지만 이중으로
     cache: 'no-store',

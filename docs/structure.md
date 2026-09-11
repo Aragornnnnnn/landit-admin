@@ -55,6 +55,7 @@ app/
 - `features/letter/` — `api/` 목록 경로·응답 타입·`fetchLetterPage`, `model/` 타입·상태 라벨. `/letters`와 대시보드 편지함 카드가 같이 쓴다. 탭·요약 문구·초안 규칙·편집기는 라우트에 있다
 - `features/app-version/` — `api/` 경로·타입·`fetchAppVersions`, `model/` 플랫폼 순서·라벨과 `useAppVersionsQuery`(대시보드와 화면이 같은 키를 쓰고, 저장이 둘 다 무효화한다). 초안 검증·저장 뮤테이션은 라우트에 있다
 - `features/user/` — `api/` 목록 경로·응답 타입·`fetchUserPage`. `/users`와 대시보드 가입 수가 같이 쓴다. 상세·필터 규칙은 라우트에 있다
+- `features/push-campaign/` — `api/` 경로·타입·조회/변경 함수(멱등성 키 포함), `model/` 조회·변경 훅과 도메인 규칙(상태 라벨·딥 링크/UTM·대상 합산·예약 시각). `/push-campaigns` 목록·편집기·상세 세 라우트가 같이 쓴다. 필터·초안 상태·화면 조립은 라우트에 있다
 
 라우트끼리는 서로의 `_ui/`·`_model/`을 import하지 않는다 — `../feedbacks/_model/…` 같은 상대경로가 생기면 그 코드가 features로 내려갈 때다.
 
