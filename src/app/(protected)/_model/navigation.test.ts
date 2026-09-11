@@ -23,6 +23,9 @@ describe('pageTitleFor', () => {
     ['/letters/new', '공지·업데이트 / 새 편지'],
     ['/letters/21', '공지·업데이트'],
     ['/users/12', '사용자'],
+    ['/push-campaigns', '푸시 알림'],
+    ['/push-campaigns/new', '푸시 알림 / 새 푸시'],
+    ['/push-campaigns/3f2a-uuid', '푸시 알림 / 상세'],
     ['/unknown', ''],
   ])('%s → "%s"', (pathname, title) => {
     expect(pageTitleFor(pathname)).toBe(title);
