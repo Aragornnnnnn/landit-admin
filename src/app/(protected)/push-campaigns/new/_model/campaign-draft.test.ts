@@ -26,7 +26,7 @@ const draft = (patch: Partial<CampaignDraft> = {}): CampaignDraft => ({
 describe('finalDeepLink', () => {
   it('UTM 스위치가 켜져 있으면 붙이고, 꺼져 있으면 입력 그대로', () => {
     expect(finalDeepLink(draft())).toBe(
-      '/survey?utm_source=push&utm_medium=admin&utm_campaign=survey_0912',
+      '/survey?utm_source=push&utm_medium=notification&utm_campaign=survey_0912',
     );
     expect(finalDeepLink(draft({ utmEnabled: false }))).toBe('/survey');
   });
@@ -37,7 +37,7 @@ describe('withTitle', () => {
 
   it('제목을 바꾸면 캠페인 값이 따라간다 — 운영자가 손대기 전까지', () => {
     const next = withTitle(EMPTY_CAMPAIGN_DRAFT, '설문 안내', date);
-    expect(next.utmCampaign).toBe('설문_안내_0912');
+    expect(next.utmCampaign).toBe('admin_설문_안내_0912');
   });
 
   it('운영자가 캠페인 값을 직접 고쳤으면 제목이 바뀌어도 건드리지 않는다', () => {
@@ -81,7 +81,7 @@ describe('toCampaignRequest', () => {
       title: '설문 안내',
       body: '설문에 답해 주세요',
       deepLink:
-        '/survey?utm_source=push&utm_medium=admin&utm_campaign=survey_0912',
+        '/survey?utm_source=push&utm_medium=notification&utm_campaign=survey_0912',
       audienceType: 'ALL',
       userProfileIds: [],
       audienceSql: undefined,
