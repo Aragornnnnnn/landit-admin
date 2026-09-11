@@ -13,6 +13,7 @@ import {
   LETTER_STATUS_LABEL,
 } from '@/features/letter/model/letter-label';
 import { InlineError } from '@/shared/ui/InlineError';
+import { LeaveEditorDialog } from '@/shared/ui/LeaveEditorDialog';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 import { Button } from '@/shared/ui/shadcn/button';
 import { StatusChip } from '@/shared/ui/StatusChip';
@@ -34,7 +35,6 @@ import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { statusAfter } from '../../_model/letter-actions';
 import { useLetterActions } from '../../_model/useLetterActions';
 import { LetterActionDialog } from '../../_ui/LetterActionDialog';
-import { LeaveEditorDialog } from './LeaveEditorDialog';
 import { LetterBasicFields } from './LetterBasicFields';
 import { LetterBodyCard } from './LetterBodyCard';
 import { LetterPreview } from './LetterPreview';

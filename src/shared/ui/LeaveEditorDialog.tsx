@@ -1,6 +1,6 @@
 'use client';
 
-// 저장 안 한 채 나갈 때 — 쓰던 편지를 잃는 건 되돌릴 수 없다 (docs/screens/letters.md "이탈 다이얼로그")
+// 저장 안 한 채 편집기를 나갈 때 — 쓰던 것을 잃는 건 되돌릴 수 없다. 편지 편집기와 푸시 편집기가 같이 쓴다 (docs/screens/letters.md "이탈 다이얼로그")
 import {
   AlertDialog,
   AlertDialogAction,
