@@ -83,6 +83,18 @@ export interface AdminPushAudiencePreview {
   estimatedAt: string;
 }
 
+/** 사용자 목록 — LAN-462가 더한 필터 응답(전체 수·페이지 수·푸시 권한). 같은 배포에 묶여 있어 같은 시점에 지운다 */
+export type AdminUserListPagePatched = Omit<
+  Schema<'AdminUserListResponse'>,
+  'items'
+> & {
+  items: (Schema<'AdminUserListItem'> & {
+    pushPermissionStatus?: 'GRANTED' | 'DENIED' | 'NOT_DETERMINED';
+  })[];
+  totalCount?: number;
+  totalPages?: number;
+};
+
 export interface AdminPushCampaignRequest {
   title: string;
   body: string;
