@@ -7,12 +7,11 @@ import type {
   AudienceDraft,
   AudienceSourceKind,
 } from '@/features/push-campaign/model/audience';
-import { cn } from '@/shared/lib/cn';
-
 import {
   AUDIENCE_SOURCE_LABEL,
   audienceSourceSummary,
-} from '../_model/audience-source-label';
+} from '@/features/push-campaign/model/audience-source-label';
+import { cn } from '@/shared/lib/cn';
 
 interface AudienceSourceListProps {
   audience: AudienceDraft;
