@@ -1,29 +1,32 @@
 'use client';
 
-// 목록 페이지 이동 — 좌측 "1–20 / 128", 우측 페이지 버튼 (Figma 1050:8193)
+// 목록 페이지 이동 — 좌측 "1–20 / 128", 우측 페이지 번호 + ‹ › (Figma 피드백 1050:8193). 피드백·사용자 목록이 같이 쓴다
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/shared/lib/cn';
 
-interface FeedbackPaginationProps {
+interface PaginationProps {
   /** 0부터 */
   page: number;
   size: number;
   totalElements: number;
   totalPages: number;
+  /** 왼쪽 요약 문구 — 없으면 "{from}–{to} / {total}" */
+  summary?: string;
   onChangePage: (page: number) => void;
 }
 
 // 현재 페이지 주변으로 이만큼만 보여주고 나머지는 …로 접는다 (Figma: 7페이지에서 "1 2 3 … 7")
 const WINDOW = 3;
 
-export function FeedbackPagination({
+export function Pagination({
   page,
   size,
   totalElements,
   totalPages,
+  summary,
   onChangePage,
-}: FeedbackPaginationProps) {
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const first = page * size + 1;
@@ -33,7 +36,7 @@ export function FeedbackPagination({
   return (
     <div className="flex w-full items-center gap-1.5">
       <span className="text-xs text-subtle">
-        {first}–{last} / {totalElements}
+        {summary ?? `${first}–${last} / ${totalElements}`}
       </span>
       <div className="ml-auto flex items-center gap-1.5">
         {pages.map((target, index) =>

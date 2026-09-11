@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
+import { Pagination } from '@/shared/ui/Pagination';
+
 import {
   FEEDBACK_PAGE_SIZE,
   writeFeedbackFilter,
@@ -15,7 +17,6 @@ import { useFeedbackDetailQuery } from '../_model/reply/useFeedbackDetailQuery';
 import { usePendingFeedbackCountQuery } from '../../_model/usePendingFeedbackCountQuery';
 import { FeedbackFilters } from './list/FeedbackFilters';
 import { FeedbackList } from './list/FeedbackList';
-import { FeedbackPagination } from './list/FeedbackPagination';
 import { FeedbackReply } from './reply/FeedbackReply';
 
 /** Figma: "처리중 12건 · 전체 128건". 조건 때문에 결과가 없으면 "0건"만 (docs/screens/feedbacks.md) */
@@ -104,7 +105,7 @@ export function FeedbackListPage() {
       )}
 
       {feedbacks.isSuccess && items.length > 0 && (
-        <FeedbackPagination
+        <Pagination
           page={filter.page}
           size={FEEDBACK_PAGE_SIZE}
           totalElements={totalElements}
