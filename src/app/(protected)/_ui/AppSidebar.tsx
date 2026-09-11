@@ -6,14 +6,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '@/shared/lib/cn';
+import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
+import { LanditLogo } from '@/shared/ui/LanditLogo';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
-import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
-import { LanditLogo } from '@/shared/ui/LanditLogo';
+} from '@/shared/ui/shadcn/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/shared/ui/sidebar';
+} from '@/shared/ui/shadcn/sidebar';
 
 import { isActiveNav, isDevelopServer, NAV_GROUPS } from '../_model/navigation';
 import { useAccountNickname } from '../_model/useAccountNickname';

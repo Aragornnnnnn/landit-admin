@@ -1,7 +1,7 @@
 // 루트 레이아웃 — 언어·메타데이터·전역 스타일. 셸(사이드바)은 (protected) 그룹 레이아웃이 담당한다
 import type { Metadata } from 'next';
 
-import { Toaster } from '@/shared/ui/sonner';
+import { Toaster } from '@/shared/ui/shadcn/sonner';
 
 import './globals.css';
 

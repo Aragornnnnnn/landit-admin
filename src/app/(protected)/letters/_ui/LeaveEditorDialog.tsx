@@ -9,8 +9,8 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-} from '@/shared/ui/alert-dialog';
-import { Button } from '@/shared/ui/button';
+} from '@/shared/ui/shadcn/alert-dialog';
+import { Button } from '@/shared/ui/shadcn/button';
 
 interface LeaveEditorDialogProps {
   open: boolean;

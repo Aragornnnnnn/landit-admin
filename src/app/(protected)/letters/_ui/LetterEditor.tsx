@@ -12,9 +12,9 @@ import {
   LETTER_STATUS_DOT,
   LETTER_STATUS_LABEL,
 } from '@/features/letter/model/letter-label';
-import { Button } from '@/shared/ui/button';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
+import { Button } from '@/shared/ui/shadcn/button';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 import { statusAfter } from '../_model/letter-actions';

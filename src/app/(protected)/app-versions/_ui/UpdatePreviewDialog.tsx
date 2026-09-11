@@ -7,8 +7,8 @@ import { X } from 'lucide-react';
 import type { Platform } from '@/features/app-version/api/app-version';
 import { PLATFORM_LABEL } from '@/features/app-version/model/platform';
 import { cn } from '@/shared/lib/cn';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { LanditAppIcon } from '@/shared/ui/LanditAppIcon';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/shadcn/dialog';
 
 import type { AppVersionDraft } from '../_model/app-version-draft';
 import {

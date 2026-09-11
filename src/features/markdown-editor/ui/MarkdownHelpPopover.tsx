@@ -4,7 +4,11 @@
 // 항상 보이는 안내 문장 대신 두는 이유는 알고 나면 소음이고, 한 줄로는 문법을 다 못 알려줘서다 (docs/screens/feedbacks.md "답장 본문 마크다운")
 import { CircleHelp } from 'lucide-react';
 
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/shared/ui/shadcn/popover';
 
 /** 앱(remark-gfm + remark-breaks)이 그리는 것만. 여기 없는 문법은 앱에서도 안 된다 */
 const SYNTAX_ROWS: [syntax: string, result: string][] = [

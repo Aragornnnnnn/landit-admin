@@ -9,7 +9,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-} from '@/shared/ui/alert-dialog';
+} from '@/shared/ui/shadcn/alert-dialog';
 
 import { LETTER_CONFIRM, type LetterAction } from '../_model/letter-actions';
 

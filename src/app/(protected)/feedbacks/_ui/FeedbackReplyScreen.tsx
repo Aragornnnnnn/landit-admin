@@ -6,8 +6,8 @@
 import { ChevronLeft } from 'lucide-react';
 
 import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
-import { Button } from '@/shared/ui/button';
-import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet';
+import { Button } from '@/shared/ui/shadcn/button';
+import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/shadcn/sheet';
 
 import type { ReplyDraft } from '../_model/useReplyDraft';
 import { ServerBadge } from '../../_ui/ServerBadge';

@@ -10,6 +10,8 @@ import { FEEDBACK_TYPE_LABEL } from '@/features/feedback/model/feedback-label';
 import { MarkdownEditor } from '@/features/markdown-editor/ui/MarkdownEditor';
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
+import { InlineError } from '@/shared/ui/InlineError';
+import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,11 +20,9 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-} from '@/shared/ui/alert-dialog';
-import { Checkbox } from '@/shared/ui/checkbox';
-import { InlineError } from '@/shared/ui/InlineError';
-import { Input } from '@/shared/ui/input';
-import { ListSkeleton } from '@/shared/ui/ListSkeleton';
+} from '@/shared/ui/shadcn/alert-dialog';
+import { Checkbox } from '@/shared/ui/shadcn/checkbox';
+import { Input } from '@/shared/ui/shadcn/input';
 
 import { REPLY_BODY_MAX, REPLY_TITLE_MAX } from '../_model/reply-draft';
 import { templatesFor, type ReplyTemplate } from '../_model/reply-templates';

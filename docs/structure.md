@@ -74,14 +74,14 @@ app/
 shared/
 ├── api/         client.ts(api.get/post/…) · parse.ts(BE 응답 봉투) · api-error.ts · schema.d.ts(생성) · schema-patch.ts · query-client.ts
 ├── auth/        crypto.ts(PKCE·nonce) · web-social-login.ts · session-cookie.ts(이름·속성, 서버 전용) · route-guard.ts · forbidden-notice.ts · account-display.ts
-├── ui/          shadcn 생성물(button·dialog·…) + 우리 프리미티브(StatusChip·EmptyState·InlineError·ListSkeleton)
+├── ui/          우리 프리미티브(StatusChip·EmptyState·InlineError·ListSkeleton·LanditLogo) · shadcn/ 생성물(button·dialog·…)
 ├── security/    csp.ts · same-origin.ts(CSRF 판정 — 프록시·auth 공용)
 ├── monitoring/  report.ts(reportError·reportWarning — 지금은 콘솔)
 └── lib/         cn.ts · use-mobile.ts · useDelayedPending.ts(로딩 200ms 규칙) — 이름 붙일 주제가 없는 범용 유틸·훅만
 ```
 
 - 파일이 3개 이상 모이는 주제는 형제 폴더로 독립시킨다(`auth`·`monitoring`처럼). `shared/lib`은 최후의 자리.
-- `shared/ui`의 shadcn 생성물은 리뷰 대상이 아니다(CodeRabbit path_filters 제외). 손대면 커밋 메시지에 이유를 적는다. shadcn 별칭(`components.json`)은 `ui`·`components`→`@/shared/ui`, `utils`→`@/shared/lib/cn`, `lib`·`hooks`→`@/shared/lib`. `shared/lib/use-mobile.ts`는 shadcn이 정한 이름이라 훅 파일명 규칙(`useCamel.ts`)의 예외다.
+- shadcn 생성물은 `shared/ui/shadcn/`에만 둔다 — 리뷰 대상이 아니고(CodeRabbit path_filters 제외), 손대면 커밋 메시지에 이유를 적는다. 우리가 쓴 프리미티브는 `shared/ui/` 바로 아래(PascalCase). shadcn 별칭(`components.json`)은 `ui`→`@/shared/ui/shadcn`, `components`→`@/shared/ui`, `utils`→`@/shared/lib/cn`, `lib`·`hooks`→`@/shared/lib`. `shared/lib/use-mobile.ts`는 shadcn이 정한 이름이라 훅 파일명 규칙(`useCamel.ts`)의 예외다.
 - 서버 전용 모듈(쿠키·프록시 헬퍼)은 `import 'server-only'`를 첫 줄에 둔다 — 클라이언트 번들에 섞이면 빌드가 깨지게.
 
 ## 파일 이름

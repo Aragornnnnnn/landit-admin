@@ -9,10 +9,10 @@ import type { UserListItem } from '@/features/user/api/user-list';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
-import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
+import { Button } from '@/shared/ui/shadcn/button';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 import { useAllUsersQuery } from '../_model/useAllUsersQuery';

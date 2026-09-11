@@ -31,7 +31,7 @@ reviews:
     - '!pnpm-lock.yaml'
     - '!next-env.d.ts'
     - '!src/shared/api/schema.d.ts'
-    - '!src/shared/ui/**'
+    - '!src/shared/ui/shadcn/**'
   path_instructions:
     - path: 'src/app/api/**'
       instructions: |

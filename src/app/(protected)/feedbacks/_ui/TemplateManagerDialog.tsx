@@ -7,15 +7,15 @@ import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { cn } from '@/shared/lib/cn';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/shadcn/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@/shared/ui/dialog';
-import { Input } from '@/shared/ui/input';
-import { Textarea } from '@/shared/ui/textarea';
+} from '@/shared/ui/shadcn/dialog';
+import { Input } from '@/shared/ui/shadcn/input';
+import { Textarea } from '@/shared/ui/shadcn/textarea';
 
 import type { ReplyTemplate } from '../_model/reply-templates';
 import type { ReplyTemplatesStore } from '../_model/useReplyTemplates';

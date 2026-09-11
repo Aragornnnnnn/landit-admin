@@ -5,14 +5,14 @@ import Link from 'next/link';
 
 import type { LetterType } from '@/features/letter/api/letter-list';
 import { cn } from '@/shared/lib/cn';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/shadcn/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui/select';
+} from '@/shared/ui/shadcn/select';
 
 import {
   LETTER_TABS,

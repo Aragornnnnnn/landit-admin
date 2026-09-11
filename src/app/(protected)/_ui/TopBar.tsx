@@ -5,7 +5,7 @@
 import { Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-import { useSidebar } from '@/shared/ui/sidebar';
+import { useSidebar } from '@/shared/ui/shadcn/sidebar';
 
 import { pageTitleFor } from '../_model/navigation';
 import { ServerBadge } from './ServerBadge';

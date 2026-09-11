@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
+} from '@/shared/ui/shadcn/dropdown-menu';
 
 import { letterMenuItems, type LetterAction } from '../_model/letter-actions';
 

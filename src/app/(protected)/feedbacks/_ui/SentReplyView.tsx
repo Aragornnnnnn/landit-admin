@@ -5,7 +5,7 @@
 import { X } from 'lucide-react';
 
 import { formatDateTime } from '@/shared/lib/format-time';
-import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/shadcn/sheet';
 
 import { type FeedbackDetail } from '../_model/useFeedbackDetailQuery';
 import { FeedbackOriginCard, FeedbackPersonHeader } from './ReplyFields';
