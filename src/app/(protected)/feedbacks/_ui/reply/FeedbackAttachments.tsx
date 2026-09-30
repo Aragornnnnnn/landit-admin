@@ -147,7 +147,7 @@ function LoadFailed({ className }: { className: string }) {
   return (
     <div
       className={cn(
-        'flex items-center justify-center bg-muted p-2 text-center text-[11px] leading-snug text-subtle',
+        'flex items-center justify-center bg-muted p-2 text-center text-[11px] leading-snug break-keep text-subtle',
         className,
       )}
     >
