@@ -62,3 +62,75 @@ describe('FeedbackAttachments', () => {
     );
   });
 });
+
+describe('FeedbackAttachments 넘겨보기', () => {
+  const imageSrc = (dialog: HTMLElement) =>
+    dialog.querySelector('img')?.getAttribute('src');
+
+  async function openAt(index: number, list = attachments) {
+    render(<FeedbackAttachments attachments={list} />);
+    await userEvent.click(
+      screen.getByRole('button', { name: `첨부 이미지 ${index} 크게 보기` }),
+    );
+    return screen.findByRole('dialog');
+  }
+
+  it('다음 버튼을 누르면 다음 이미지로 넘어간다', async () => {
+    const dialog = await openAt(1);
+
+    await userEvent.click(screen.getByRole('button', { name: '다음 이미지' }));
+
+    expect(dialog).toHaveAccessibleName('첨부 이미지 2 / 2');
+    expect(imageSrc(dialog)).toBe(
+      '/api/proxy/api/v1/mailbox/feedbacks/12/attachments/35',
+    );
+  });
+
+  it('이전 버튼을 누르면 앞 이미지로 돌아간다', async () => {
+    const dialog = await openAt(2);
+
+    await userEvent.click(screen.getByRole('button', { name: '이전 이미지' }));
+
+    expect(dialog).toHaveAccessibleName('첨부 이미지 1 / 2');
+  });
+
+  it('키보드 → ←로도 넘긴다', async () => {
+    const dialog = await openAt(1);
+
+    await userEvent.keyboard('{ArrowRight}');
+    expect(dialog).toHaveAccessibleName('첨부 이미지 2 / 2');
+
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(dialog).toHaveAccessibleName('첨부 이미지 1 / 2');
+  });
+
+  it('첫 장엔 이전 버튼이, 마지막 장엔 다음 버튼이 없다 — 끝에서 처음으로 돌지 않는다', async () => {
+    await openAt(1);
+
+    expect(
+      screen.queryByRole('button', { name: '이전 이미지' }),
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '다음 이미지' }));
+
+    expect(
+      screen.queryByRole('button', { name: '다음 이미지' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('마지막 장에서 → 를 눌러도 그대로다', async () => {
+    const dialog = await openAt(2);
+
+    await userEvent.keyboard('{ArrowRight}');
+
+    expect(dialog).toHaveAccessibleName('첨부 이미지 2 / 2');
+  });
+
+  it('첨부가 1장이면 넘기기 버튼을 그리지 않는다', async () => {
+    await openAt(1, attachments.slice(0, 1));
+
+    expect(
+      screen.queryByRole('button', { name: /이미지$/ }),
+    ).not.toBeInTheDocument();
+  });
+});
