@@ -50,4 +50,27 @@ describe('FeedbackReply', () => {
       screen.getByText('답장 내용을 불러오지 못했어요'),
     ).toBeInTheDocument();
   });
+
+  it('사용자가 사진을 첨부했으면 원문 아래에 썸네일을 보여준다', () => {
+    render(
+      <FeedbackReply
+        feedback={{
+          ...completed,
+          attachments: [
+            {
+              attachmentId: 9,
+              contentType: 'image/png',
+              fileSize: 100,
+              downloadUrl: '/api/v1/mailbox/feedbacks/7/attachments/9',
+            },
+          ],
+        }}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: '첨부 이미지 1 크게 보기' }),
+    ).toBeInTheDocument();
+  });
 });

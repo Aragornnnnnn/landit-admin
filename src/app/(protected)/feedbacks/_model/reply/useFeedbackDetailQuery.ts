@@ -6,14 +6,19 @@ import { useQuery } from '@tanstack/react-query';
 
 import { FEEDBACKS_PATH } from '@/features/feedback/api/feedback-list';
 import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
+import type {
+  MailboxFeedbackAttachment,
+  Schema,
+} from '@/shared/api/schema-patch';
 
-// 스웨거는 reply의 nullable을 안 찍지만 실제 응답은 답장이 없으면 null이다 — 실계약으로 넓힌다
+// 스웨거는 reply의 nullable을 안 찍지만 실제 응답은 답장이 없으면 null이다 — 실계약으로 넓힌다.
+// attachments는 schema-patch의 임시 타입(재생성 전까지)
 export type FeedbackDetail = Omit<
   Schema<'AdminMailboxFeedbackDetailResponse'>,
   'reply'
 > & {
   reply?: Schema<'Reply'> | null;
+  attachments?: MailboxFeedbackAttachment[];
 };
 
 export function useFeedbackDetailQuery(feedbackId: number | undefined) {
