@@ -5,17 +5,17 @@
 // 시트와 같은 Radix Dialog 위에 얹는다 — 포커스 가둠·Esc·바깥 스크롤 잠금을 직접 만들지 않으려고
 import { ChevronLeft } from 'lucide-react';
 
-import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/shadcn/sheet';
 
+import type { FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import type { ReplyDraft } from '../../_model/reply/useReplyDraft';
 import { ServerBadge } from '../../../_ui/ServerBadge';
 import { ReplyConfirmDialog } from './ReplyConfirmDialog';
 import { ReplyFields } from './ReplyFields';
 
 interface FeedbackReplyScreenProps {
-  feedback: FeedbackItem;
+  feedback: FeedbackDetail;
   draft: ReplyDraft;
   onClose: () => void;
 }

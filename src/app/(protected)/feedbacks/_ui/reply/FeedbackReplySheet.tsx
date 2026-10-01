@@ -3,16 +3,16 @@
 // 데스크톱 답장 — 목록을 덮지 않고 오른쪽에서 열리는 시트 (Figma 1050:8441 · 9683)
 import { X } from 'lucide-react';
 
-import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/shadcn/sheet';
 
+import type { FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import type { ReplyDraft } from '../../_model/reply/useReplyDraft';
 import { ReplyConfirmDialog } from './ReplyConfirmDialog';
 import { ReplyFields } from './ReplyFields';
 
 interface FeedbackReplySheetProps {
-  feedback: FeedbackItem;
+  feedback: FeedbackDetail;
   draft: ReplyDraft;
   onClose: () => void;
 }

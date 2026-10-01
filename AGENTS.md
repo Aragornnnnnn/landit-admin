@@ -88,7 +88,7 @@ pnpm api:types        # 스웨거 → src/shared/api/schema.d.ts 재생성 (BE �
 **BE 통로·CSRF**
 
 - BE 호출은 `/api/proxy/*` 하나로만. 브라우저가 BE 도메인을 직접 fetch하지 않는다(rewrites도 안 쓴다 — 쿠키 부착이 필요해서). Server Actions로 변경 요청을 보내지 않는다 — 인가·감사 로그가 BE 한 곳에 모이도록 프록시만 쓴다.
-- 프록시는 `/api/v1/admin/*`·`/api/v1/auth/*` 화이트리스트 밖 경로와 허용 메서드 밖 요청을 거부한다.
+- 프록시는 `/api/v1/admin/*`·`/api/v1/auth/*` 화이트리스트(+ GET 한정 피드백 첨부 이미지 경로, docs/security.md) 밖 경로와 허용 메서드 밖 요청을 거부한다.
 - 쿠키 인증은 CSRF 표면이 생긴다. 프록시는 변경 요청(POST/PUT/PATCH/DELETE)에서 `Sec-Fetch-Site: same-origin`(없으면 `Origin`이 자기 오리진)이 아니면 거부한다. `SameSite=Strict`는 1차, 이 검사가 2차 방어다.
 - 프록시 응답에는 `Cache-Control: no-store`. 어드민 데이터는 어떤 계층(브라우저·CDN·Next fetch 캐시·ISR)에도 캐시하지 않는다. 서버 컴포넌트에서 어드민 데이터를 fetch하지 않는다(전부 클라이언트 → 프록시).
 

@@ -104,3 +104,16 @@ export interface AdminPushCampaignRequest {
   audienceSql?: string;
   excludedUserProfileIds: number[];
 }
+
+/**
+ * 피드백 첨부 이미지 — 스웨거엔 올라왔지만(landit-be 3973d971) 지금 재생성하면 편지 타입 DIRECT 등 이 작업 밖 변경이
+ * 같이 들어와 타입이 깨진다. BE `MailboxFeedbackAttachmentResponse`를 그대로 옮긴 임시 타입이다.
+ * 다음 `pnpm api:types` 재생성 때 지우고 `Schema<'MailboxFeedbackAttachmentResponse'>`로 바꾼다.
+ */
+export interface MailboxFeedbackAttachment {
+  attachmentId?: number;
+  contentType?: string;
+  fileSize?: number;
+  /** Bearer 인증을 붙여 이미지 바이트를 조회할 API 상대 경로 — `/api/v1/mailbox/feedbacks/{id}/attachments/{id}` */
+  downloadUrl?: string;
+}
