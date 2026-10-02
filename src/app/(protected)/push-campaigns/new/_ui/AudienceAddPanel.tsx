@@ -5,13 +5,13 @@
 import { useState } from 'react';
 
 import {
-  parseIdList,
   unionIds,
   type AudienceDraft,
 } from '@/features/push-campaign/model/audience';
 import { usePushAudienceQueryMutation } from '@/features/push-campaign/model/usePushCampaignMutation';
 import { cn } from '@/shared/lib/cn';
 import { formatCount } from '@/shared/lib/format-count';
+import { parseIdList } from '@/shared/lib/parse-id-list';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Checkbox } from '@/shared/ui/shadcn/checkbox';
 import { Input } from '@/shared/ui/shadcn/input';
