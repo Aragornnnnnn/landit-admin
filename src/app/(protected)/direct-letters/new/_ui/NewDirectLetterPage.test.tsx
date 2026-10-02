@@ -93,7 +93,7 @@ describe('NewDirectLetterPage', () => {
     await user.click(await screen.findByRole('button', { name: '2명 추가' }));
     await user.type(screen.getByLabelText('제목'), ' 결제 오류 보상 안내 ');
     await user.type(
-      screen.getByLabelText('본문'),
+      screen.getByLabelText('편지 본문'),
       '안녕하세요.{enter}{enter}감사합니다.',
     );
     await user.click(screen.getByRole('button', { name: '2명에게 보내기' }));
@@ -130,7 +130,7 @@ describe('NewDirectLetterPage', () => {
     await pasteIds(user, '1290');
     await user.click(await screen.findByRole('button', { name: '1명 추가' }));
     await user.type(screen.getByLabelText('제목'), '안내');
-    await user.type(screen.getByLabelText('본문'), '본문');
+    await user.type(screen.getByLabelText('편지 본문'), '본문');
     await user.click(screen.getByRole('button', { name: '1명에게 보내기' }));
     await user.click(
       within(await screen.findByRole('alertdialog')).getByRole('button', {

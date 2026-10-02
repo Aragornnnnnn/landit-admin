@@ -1,7 +1,8 @@
 'use client';
 
-// 사용자 편지함 미리보기 — 받는 사람이 볼 편지를 그린다 (Figma 2593:426 우측). 본문은 일반 텍스트라 줄바꿈만 살린다.
+// 사용자 편지함 미리보기 — 받는 사람이 볼 편지를 그린다 (Figma 2593:426 우측). 본문은 사용자 앱과 같은 마크다운 렌더 조합이다.
 // 칩 문구 "편지"는 앱이 DIRECT를 어떻게 보여 줄지 정해지면 맞춘다 (docs/screens/direct-letters.md "열린 질문")
+import { MarkdownPreview } from '@/features/markdown-editor/ui/MarkdownPreview';
 import { cn } from '@/shared/lib/cn';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
@@ -33,9 +34,7 @@ export function DirectLetterPreview({
         <h3 className="text-[17px] leading-snug font-bold break-words text-foreground">
           {title}
         </h3>
-        <p className="text-[14px] leading-[1.6] break-words whitespace-pre-wrap text-foreground">
-          {body.trim()}
-        </p>
+        <MarkdownPreview text={body} className="text-[14px]" />
       </div>
     </div>
   );

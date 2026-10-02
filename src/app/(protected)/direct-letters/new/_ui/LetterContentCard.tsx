@@ -1,9 +1,9 @@
 'use client';
 
-// 내용 카드 — 제목(200자) · 본문(일반 텍스트). 공지와 달리 마크다운을 쓰지 않는다 — BE가 bodyText를 그대로 보여 준다 (Figma 2593:426)
+// 내용 카드 — 제목(200자) · 본문. 본문은 피드백 답장과 같은 마크다운 편집기다 — 사용자 앱이 bodyText를 마크다운으로 그린다 (Figma 2593:426)
+import { MarkdownEditor } from '@/features/markdown-editor/ui/MarkdownEditor';
 import { cn } from '@/shared/lib/cn';
 import { Input } from '@/shared/ui/shadcn/input';
-import { Textarea } from '@/shared/ui/shadcn/textarea';
 
 import {
   TITLE_MAX,
@@ -47,19 +47,16 @@ export function LetterContentCard({ draft, onChange }: LetterContentCardProps) {
         />
       </label>
 
-      <label className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5">
         <span className="text-[13px] text-subtle">본문</span>
-        <Textarea
+        <MarkdownEditor
           value={draft.body}
-          onChange={(event) => onChange({ ...draft, body: event.target.value })}
-          aria-label="본문"
-          rows={8}
-          className={cn(FIELD, 'min-h-[196px] leading-[1.6]')}
+          onChange={(body) => onChange({ ...draft, body })}
+          background="card"
+          label="편지 본문"
+          placeholder="본문 — 이미지는 붙여넣거나 끌어다 놓으세요"
         />
-        <span className="text-[11px] text-subtle">
-          일반 텍스트로 보내요 · 줄바꿈은 그대로 보여요
-        </span>
-      </label>
+      </div>
     </section>
   );
 }
