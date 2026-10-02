@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-import type { MailboxFeedbackAttachment } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 import { cn } from '@/shared/lib/cn';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/shadcn/dialog';
 
@@ -15,7 +15,7 @@ import {
 } from '../../_model/reply/feedback-attachments';
 
 interface FeedbackAttachmentsProps {
-  attachments: MailboxFeedbackAttachment[] | undefined;
+  attachments: Schema<'MailboxFeedbackAttachmentResponse'>[] | undefined;
 }
 
 export function FeedbackAttachments({ attachments }: FeedbackAttachmentsProps) {

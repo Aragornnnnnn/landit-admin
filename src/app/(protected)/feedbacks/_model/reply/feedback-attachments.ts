@@ -1,6 +1,6 @@
 // 피드백 첨부 이미지 → 화면에 걸 주소. BE 상대 경로를 프록시 경로로 바꾼다 (프록시가 GET으로 열어 둔 모양만)
 import { FEEDBACK_ATTACHMENT_PATH } from '@/features/feedback/api/feedback-attachment';
-import type { MailboxFeedbackAttachment } from '@/shared/api/schema-patch';
+import type { Schema } from '@/shared/api/schema-patch';
 
 export interface AttachmentImage {
   id: number;
@@ -11,7 +11,7 @@ export interface AttachmentImage {
 const PROXY_PREFIX = '/api/proxy';
 
 export function toAttachmentImages(
-  attachments: MailboxFeedbackAttachment[] | null | undefined,
+  attachments: Schema<'MailboxFeedbackAttachmentResponse'>[] | null | undefined,
 ): AttachmentImage[] {
   return (attachments ?? []).flatMap(({ attachmentId, downloadUrl }) =>
     attachmentId !== undefined && isAttachmentPath(downloadUrl)
