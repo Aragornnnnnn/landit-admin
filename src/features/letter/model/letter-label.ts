@@ -5,6 +5,8 @@ export const LETTER_TYPE_LABEL: Record<LetterType, string> = {
   NOTICE: '공지',
   UPDATE: '업데이트',
   REPLY: '답장',
+  // 특정 사용자에게만 가는 편지 — 공지·업데이트 목록 API는 이 타입을 내려주지 않는다(개인 편지 화면에서만 쓴다)
+  DIRECT: '개인 편지',
 };
 
 export const LETTER_STATUS_LABEL: Record<LetterStatus, string> = {

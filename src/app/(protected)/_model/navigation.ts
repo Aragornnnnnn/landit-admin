@@ -3,6 +3,7 @@
 import {
   AppVersionsIcon,
   DashboardIcon,
+  DirectLetterIcon,
   FeedbackIcon,
   LettersIcon,
   PushIcon,
@@ -42,6 +43,12 @@ export const NAV_GROUPS: NavGroup[] = [
         badge: 'pendingFeedbacks',
       },
       { href: '/letters', label: '공지·업데이트', icon: LettersIcon },
+      // 특정 사용자에게만 가는 편지 — 편지함에 도착하고 푸시는 보내지 않아 알림이 아니라 편지함 그룹이다
+      {
+        href: '/direct-letters',
+        label: '개인 편지',
+        icon: DirectLetterIcon,
+      },
     ],
   },
   {
@@ -94,6 +101,7 @@ export function pageTitleFor(pathname: string): string {
 
 const SUB_TITLES: Record<string, string> = {
   '/letters/new': '새 편지',
+  '/direct-letters/new': '새 편지',
   '/push-campaigns/new': '새 푸시',
 };
 

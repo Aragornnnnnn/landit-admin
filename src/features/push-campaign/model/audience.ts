@@ -42,29 +42,6 @@ export function toAudienceDraft(campaign: PushCampaign): AudienceDraft {
   };
 }
 
-export interface ParsedIds {
-  ids: number[];
-  recognized: number;
-  duplicates: number;
-  invalid: number;
-}
-
-/** "1284, 1283\n#1279 1201" → ID 목록. 쉼표·세미콜론·공백·줄바꿈이 구분자, 앞의 #은 뗀다. 양의 정수만 인식한다 */
-export function parseIdList(text: string): ParsedIds {
-  const seen = new Set<number>();
-  let duplicates = 0;
-  let invalid = 0;
-  for (const token of text.split(/[\s,;]+/)) {
-    if (!token) continue;
-    const digits = token.replace(/^#/, '');
-    const id = /^\d+$/.test(digits) ? Number(digits) : 0;
-    if (id <= 0) invalid += 1;
-    else if (seen.has(id)) duplicates += 1;
-    else seen.add(id);
-  }
-  return { ids: [...seen], recognized: seen.size, duplicates, invalid };
-}
-
 /** 중복 없이 오름차순 — BE도 정규화하지만 같은 요청이 같은 본문이 되게 화면에서 먼저 맞춘다 */
 export function unionIds(...lists: number[][]): number[] {
   return [...new Set(lists.flat())].sort((a, b) => a - b);

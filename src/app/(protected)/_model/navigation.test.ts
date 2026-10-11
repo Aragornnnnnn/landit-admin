@@ -13,6 +13,11 @@ describe('isActiveNav', () => {
     expect(isActiveNav('/letters', '/letters/3')).toBe(true);
     expect(isActiveNav('/letters', '/lettersx')).toBe(false);
   });
+
+  it('개인 편지는 공지·업데이트와 경로가 겹치지 않아 서로를 활성으로 두지 않는다', () => {
+    expect(isActiveNav('/letters', '/direct-letters/new')).toBe(false);
+    expect(isActiveNav('/direct-letters', '/direct-letters/new')).toBe(true);
+  });
 });
 
 describe('pageTitleFor', () => {
@@ -22,6 +27,7 @@ describe('pageTitleFor', () => {
     // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
     ['/letters/new', '공지·업데이트 / 새 편지'],
     ['/letters/21', '공지·업데이트'],
+    ['/direct-letters/new', '개인 편지 / 새 편지'],
     ['/users/12', '사용자'],
     ['/push-campaigns', '푸시 알림'],
     ['/push-campaigns/new', '푸시 알림 / 새 푸시'],

@@ -118,6 +118,79 @@ describe('화이트리스트', () => {
   );
 });
 
+describe('피드백 첨부 이미지 경로', () => {
+  const ATTACHMENT = 'api/v1/mailbox/feedbacks/12/attachments/34';
+
+  it('GET이면 BE로 전달하고 이미지 바이트와 content-type을 그대로 돌려준다', async () => {
+    const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    const fetchMock = vi.fn<ForwardDeps['fetch']>(
+      async () =>
+        new Response(bytes, {
+          status: 200,
+          headers: { 'content-type': 'image/png' },
+        }),
+    );
+
+    const res = await forwardToBackend(
+      incoming(ATTACHMENT),
+      ATTACHMENT.split('/'),
+      deps(fetchMock),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API}/${ATTACHMENT}`,
+      expect.objectContaining({ method: 'GET' }),
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('image/png');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(bytes);
+  });
+
+  it.each(['text/html', 'image/svg+xml', null])(
+    'BE가 PNG·JPEG 아닌 형식(%s)을 주면 전달하지 않고 502를 준다 — 사용자 업로드가 어드민 오리진에서 문서로 열리지 않게',
+    async (contentType) => {
+      const headers = new Headers();
+      if (contentType) headers.set('content-type', contentType);
+
+      const res = await forwardToBackend(
+        incoming(ATTACHMENT),
+        ATTACHMENT.split('/'),
+        deps(async () => new Response('<script>x</script>', { headers })),
+      );
+
+      expect(res.status).toBe(502);
+      expect(await res.text()).not.toContain('<script>');
+    },
+  );
+
+  it.each([
+    [ATTACHMENT, 'POST', '같은 경로의 변경 메서드'],
+    [ATTACHMENT, 'DELETE', '같은 경로의 변경 메서드'],
+    [
+      'api/v1/mailbox/feedbacks/abc/attachments/34',
+      'GET',
+      '숫자 아닌 피드백 id',
+    ],
+    ['api/v1/mailbox/feedbacks/12/attachments/x1', 'GET', '숫자 아닌 첨부 id'],
+    ['api/v1/mailbox/feedbacks/12/attachments', 'GET', '첨부 목록'],
+    [`${ATTACHMENT}/extra`, 'GET', '뒤에 붙은 세그먼트'],
+    ['api/v1/mailbox/feedbacks/12', 'GET', '다른 mailbox 경로'],
+    ['api/v1/mailbox/letters', 'GET', '다른 mailbox 경로'],
+  ])('%s %s(%s)는 BE를 부르지 않고 404를 준다', async (path, method) => {
+    const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
+
+    const res = await forwardToBackend(
+      incoming(path, { method, body: method === 'GET' ? undefined : '{}' }),
+      path.split('/'),
+      deps(fetchMock),
+    );
+
+    expect(res.status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
 describe('CSRF', () => {
   it('변경 요청의 Sec-Fetch-Site가 same-origin이 아니면 403이고 BE를 부르지 않는다', async () => {
     const fetchMock = vi.fn<ForwardDeps['fetch']>(async () => ok());
@@ -228,7 +301,7 @@ describe('전달', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('응답에는 Cache-Control: no-store를 붙이고 BE body는 그대로 돌려준다', async () => {
+  it('응답에는 Cache-Control: no-store와 문서 실행을 막는 CSP를 붙이고 BE body는 그대로 돌려준다', async () => {
     const res = await forwardToBackend(
       incoming('api/v1/admin/users'),
       ['api', 'v1', 'admin', 'users'],
@@ -236,6 +309,9 @@ describe('전달', () => {
     );
 
     expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('content-security-policy')).toBe(
+      "default-src 'none'; sandbox",
+    );
     await expect(res.json()).resolves.toEqual({
       success: true,
       data: { items: [] },

@@ -32,11 +32,13 @@ import {
   templatesFor,
   type ReplyTemplate,
 } from '../../_model/reply/reply-templates';
+import type { FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import type { ReplyDraft } from '../../_model/reply/useReplyDraft';
+import { FeedbackAttachments } from './FeedbackAttachments';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
-  feedback: FeedbackItem;
+  feedback: FeedbackDetail;
   draft: ReplyDraft;
   /** 시트는 흰 배경 위라 입력이 회색, 전체화면은 회색 배경 위라 입력이 흰색 (Figma 프레임 기준) */
   variant: 'sheet' | 'screen';
@@ -81,8 +83,8 @@ export function FeedbackPersonHeader({
   );
 }
 
-/** 클릭한 피드백 원문 — 무엇에 대한 답인지 */
-export function FeedbackOriginCard({ feedback }: { feedback: FeedbackItem }) {
+/** 클릭한 피드백 원문 — 무엇에 대한 답인지. 사용자가 붙인 사진은 본문 아래에 */
+export function FeedbackOriginCard({ feedback }: { feedback: FeedbackDetail }) {
   return (
     <article className="flex flex-col gap-2 rounded-[14px] bg-background p-4">
       <div className="flex items-center justify-between">
@@ -96,6 +98,7 @@ export function FeedbackOriginCard({ feedback }: { feedback: FeedbackItem }) {
       <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-strong">
         {feedback.content}
       </p>
+      <FeedbackAttachments attachments={feedback.attachments} />
     </article>
   );
 }

@@ -18,6 +18,7 @@ const user = (patch: Partial<UserListItem>): UserListItem => ({
   nickname: '수진',
   role: 'USER',
   status: 'ACTIVE',
+  pushPermissionStatus: 'GRANTED',
   createdAt: '2026-08-18T10:00:00',
   ...patch,
 });

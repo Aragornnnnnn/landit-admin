@@ -2,6 +2,10 @@
 import 'server-only';
 
 import {
+  FEEDBACK_ATTACHMENT_PATH,
+  FEEDBACK_ATTACHMENT_TYPES,
+} from '@/features/feedback/api/feedback-attachment';
+import {
   clearSessionCookieHeaders,
   readSessionCookies,
   sessionCookieHeaders,
@@ -22,6 +26,10 @@ const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 // 전달해도 되는 경로 — 이 밖은 전부 404. 로그인은 전용 route handler(/api/auth/social-login)가 따로 처리한다
 const ALLOWED_PREFIXES = ['api/v1/admin/'];
 const ALLOWED_EXACT = new Set(['api/v1/auth/logout']);
+// 조회(GET)만 여는 admin 밖 경로 — 피드백 첨부 이미지 바이트. BE가 작성자·관리자만 허용한다. mailbox 접두사를 통째로 열지 않는다
+const ALLOWED_GET_PATTERNS = [FEEDBACK_ATTACHMENT_PATH];
+// 모든 프록시 응답에 붙인다 — 응답이 주소창에서 문서로 열려도(첨부 이미지 "새 탭에서 열기" 등) 스크립트가 돌지 않게
+const DOCUMENT_CSP = "default-src 'none'; sandbox";
 // BE에 그대로 넘기는 요청 헤더. 쿠키·호스트·기타는 넘기지 않는다.
 // idempotency-key는 푸시 캠페인 변경 요청(생성·테스트·발송·예약)이 요구한다 — 값은 클라이언트가 만든 UUID라 비밀이 아니다
 const FORWARDED_REQUEST_HEADERS = ['content-type', 'accept', 'idempotency-key'];
@@ -57,7 +65,7 @@ export async function forwardToBackend(
   if (!ALLOWED_METHODS.has(method))
     return apiFailure(405, 'METHOD_NOT_ALLOWED');
 
-  const target = resolveAllowedTarget(pathSegments, request, deps);
+  const target = resolveAllowedTarget(pathSegments, method, request, deps);
   if (!target) return apiFailure(404, 'NOT_FOUND');
 
   if (MUTATING_METHODS.has(method) && !isSameOriginRequest(request)) {
@@ -101,6 +109,21 @@ export async function forwardToBackend(
   // 새로 받은 토큰으로도 401이면 이 세션은 쓸 수 없다 — 쿠키를 지워 로그인↔보호 경로 루프를 끊는다
   if (upstream.status === 401 && refreshed) return sessionEnded(deps);
 
+  // 첨부는 사용자가 올린 바이트다 — BE 검증이 새도 PNG·JPEG 아닌 것은 어드민 오리진에서 내려주지 않는다
+  if (
+    upstream.ok &&
+    FEEDBACK_ATTACHMENT_PATH.test(pathSegments.join('/')) &&
+    !isAllowedAttachmentType(upstream.headers.get('content-type'))
+  ) {
+    await upstream.body?.cancel();
+    return apiFailure(
+      502,
+      'UNSUPPORTED_ATTACHMENT',
+      undefined,
+      refreshed ? refreshedCookieHeaders(refreshed, deps) : undefined,
+    );
+  }
+
   return passThrough(upstream, refreshed, deps);
 }
 
@@ -109,6 +132,7 @@ export async function forwardToBackend(
 // 최종 URL을 파싱해 정규화된 경로가 여전히 BE 주소(경로 prefix 포함) 아래 허용 범위인지 한 번 더 확인한다
 function resolveAllowedTarget(
   segments: string[],
+  method: string,
   request: Request,
   deps: ForwardDeps,
 ): string | null {
@@ -118,7 +142,9 @@ function resolveAllowedTarget(
   const path = segments.join('/');
   const allowed = (p: string) =>
     ALLOWED_EXACT.has(p) ||
-    ALLOWED_PREFIXES.some((prefix) => p.startsWith(prefix));
+    ALLOWED_PREFIXES.some((prefix) => p.startsWith(prefix)) ||
+    (method === 'GET' &&
+      ALLOWED_GET_PATTERNS.some((pattern) => pattern.test(p)));
   if (!allowed(path)) return null;
 
   const base = new URL(deps.apiBaseUrl);
@@ -202,16 +228,30 @@ function passThrough(
   const contentType = upstream.headers.get('content-type');
   if (contentType) headers.set('content-type', contentType);
   headers.set('cache-control', 'no-store');
+  headers.set('content-security-policy', DOCUMENT_CSP);
   if (refreshed) {
-    for (const cookie of sessionCookieHeaders(
-      deps.cookieNames,
-      refreshed,
-      deps.cookieSecurity,
-    )) {
-      headers.append('set-cookie', cookie);
+    for (const [name, value] of refreshedCookieHeaders(refreshed, deps)) {
+      headers.append(name, value);
     }
   }
   return new Response(upstream.body, { status: upstream.status, headers });
+}
+
+function refreshedCookieHeaders(
+  refreshed: IssuedTokens,
+  deps: ForwardDeps,
+): string[][] {
+  return sessionCookieHeaders(
+    deps.cookieNames,
+    refreshed,
+    deps.cookieSecurity,
+  ).map((cookie) => ['set-cookie', cookie]);
+}
+
+// `image/png; charset=...`처럼 파라미터가 붙어도 형식만 본다
+function isAllowedAttachmentType(contentType: string | null): boolean {
+  const type = contentType?.split(';')[0].trim().toLowerCase();
+  return type !== undefined && FEEDBACK_ATTACHMENT_TYPES.has(type);
 }
 
 // 세션 끝 — 쿠키를 지우고 401. 클라이언트는 /login으로 보낸다
