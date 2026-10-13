@@ -1,9 +1,12 @@
 'use client';
 
 // 새 개인 편지 (Figma 2593:426) — 받는 사람을 고르고 내용을 쓴 뒤, 확인창을 거쳐 바로 보낸다.
-// 보낸 편지 목록·상세가 아직 없어(BE 조회 API 대기) 보낸 뒤엔 토스트를 띄우고 폼을 비운다 (docs/screens/direct-letters.md "열린 질문")
+// 발송 성공 후 생성된 편지 상세로 이동한다.
 import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+import { DirectLetterPreview } from '@/features/direct-letter/ui/DirectLetterPreview';
 import { Button } from '@/shared/ui/shadcn/button';
 
 import {
@@ -16,14 +19,23 @@ import {
 } from '../_model/direct-letter-draft';
 import { toSendFailure } from '../_model/send-failure';
 import { useSendDirectLetterMutation } from '../_model/useSendDirectLetterMutation';
-import { DirectLetterPreview } from './DirectLetterPreview';
 import { LetterContentCard } from './LetterContentCard';
 import { RecipientCard } from './RecipientCard';
 import { SendLetterDialog } from './SendLetterDialog';
 
-export function NewDirectLetterPage() {
+export function NewDirectLetterPage({
+  initialRecipients = [],
+  excluded = 0,
+}: {
+  initialRecipients?: DirectLetterDraft['recipients'];
+  excluded?: number;
+}) {
+  const router = useRouter();
   const send = useSendDirectLetterMutation();
-  const [draft, setDraft] = useState(EMPTY_DIRECT_LETTER_DRAFT);
+  const [draft, setDraft] = useState({
+    ...EMPTY_DIRECT_LETTER_DRAFT,
+    recipients: initialRecipients,
+  });
   const [confirming, setConfirming] = useState(false);
   // 404 — 받는 사람 중 누군가 없거나 탈퇴해 BE가 전체를 취소했다. 받는 사람을 고치면 내린다
   const [recipientsRejected, setRecipientsRejected] = useState(false);
@@ -36,9 +48,10 @@ export function NewDirectLetterPage() {
 
   const confirmSend = () =>
     send.mutate(toDirectLetterRequest(draft), {
-      onSuccess: () => {
+      onSuccess: (sent) => {
         setConfirming(false);
         setDraft(EMPTY_DIRECT_LETTER_DRAFT);
+        router.push(`/direct-letters/${sent.letterId}`);
       },
       onError: (error) => {
         setConfirming(false);
@@ -50,6 +63,9 @@ export function NewDirectLetterPage() {
   return (
     <div className="flex flex-col gap-4 pt-1 pb-12">
       <div className="flex flex-wrap items-center gap-3">
+        <Link href="/direct-letters" className="text-xs text-subtle">
+          ← 목록
+        </Link>
         <span className="text-[13px] text-subtle">
           편지함에만 도착해요 · 푸시는 보내지 않아요
         </span>
@@ -62,6 +78,11 @@ export function NewDirectLetterPage() {
         </Button>
       </div>
 
+      {excluded > 0 && (
+        <p role="status" className="text-sm text-subtle">
+          현재 활성 사용자가 아닌 {excluded}명은 제외했어요.
+        </p>
+      )}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {recipientsRejected && <RecipientsRejectedBanner />}

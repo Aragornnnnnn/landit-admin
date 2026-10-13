@@ -15,10 +15,12 @@ export function DirectLetterPreview({
   title,
   body,
   className,
+  sentAt,
 }: {
   title: string;
   body: string;
   className?: string;
+  sentAt?: string;
 }) {
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -29,7 +31,11 @@ export function DirectLetterPreview({
         <span className="text-[13px] text-subtle">‹ 편지함</span>
         <span className="flex items-center gap-2">
           <StatusChip>편지</StatusChip>
-          <span className="text-[12px] text-subtle">{todayLabel()}</span>
+          <span className="text-[12px] text-subtle">
+            {sentAt
+              ? `${Number(sentAt.slice(5, 7))}월 ${Number(sentAt.slice(8, 10))}일`
+              : todayLabel()}
+          </span>
         </span>
         <h3 className="text-[17px] leading-snug font-bold break-words text-foreground">
           {title}

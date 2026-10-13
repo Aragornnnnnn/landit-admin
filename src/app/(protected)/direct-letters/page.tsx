@@ -1,6 +1,15 @@
-// 개인 편지 — 보낸 편지 목록 자리. BE 조회 API가 생기기 전까지는 새 편지로 보낸다 (docs/screens/direct-letters.md "열린 질문")
-import { redirect } from 'next/navigation';
+// 개인 편지 발송 내역의 페이지 번호를 해석한다.
+import { DirectLetterListPage } from './_ui/DirectLetterListPage';
 
-export default function Page() {
-  redirect('/direct-letters/new');
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const value = Number((await searchParams).page ?? 0);
+  return (
+    <DirectLetterListPage
+      page={Number.isSafeInteger(value) && value >= 0 ? value : 0}
+    />
+  );
 }
