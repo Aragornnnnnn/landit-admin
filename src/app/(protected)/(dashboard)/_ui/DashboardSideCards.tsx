@@ -11,19 +11,29 @@ import {
 } from '@/features/app-version/model/platform';
 import type { LetterItem } from '@/features/letter/api/letter-list';
 import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
+import { InlineError } from '@/shared/ui/InlineError';
+import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 
 export function AppVersionSummaryCard({
   versions,
   error = false,
+  pending = false,
+  onRetry,
 }: {
   versions: AppVersion[];
   /** 조회 실패 — 조용히 "—"로 두면 값이 없는 것과 구분이 안 돼 실패라고 밝힌다 */
   error?: boolean;
+  pending?: boolean;
+  onRetry?: () => void;
 }) {
-  if (error)
+  if (pending || error)
     return (
       <Card title="앱 버전" href="/app-versions" linkLabel="앱 버전">
-        <FetchFailed />
+        {pending ? (
+          <ListSkeleton rows={2} />
+        ) : (
+          <InlineError onRetry={onRetry} className="py-4" />
+        )}
       </Card>
     );
   return (
@@ -53,15 +63,23 @@ export function MailboxSummaryCard({
   letters,
   draftCount,
   error = false,
+  pending = false,
+  onRetry,
 }: {
   letters: LetterItem[];
   draftCount: number;
   error?: boolean;
+  pending?: boolean;
+  onRetry?: () => void;
 }) {
-  if (error)
+  if (pending || error)
     return (
       <Card title="지금 편지함 맨 위" href="/letters" linkLabel="공지·업데이트">
-        <FetchFailed />
+        {pending ? (
+          <ListSkeleton rows={2} />
+        ) : (
+          <InlineError onRetry={onRetry} className="py-4" />
+        )}
       </Card>
     );
   // 사용자 편지함과 같은 순서 — 고정이 맨 위, 그다음 최신
@@ -104,10 +122,6 @@ export function MailboxSummaryCard({
   );
 }
 
-function FetchFailed() {
-  return <p className="py-2 text-[13px] text-subtle">불러오지 못했어요</p>;
-}
-
 function Card({
   title,
   href,
@@ -120,7 +134,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex w-full flex-col gap-3 rounded-[20px] bg-card px-5 py-4.5">
+    <section
+      aria-label={title}
+      className="flex w-full flex-col gap-3 rounded-[20px] bg-card px-5 py-4.5"
+    >
       <header className="flex items-baseline justify-between">
         <h2 className="text-[15px] font-bold text-foreground">{title}</h2>
         <Link href={href} className="text-[12px] text-subtle hover:text-body">

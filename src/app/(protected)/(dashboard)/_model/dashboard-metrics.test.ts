@@ -6,25 +6,11 @@ import {
   dailyCounts,
   formatDelta,
   oldestPending,
-  signupCounts,
-  startOfWeek,
   todayLabel,
 } from './dashboard-metrics';
 
 const now = new Date(2026, 7, 18, 14, 20); // 2026-08-18 (화) 14:20
 const at = (iso: string) => ({ createdAt: iso });
-
-describe('startOfWeek', () => {
-  it('주는 월요일에 시작한다', () => {
-    expect(startOfWeek(now)).toEqual(new Date(2026, 7, 17));
-  });
-
-  it('일요일은 그 주의 마지막 날이다 — 다음 주로 넘기지 않는다', () => {
-    expect(startOfWeek(new Date(2026, 7, 23, 23, 0))).toEqual(
-      new Date(2026, 7, 17),
-    );
-  });
-});
 
 describe('countCreatedToday', () => {
   it('새벽에 들어온 것도 오늘이다 — 시각이 아니라 날짜로 센다', () => {
@@ -112,42 +98,6 @@ describe('countsByType', () => {
       { type: 'QUESTION', count: 1 },
       { type: 'CHEER', count: 0 },
     ]);
-  });
-});
-
-describe('signupCounts', () => {
-  const users = [
-    { createdAt: '2026-08-18T10:00:00' },
-    { createdAt: '2026-08-17T00:30:00' },
-    { createdAt: '2026-08-16T10:00:00' },
-    { createdAt: '2026-08-11T10:00:00' },
-    { createdAt: '2026-08-01T00:00:00' },
-    { createdAt: '2026-07-31T23:59:00' },
-    { createdAt: '2026-07-01T00:00:00' },
-    { createdAt: '2026-06-30T23:59:00' },
-  ];
-
-  it('이번 주와 지난주를 월요일 기준으로 가른다', () => {
-    expect(signupCounts(users, now)).toMatchObject({
-      thisWeek: 2,
-      lastWeek: 2,
-    });
-  });
-
-  it('이번 달과 지난달을 1일 기준으로 가른다', () => {
-    expect(signupCounts(users, now)).toMatchObject({
-      thisMonth: 5,
-      lastMonth: 2,
-    });
-  });
-
-  it('해가 바뀌는 1월에는 지난달이 작년 12월이다', () => {
-    expect(
-      signupCounts(
-        [{ createdAt: '2025-12-15T10:00:00' }, { createdAt: '2026-01-02' }],
-        new Date(2026, 0, 5),
-      ),
-    ).toMatchObject({ thisMonth: 1, lastMonth: 1 });
   });
 });
 

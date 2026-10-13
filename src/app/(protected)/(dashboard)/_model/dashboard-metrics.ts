@@ -1,4 +1,4 @@
-// 대시보드가 보여 주는 숫자들 — 집계 API가 없어 목록으로 받은 것을 여기서 센다 (docs/screens/dashboard.md).
+// 대시보드가 보여 주는 숫자들 — 피드백 목록으로 받은 것을 여기서 센다 (docs/screens/dashboard.md).
 // 세는 규칙이 곧 화면의 뜻이라 순수 함수로 떼어 테스트로 고정한다
 import type {
   FeedbackItem,
@@ -8,14 +8,6 @@ import type {
 /** 하루의 시작 — 시각이 아니라 날짜로 세기 위한 기준 */
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-/** 이번 주 시작(월요일 00:00). 가입 수를 "이번 주"로 묶는 기준이다 */
-export function startOfWeek(date: Date): Date {
-  const day = startOfDay(date);
-  // getDay(): 일=0 … 토=6. 월요일을 주의 시작으로 본다
-  const offset = (day.getDay() + 6) % 7;
-  return new Date(day.getFullYear(), day.getMonth(), day.getDate() - offset);
 }
 
 const DAY_MS = 86_400_000;
@@ -96,43 +88,6 @@ export function countsByType(
     type,
     count: items.filter((item) => item.type === type).length,
   }));
-}
-
-/** 이번 달 시작(1일 00:00). 가입 수를 "이번 달"로 묶는 기준이다 */
-export function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-export interface SignupCounts {
-  thisWeek: number;
-  lastWeek: number;
-  thisMonth: number;
-  lastMonth: number;
-}
-
-/** 주·월별 가입 수 — 달력 기준(월요일·1일 시작)이라 "이번 주"는 진행 중인 몫이다.
- * 가입 시각만 보면 되므로 사용자 전체 타입을 요구하지 않는다 */
-export function signupCounts(
-  users: { createdAt?: string }[],
-  now: Date,
-): SignupCounts {
-  const weekStart = startOfWeek(now).getTime();
-  const lastWeekStart = weekStart - 7 * DAY_MS;
-  const monthStart = startOfMonth(now).getTime();
-  const lastMonthStart = new Date(
-    now.getFullYear(),
-    now.getMonth() - 1,
-    1,
-  ).getTime();
-  const joined = users.map((user) => timeOf(user.createdAt));
-  const between = (from: number, to: number) =>
-    joined.filter((at) => at >= from && at < to).length;
-  return {
-    thisWeek: between(weekStart, Infinity),
-    lastWeek: between(lastWeekStart, weekStart),
-    thisMonth: between(monthStart, Infinity),
-    lastMonth: between(lastMonthStart, monthStart),
-  };
 }
 
 /** 전 기간 대비 증감 — "+6" "−7" "±0". 하이픈이 아니라 마이너스 기호라 숫자 폭이 맞는다 */
