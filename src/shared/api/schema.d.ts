@@ -1,6 +1,46 @@
 // 이 파일은 `pnpm api:types`가 스웨거(https://api-develop.landit.im/v3/api-docs)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
+    "/api/v1/me/push-devices/{installationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 앱 설치 푸시 상태 동기화
+         * @description 로그인·계정 전환·Token 갱신 시 호출합니다. 활성 등록 시 현재 계정의 설치 ID 없는 다른 활성 Token을 비활성화합니다. 아직 전환하지 않은 다른 기기도 새 API로 등록해야 수신을 재개합니다. 설치 ID가 연결된 다른 기기와 다른 계정의 Token은 유지합니다. pushEnabled=false이면 해당 설치만 비활성화하고 구형 Token은 정리하지 않습니다.
+         */
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/nickname": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 사용자 닉네임 변경
+         * @description 마이페이지에서 사용자가 원할 때 자신의 닉네임을 변경합니다. 앞뒤 공백을 제거한 값을 저장하며, 1자 이상 20자 이하의 글자·숫자·단어 사이 공백만 허용합니다. 이모지, 밑줄이나 마침표 같은 기호, 제어 문자, 보이지 않는 문자는 거절합니다. 다른 사용자와 같은 닉네임도 허용하고, 현재와 같은 값을 보내도 200으로 응답합니다. 가입 때 저장된 기본 닉네임에는 이 규칙을 적용하지 않습니다.
+         */
+        put: operations["updateNickname"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/learning-level": {
         parameters: {
             query?: never;
@@ -37,7 +77,7 @@ export interface paths {
          * Expo Push Token 상태 변경
          * @description 현재 사용자의 Expo Push Token을 등록·갱신하거나 비활성화합니다.
          */
-        put: operations["update"];
+        put: operations["update_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -106,7 +146,7 @@ export interface paths {
          * 무료 체험 알림 채널 설정 변경
          * @description DB에 채널별 ON/OFF를 저장하고 예약 등록 및 발송 직전에 확인합니다. 서버 재시작은 필요 없으며 이미 외부에 접수된 알림은 취소되지 않습니다.
          */
-        put: operations["update_1"];
+        put: operations["update_2"];
         post?: never;
         delete?: never;
         options?: never;
@@ -125,7 +165,7 @@ export interface paths {
         put?: never;
         /**
          * 사용자 발화 제출
-         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다.
+         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다. 신규 환급 참여자의 정상 완료에만 reward를 제공한다. clientMessageId를 유지한 재전송은 최초 영수증을 반환하며 completionId로 중복 안내를 방지한다. /api/v1/me/rewards/completions/{completionId}로 대기 결과를 재조회한다.
          */
         post: operations["submitMessage"];
         delete?: never;
@@ -145,7 +185,7 @@ export interface paths {
         put?: never;
         /**
          * 대화 최종 피드백 생성 및 조회
-         * @description 완료된 세션의 요약 피드백과 메시지별 피드백을 생성하거나 조회한다. 유료 도입 후 무료 사용자는 첫 시나리오의 첫 완료 세션만 메시지별 피드백을 받고, 그 외 세션은 messageFeedbacks가 비고 detailFeedbackLocked가 true다. 결제 후 다시 조회하면 전부 내려간다.
+         * @description 완료된 세션의 요약 피드백과 메시지별 피드백을 생성하거나 조회한다. 유료 도입 후 무료 사용자는 첫 시나리오의 첫 완료 세션만 메시지별 피드백을 받고, 그 외 세션은 messageFeedbacks가 비고 detailFeedbackLocked가 true다. 결제 후 다시 조회하면 전부 내려간다. userLevelAssessment에는 기존 비동기 사용자 수준 평가 상태·결과를 포함한다. growthFeedback은 직전 완료 시나리오와 비교할 근거가 없으면 null이다. expressionReuse.pending은 분석 대기 여부이며, 완료 후 items가 비어 있으면 FE에서 카드를 숨긴다.
          */
         post: operations["getOrCreateFeedback"];
         delete?: never;
@@ -244,8 +284,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * 페이월 이탈 할인 부여
-         * @description 요청 바디 없이 호출합니다. 비구독자의 최초 이탈에서만 5분 할인을 부여합니다. 중복·동시 요청은 만료 시각을 연장하지 않습니다. 프리미엄·만료 상태는 promo가 null입니다. newUser는 부여 당시 가입 후 7일 미만 여부이며 이후 유지합니다.
+         * 페이월 이탈 (할인 부여 중단)
+         * @description 요청 바디 없이 호출합니다. 2026-10 상품 개편으로 5분 할인 부여를 중단해 promo는 항상 null입니다. 구버전 앱 호환을 위해 경로와 응답 형식만 유지하며, 호출해도 서버에 아무것도 기록하지 않습니다.
          */
         post: operations["dismissPaywall"];
         delete?: never;
@@ -355,6 +395,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/free-talk/sessions/{sessionId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 프리톡 직접 완료
+         * @description 진행 중이거나 종료 확인 대기 중인 세션을 즉시 완료한다. 이미 완료된 세션도 200을 반환한다. 서버에 저장된 발화까지 보존하고 마무리 AI 발화는 생성하지 않는다. 동시 발화 요청은 서버의 발화 저장과 완료 잠금 순서로 결정되며 완료 후 새 발화는 거부한다. 응답 후 summary를 조회하고 pending이면 다시 조회한다. 종료 사유는 DIRECT_COMPLETION이며 작별 종료 USER_ENDED, 시간 소진 TIME_LIMIT_REACHED와 구분한다.
+         */
+        post: operations["completeSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/expressions/{expressionId}/pronunciation/sentence-analysis": {
         parameters: {
             query?: never;
@@ -426,7 +486,7 @@ export interface paths {
         put?: never;
         /**
          * 소셜 로그인
-         * @description OIDC ID Token과 nonce를 검증하고 서비스 토큰을 발급한다.
+         * @description OIDC ID Token과 nonce를 검증하고 서비스 토큰을 발급한다. 기존 사용자는 이메일만 최신 값으로 갱신하고, 닉네임은 제공자 이름으로 덮어쓰지 않는다. 닉네임은 가입 때 한 번 저장되며 이후에는 닉네임 변경 API로만 바뀐다.
          */
         post: operations["socialLogin"];
         delete?: never;
@@ -446,7 +506,7 @@ export interface paths {
         put?: never;
         /**
          * 로그아웃
-         * @description 전달받은 refresh token을 폐기한다.
+         * @description 전달받은 refresh token을 폐기하고 installationId가 있으면 해당 설치의 푸시를 중지한다.
          */
         post: operations["logout"];
         delete?: never;
@@ -655,7 +715,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * 직접 편지 발송 목록
+         * @description DIRECT 발송만 sentAt DESC, letterId DESC로 조회한다. 한 번의 발송은 한 항목이며 recipientCount는 탈퇴 수신자를 포함한다. page × size는 2147483647 이하여야 하며 잘못된 페이지 조건은 400 VALIDATION_FAILED다.
+         */
+        get: operations["getDirectLetters"];
         put?: never;
         /**
          * 특정 사용자에게 직접 편지 발송
@@ -776,7 +840,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** 관리자 앱 버전 정책 수정 */
-        patch: operations["update_2"];
+        patch: operations["update_3"];
         trace?: never;
     };
     "/api/v1/sessions/{sessionId}/messages/{messageId}/inner-thought": {
@@ -808,7 +872,7 @@ export interface paths {
         };
         /**
          * 세션 텍스트 수준 평가 조회
-         * @description 비동기 수준 평가 상태와 완료된 영역별 평가 결과를 조회한다. LANDIT_SUBSCRIPTION_LAUNCHED_AT 미설정, 현재 시각이 도입 시각 전이거나 도입 전 완료 세션이면 HTTP 200과 success=true, data=null, error=null을 반환한다. FE는 polling을 종료한다. 현재 시각이 도입 시각에 도달하면 서버 재시작 없이 수준 평가를 활성화한다. 도입 이후 최초 유효 평가만 기존/기본 수준을 대체하고 INITIALIZED를 반환한다. 이후 현재 수준보다 0.7 이상 높은 충분한 평가가 2회 연속이면 한 단계 승급하며 자동 강등은 없다. changeType은 INITIALIZED, PROMOTED, UNCHANGED, NOT_APPLIED이며 과거 v1.2 평가 조회에는 DEMOTED가 남아 있을 수 있다. previousLevel과 currentLevel로 변경 전후 수준을 제공한다. Fallback·근거 부족·최신 설정 이후 도착한 오래된 평가는 적용하지 않는다. 영역 confidence는 정답 확률이 아닌 가중 관찰 비율이다.
+         * @description 비동기 수준 평가 상태와 완료된 영역별 평가 결과를 조회한다. 신규 영역·종합 점수는 1~100이며 scoreMax=100이다. 과거 평가는 원래 1~5 점수와 scoreMax=5를 유지한다. 학습 레벨과 displayLevel은 1~5이며 confidence는 관찰 비율이다. LANDIT_SUBSCRIPTION_LAUNCHED_AT 미설정, 현재 시각이 도입 시각 전이거나 도입 전 완료 세션이면 HTTP 200과 success=true, data=null, error=null을 반환한다. FE는 polling을 종료한다. 현재 시각이 도입 시각에 도달하면 서버 재시작 없이 수준 평가를 활성화한다. 도입 이후 최초 유효 평가만 기존/기본 수준을 대체하고 INITIALIZED를 반환한다. 이후 현재 레벨 상한보다 4점 이상 높은 충분한 평가가 2회 연속이면 한 단계 승급한다. 레벨 1~4의 승급 기준은 각각 24·44·64·84점이며 자동 강등은 없다. changeType은 INITIALIZED, PROMOTED, UNCHANGED, NOT_APPLIED이며 과거 v1.2 평가 조회에는 DEMOTED가 남아 있을 수 있다. previousLevel과 currentLevel로 변경 전후 수준을 제공한다. Fallback·근거 부족·최신 설정 이후 도착한 오래된 평가는 적용하지 않는다. 영역 confidence는 정답 확률이 아닌 가중 관찰 비율이다.
          */
         get: operations["getLevelAssessment"];
         put?: never;
@@ -831,6 +895,26 @@ export interface paths {
          * @description 카테고리별 시나리오 목록과 사용자별 일일 접근 상태, 신규·재도전 구분, 별점, 시작 메시지 미리보기를 조회한다.
          */
         get: operations["listScenarios"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scenarios/{scenarioId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 시나리오 전체 완료 회차 히스토리 조회
+         * @description 사용자 ID는 로그인 토큰에서 식별한다. 완료한 모든 회차를 endedAt 내림차순, 동률이면 sessionId 내림차순으로 반환한다. 진행 중·중도 종료 회차는 제외하며, 비활성 콘텐츠의 과거 기록도 조회한다. 각 회차의 messages는 messageSequence 오름차순이다. 기록이 없거나 존재하지 않는 시나리오 ID이면 sessions는 빈 배열이다. 저장된 완료 피드백이 없으면 feedback은 null이며 AI 생성은 실행하지 않는다. 기존 정책으로 잠긴 상세 피드백은 messageFeedbacks가 빈 배열이고 detailFeedbackLocked가 true다. 과거 평가 문맥을 복원할 메시지나 시작 안내가 없으면 evaluationContext는 null이다.
+         */
+        get: operations["getHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -908,7 +992,7 @@ export interface paths {
         };
         /**
          * 사용자 구독 상태 조회
-         * @description RevenueCat 웹훅으로 갱신된 서버 기준 구독 상태를 조회합니다. premium이 true면 프리미엄 혜택이 적용 중입니다. isTrial이 true면 연간 구독의 7일 무료 체험 중이며 expiresAt이 체험 종료 시각입니다. 대시보드에서 부여한 프로모션 권한은 periodType이 PROMOTIONAL이고 isTrial은 false입니다. 시나리오 대화는 구독과 관계없이 무료이고, 무료 사용자의 상세 피드백 잠금은 피드백 응답의 detailFeedbackLocked로 판단합니다. promo는 이탈 API와 같은 할인 객체이며 조회로 생성하지 않습니다. price·currency는 최신 실제 결제 금액·통화이며 없으면 null입니다. productId와 store는 프리미엄이 켜져 있을 때만 값이 있습니다.
+         * @description RevenueCat 웹훅으로 갱신된 서버 기준 구독 상태를 조회합니다. premium이 true면 프리미엄 혜택이 적용 중입니다. isTrial이 true면 연간 구독의 7일 무료 체험 중이며 expiresAt이 체험 종료 시각입니다. 대시보드에서 부여한 프로모션 권한은 periodType이 PROMOTIONAL이고 isTrial은 false입니다. 시나리오 대화는 구독과 관계없이 무료이고, 무료 사용자의 상세 피드백 잠금은 피드백 응답의 detailFeedbackLocked로 판단합니다. promo는 할인 부여 중단으로 항상 null입니다. price·currency는 최신 실제 결제 금액·통화이며 없으면 null입니다. productId와 store는 프리미엄이 켜져 있을 때만 값이 있습니다.
          */
         get: operations["getSubscription"];
         put?: never;
@@ -948,7 +1032,7 @@ export interface paths {
         };
         /**
          * 현재 스트릭 조회
-         * @description 현재 연속 학습 일수, KST 기준 오늘 날짜와 정상 완료 여부를 조회한다.
+         * @description 현재 연속 학습 일수, KST 기준 오늘 날짜와 정상 완료 여부를 조회한다. 신규 환급 참여자는 rewardSummary로 현재 잔액·이전 회차 환급 예정액·남은 기회를 받는다. 결제 회차 도착 전에는 PENDING이며 금액과 remainingDays가 null이다. 기존 상품 이용자는 새 환급 필드를 받지 않는다.
          */
         get: operations["getCurrentStreak"];
         put?: never;
@@ -968,9 +1052,109 @@ export interface paths {
         };
         /**
          * 월별 스트릭 달력 조회
-         * @description KST 기준 오늘 날짜, 현재 스트릭 통계와 조회 월의 완료 날짜를 조회한다. year와 month를 모두 생략하면 KST 현재 월을 조회하고, 지정할 때는 둘 다 전달해야 한다.
+         * @description KST 기준 오늘 날짜, 현재 스트릭 통계와 조회 월의 완료 날짜를 조회한다. 환급 참여자에게 rewardSummary와 월의 모든 날짜별 rewardDays를 추가한다. 부분 적립과 무활동 초기화액은 구분하며 미래·판정 대기 금액은 null이다. 기존 activeDates의 의미는 유지한다. 구독 만료 후에도 본인의 과거 기록을 조회할 수 있다. year와 month를 모두 생략하면 KST 현재 월을 조회하고, 지정할 때는 둘 다 전달해야 한다.
          */
         get: operations["getCalendar_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 학습 보상 현황
+         * @description 100일 챌린지 현황과 만료 이후 출금 가능한 금액·상태, 재구매 가능 여부를 반환한다. 결제 확인 시 구매일 KST 00시부터 완료한 학습도 적립한다. 오늘의 시나리오 완료는 하루 한 번 결제액의 100분의 1을 적립하며 표현·스몰톡은 적립하지 않는다. 미완료일에도 누적액을 보존하며 만료 자정부터 출금 가능한 금액을 제공한다. 실제 지급 완료가 아니다.
+         */
+        get: operations["summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 학습 보상 상세 내역
+         * @description 시각·문자열 ID 역순. 시나리오 적립·만기를 모든 회차에서 조회한다. 0원 완료·미확정·검토 중 회차는 제외한다. 같은 시각에는 완료, 만기 순서다. 잔액은 해당 회차 기준이며 보정 후에도 ID는 유지한다. 지연 확정 내역은 첫 페이지부터 갱신한다. 조회는 재정산하지 않으며 날짜 마감은 주기 정산 후 반영된다.
+         */
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards/cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 학습 보상 회차 목록
+         * @description 회차 ID 역순 커서 페이지. limit은 1~50이다.
+         */
+        get: operations["page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards/cycles/{cycleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 학습 보상 회차 상세
+         * @description 구매/만료 시각, 고정 최대액과 날짜별 달성/마감/적립 내역을 반환한다.
+         */
+        get: operations["detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards/completions/{completionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 완료별 학습 보상
+         * @description 완료 응답이 PENDING이면 이 경로로 재조회한다. 금액 null은 미확정, 0은 확정된 추가 적립 없음이다. 구매일의 결제 전 완료도 결제 확인 후 조회할 수 있다. 최초 완료 응답은 불변이며 이 조회만 최신 계산을 반환한다. 다른 사용자의 완료는 404다.
+         */
+        get: operations["completion"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1267,7 +1451,7 @@ export interface paths {
          * 관리자 사용자 상세 조회
          * @description 사용자 프로필과 최소 학습 요약을 조회한다.
          */
-        get: operations["detail"];
+        get: operations["detail_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1304,7 +1488,7 @@ export interface paths {
             cookie?: never;
         };
         /** 푸시 캠페인 상세 조회 */
-        get: operations["detail_1"];
+        get: operations["detail_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1401,6 +1585,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/mailbox/direct-letters/{letterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 직접 편지 발송 상세
+         * @description 탈퇴 수신자도 포함한다. readAt은 최초 읽음 시각이며 미열람이면 null이다. 관리자 조회는 읽음 상태를 변경하지 않는다. 없거나 DIRECT 발송이 아니면 404 RESOURCE_NOT_FOUND다.
+         */
+        get: operations["getDirectLetter"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/expressions/pronunciation-assets/coverage": {
         parameters: {
             query?: never;
@@ -1467,7 +1671,7 @@ export interface paths {
         post?: never;
         /**
          * 회원 탈퇴
-         * @description 현재 사용자를 탈퇴 처리하고 활성 refresh token을 폐기한다.
+         * @description 회원 행과 문의·첨부파일은 유지하고 닉네임을 '탈퇴한 사용자'로 덮어쓴다. 이메일·프로필 이미지·소셜 식별 원본과 refresh token을 정리하고, 장기기억을 삭제하며 계정 소유의 모든 푸시 Token을 비활성화한다.
          */
         delete: operations["withdraw"];
         options?: never;
@@ -1479,14 +1683,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description 사용자 학습 수준 변경 요청 */
-        UserLearningLevelUpdateRequest: {
-            /**
-             * Format: int32
-             * @description 1부터 5까지의 학습 수준
-             * @example 3
-             */
-            learningLevel: number;
+        PushDeviceUpdateRequest: {
+            /** @enum {string} */
+            platform: "IOS" | "ANDROID";
+            expoPushToken?: string;
+            pushEnabled: boolean;
+            expoPushTokenValid?: boolean;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseVoid: {
@@ -1512,6 +1714,43 @@ export interface components {
              * @example 요청한 리소스를 찾을 수 없습니다.
              */
             message?: string;
+        };
+        /** @description 사용자 닉네임 변경 요청 */
+        UserNicknameUpdateRequest: {
+            /**
+             * @description 새 닉네임. 앞뒤 공백 제거 후 1자 이상 20자 이하의 글자·숫자·공백만 허용. 이모지와 기호 불가
+             * @example 랜딧러버
+             */
+            nickname: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseUserNicknameResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["UserNicknameResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 저장된 사용자 닉네임 */
+        UserNicknameResponse: {
+            /**
+             * @description 저장된 닉네임
+             * @example 랜딧러버
+             */
+            nickname?: string;
+        };
+        /** @description 사용자 학습 수준 변경 요청 */
+        UserLearningLevelUpdateRequest: {
+            /**
+             * Format: int32
+             * @description 1부터 5까지의 학습 수준
+             * @example 3
+             */
+            learningLevel: number;
         };
         ExpoPushTokenUpdateRequest: {
             /** @enum {string} */
@@ -1637,6 +1876,72 @@ export interface components {
             /** @description 이어서 재생할 고정 질문 음원 URL */
             questionAudioUrl?: string;
         };
+        RewardActivity: {
+            activityType?: string;
+            /** Format: int64 */
+            earnedWon?: number;
+            completed?: boolean;
+            /** Format: int32 */
+            targetCount?: number;
+            /** Format: int32 */
+            completedCount?: number;
+            /** Format: int64 */
+            nextEarnableWon?: number;
+            /**
+             * Format: int64
+             * @description 오늘의 시나리오 미완료 시 결제액의 100분의 1, 완료 또는 마감 시 0원
+             */
+            remainingWon?: number;
+        };
+        RewardCompletion: {
+            /**
+             * Format: int64
+             * @description 완료별 고유 ID. 재요청에도 유지하며 프론트 중복 안내 방지에 사용
+             */
+            completionId?: number;
+            /** Format: int64 */
+            cycleId?: number;
+            activityType?: string;
+            /** Format: date */
+            learningDate?: string;
+            /**
+             * @description 미확정 PENDING은 금액 null, 확정 0원은 NO_ADDITIONAL_REWARD
+             * @enum {string}
+             */
+            status?: "EARNED" | "NO_ADDITIONAL_REWARD" | "PENDING";
+            reason?: string;
+            /**
+             * Format: int64
+             * @description 이번 완료로 받은 정수 원. 미확정이면 null
+             * @example 100
+             */
+            earnedWon?: number;
+            /**
+             * Format: int64
+             * @description 해당 완료 직후 회차 잔액. 최초 영수증은 고정, 재조회는 최신 보정 금액
+             */
+            balanceWon?: number;
+            /**
+             * Format: int64
+             * @description 완료 날짜의 전체 적립액
+             * @example 300
+             */
+            todayEarnedWon?: number;
+            /**
+             * Format: int64
+             * @description 완료 날짜의 실제 한도
+             * @example 300
+             */
+            todayMaximumWon?: number;
+            /** @description 오늘의 시나리오 완료 여부. PENDING은 미달성 확정을 뜻하지 않음 */
+            todayFullyAchieved?: boolean;
+            activities?: components["schemas"]["RewardActivity"][];
+            /** Format: date-time */
+            computedAt?: string;
+            /** Format: int64 */
+            calculationVersion?: number;
+            currency?: string;
+        };
         /** @description 사용자 발화 제출 응답 */
         SessionMessageSubmitResponse: {
             /**
@@ -1650,6 +1955,7 @@ export interface components {
             nextMessage?: components["schemas"]["NextMessageResponse"];
             /** @description 세션 진행도 */
             progress?: components["schemas"]["SessionProgressResponse"];
+            reward?: components["schemas"]["RewardCompletion"];
         };
         /** @description 세션 진행도 응답 */
         SessionProgressResponse: {
@@ -1717,11 +2023,32 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        Details: {
+            strength?: string;
+            improvement?: string;
+        };
+        DomainScore: {
+            /** @description 영역별 점수. 상위 scoreMax 척도를 따르며 미관찰 시 null */
+            score?: number;
+            /** @description 관찰 근거 비율. 정답 확률이 아님 */
+            confidence?: number;
+        };
         EvaluationContextResponse: {
             /** @enum {string} */
             type?: "AI_MESSAGE" | "SCENARIO_OPENING_INSTRUCTION";
             content?: string;
             translatedContent?: string;
+        };
+        Item: {
+            /** Format: int64 */
+            expressionId?: number;
+            text?: string;
+            meaning?: string;
+            sourceLabel?: string;
+            /** Format: int64 */
+            messageId?: number;
+            quotedSentence?: string;
+            matchedText?: string;
         };
         MessageFeedbackResponse: {
             /** Format: int64 */
@@ -1741,6 +2068,22 @@ export interface components {
             correctionReason?: string;
             benchmarkMessage?: string;
         };
+        ScenarioExpressionReuseSummary: {
+            pending?: boolean;
+            items?: components["schemas"]["Item"][];
+        };
+        ScenarioGrowthCard: {
+            /** @enum {string} */
+            pattern?: "TENSE" | "SUBJECT_VERB_AGREEMENT" | "VERB_FORM" | "ARTICLE" | "PLURAL" | "PRONOUN" | "PREPOSITION" | "NEGATION" | "QUESTION_FORM";
+            patternLabel?: string;
+            succeeded?: boolean;
+            /** Format: date */
+            previousDate?: string;
+            previousSentence?: string;
+            previousWrongSpan?: string;
+            currentSentence?: string;
+            currentSpan?: string;
+        };
         SessionFeedbackResponse: {
             /** Format: int64 */
             sessionId?: number;
@@ -1755,7 +2098,54 @@ export interface components {
              * @example false
              */
             detailFeedbackLocked?: boolean;
+            /** @description 비동기 사용자 수준 평가 상태와 결과. 평가 비활성 세션이면 null */
+            userLevelAssessment?: components["schemas"]["SessionLevelAssessmentResponse"];
+            /** @description 직전 완료 시나리오와 비교할 근거가 없으면 null */
+            growthFeedback?: components["schemas"]["ScenarioGrowthCard"];
+            /** @description pending이면 분석 중, 완료 후 items가 비어 있으면 FE에서 카드를 숨긴다 */
+            expressionReuse?: components["schemas"]["ScenarioExpressionReuseSummary"];
         };
+        SessionLevelAssessment: {
+            situationPerformance?: components["schemas"]["DomainScore"];
+            grammar?: components["schemas"]["DomainScore"];
+            vocabulary?: components["schemas"]["DomainScore"];
+            discourse?: components["schemas"]["DomainScore"];
+            interactionPragmatics?: components["schemas"]["DomainScore"];
+            /** @description 종합 점수. scoreMax로 척도를 구분하며 미평가 시 null */
+            assessedScore?: number;
+            /**
+             * Format: int32
+             * @description 종합 점수에 대응하는 학습 레벨
+             */
+            assessedLevel?: number;
+            sufficientEvidence?: boolean;
+            /** @enum {string} */
+            source?: "MODEL" | "FALLBACK";
+            /** @enum {string} */
+            changeType?: "INITIALIZED" | "PROMOTED" | "DEMOTED" | "UNCHANGED" | "NOT_APPLIED";
+            /** Format: int32 */
+            previousLevel?: number;
+            /** Format: int32 */
+            currentLevel?: number;
+            details?: components["schemas"]["Details"];
+            assessmentVersion?: string;
+            /** Format: int32 */
+            displayLevel?: number;
+            /**
+             * Format: int32
+             * @description 영역별 점수와 종합 점수의 상한. 과거 평가는 5, 신규 평가는 100
+             * @enum {integer}
+             */
+            scoreMax?: "5" | "100";
+        };
+        /** @description 수준 평가 상태와 결과. 비활성 또는 도입 전 완료 세션이면 data 자체가 null */
+        SessionLevelAssessmentResponse: {
+            /** Format: int64 */
+            sessionId?: number;
+            /** @enum {string} */
+            processingStatus?: "NOT_REQUESTED" | "PREPARING" | "COMPLETED" | "FAILED";
+            levelAssessment?: components["schemas"]["SessionLevelAssessment"];
+        } | null;
         /** @description 공통 API 응답 객체 */
         ApiResponseSessionStartResponse: {
             /**
@@ -2006,7 +2396,7 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
-        /** @description 진행 중인 5분 할인 기회 */
+        /** @description 5분 할인 기회. 할인 부여 중단으로 현재는 생성되지 않으며 스키마 호환용으로 유지 */
         DiscountOffer: {
             /**
              * Format: int64
@@ -2024,7 +2414,7 @@ export interface components {
             newUser?: boolean;
         };
         PaywallDismissResponse: {
-            /** @description 진행 중인 할인. 프리미엄이거나 만료됐으면 null */
+            /** @description 항상 null. 할인 부여 중단 후 구버전 앱 호환용으로 필드만 유지 */
             promo?: components["schemas"]["DiscountOffer"];
         };
         /** @description 편지함 피드백 등록 요청 */
@@ -2422,6 +2812,8 @@ export interface components {
         };
         LogoutRequest: {
             refreshToken: string;
+            /** Format: uuid */
+            installationId?: string;
         };
         AdminPushCampaignRequest: {
             title: string;
@@ -2834,45 +3226,6 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
-        Details: {
-            strength?: string;
-            improvement?: string;
-        };
-        DomainScore: {
-            score?: number;
-            confidence?: number;
-        };
-        SessionLevelAssessment: {
-            situationPerformance?: components["schemas"]["DomainScore"];
-            grammar?: components["schemas"]["DomainScore"];
-            vocabulary?: components["schemas"]["DomainScore"];
-            discourse?: components["schemas"]["DomainScore"];
-            interactionPragmatics?: components["schemas"]["DomainScore"];
-            assessedScore?: number;
-            /** Format: int32 */
-            assessedLevel?: number;
-            sufficientEvidence?: boolean;
-            /** @enum {string} */
-            source?: "MODEL" | "FALLBACK";
-            /** @enum {string} */
-            changeType?: "INITIALIZED" | "PROMOTED" | "DEMOTED" | "UNCHANGED" | "NOT_APPLIED";
-            /** Format: int32 */
-            previousLevel?: number;
-            /** Format: int32 */
-            currentLevel?: number;
-            details?: components["schemas"]["Details"];
-            assessmentVersion?: string;
-            /** Format: int32 */
-            displayLevel?: number;
-        };
-        /** @description 수준 평가 상태와 결과. 비활성 또는 도입 전 완료 세션이면 data 자체가 null */
-        SessionLevelAssessmentResponse: {
-            /** Format: int64 */
-            sessionId?: number;
-            /** @enum {string} */
-            processingStatus?: "NOT_REQUESTED" | "PREPARING" | "COMPLETED" | "FAILED";
-            levelAssessment?: components["schemas"]["SessionLevelAssessment"];
-        } | null;
         /** @description 공통 API 응답 객체 */
         ApiResponseScenarioListResponse: {
             /**
@@ -2970,6 +3323,51 @@ export interface components {
             lockReason?: string;
             /** @description 잠기지 않은 시나리오의 시작 메시지 미리보기 */
             openingPreview?: components["schemas"]["OpeningPreviewResponse"];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseScenarioHistoryResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["ScenarioHistoryResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        ScenarioHistoryMessage: {
+            /** Format: int64 */
+            messageId?: number;
+            /** Format: int32 */
+            messageSequence?: number;
+            /** Format: int32 */
+            turnNumber?: number;
+            /** @enum {string} */
+            role?: "AI" | "USER";
+            content?: string;
+            translatedContent?: string;
+            innerThought?: string;
+            /** @enum {string} */
+            innerThoughtType?: "GOOD" | "NORMAL" | "BAD";
+            /** @enum {string} */
+            innerThoughtProcessingStatus?: "PREPARING" | "COMPLETED" | "FAILED";
+        };
+        ScenarioHistoryResponse: {
+            /** Format: int64 */
+            scenarioId?: number;
+            sessions?: components["schemas"]["ScenarioHistorySession"][];
+        };
+        ScenarioHistorySession: {
+            /** Format: int64 */
+            sessionId?: number;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            endedAt?: string;
+            messages?: components["schemas"]["ScenarioHistoryMessage"][];
+            /** @description 저장된 완료 피드백. 아직 없거나 미완료이면 null이며 조회 시 생성하지 않는다. */
+            feedback?: components["schemas"]["SessionFeedbackResponse"];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseDailyScenarioResponse: {
@@ -3133,7 +3531,7 @@ export interface components {
              * @description 유료 도입 후 무료 상태로 처음 시작한 첫 시나리오의 예약 세션. 24시간 내 같은 시나리오 재시작 시 이어간다
              */
             freeScenarioSessionId?: number;
-            /** @description 진행 중인 할인. 조회는 할인 기회를 생성하지 않음 */
+            /** @description 항상 null. 할인 부여 중단 후 구버전 앱 호환용으로 필드만 유지 */
             promo?: components["schemas"]["DiscountOffer"];
             /**
              * @description 가장 최근 실제 결제 금액. 결제 이력이 없으면 null
@@ -3166,11 +3564,11 @@ export interface components {
              */
             eventId?: string;
             /**
-             * @description 이벤트 타입. INITIAL_PURCHASE(첫 결제 또는 체험 시작), RENEWAL(갱신, 체험 끝 첫 결제 포함), CANCELLATION(해지 예약·환불), UNCANCELLATION(해지 취소), EXPIRATION(만료), BILLING_ISSUE(갱신 결제 실패, 유예 기간 중 프리미엄 유지), PRODUCT_CHANGE(플랜 변경), NON_RENEWING_PURCHASE(대시보드 프로모션 권한 부여 등 자동 갱신 없는 구매), TRANSFER(다른 계정에서 구독을 넘겨받음)
+             * @description 이벤트 타입. INITIAL_PURCHASE(첫 결제 또는 체험 시작), RENEWAL(갱신, 체험 끝 첫 결제 포함), CANCELLATION(해지 예약·환불), UNCANCELLATION(해지 취소), EXPIRATION(만료), BILLING_ISSUE(갱신 결제 실패, 유예 기간 중 프리미엄 유지), PRODUCT_CHANGE(플랜 변경), SUBSCRIPTION_EXTENDED(과금 없는 기간 연장), NON_RENEWING_PURCHASE(대시보드 프로모션 권한 부여 등 자동 갱신 없는 구매), TRANSFER(다른 계정에서 구독을 넘겨받음)
              * @example RENEWAL
              * @enum {string}
              */
-            type?: "INITIAL_PURCHASE" | "RENEWAL" | "CANCELLATION" | "UNCANCELLATION" | "EXPIRATION" | "BILLING_ISSUE" | "PRODUCT_CHANGE" | "NON_RENEWING_PURCHASE" | "TRANSFER";
+            type?: "INITIAL_PURCHASE" | "RENEWAL" | "CANCELLATION" | "UNCANCELLATION" | "EXPIRATION" | "BILLING_ISSUE" | "SUBSCRIPTION_EXTENDED" | "PRODUCT_CHANGE" | "NON_RENEWING_PURCHASE" | "TRANSFER";
             /**
              * @description 구독 상품 ID
              * @example com.saynow.app.premium.yearly
@@ -3239,6 +3637,45 @@ export interface components {
             activeToday?: boolean;
             /** Format: date */
             today?: string;
+            rewardSummary?: components["schemas"]["RewardCalendarSummary"];
+        };
+        /** @description 현재 도전과 이전 만기 회차의 환급 예정액 */
+        RewardCalendarSummary: {
+            availability?: string;
+            reason?: string;
+            currency?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            /** Format: int64 */
+            currentCycleId?: number;
+            /**
+             * Format: int64
+             * @description 현재 도전 잔액. 결제 미확정이면 null
+             */
+            currentBalanceWon?: number;
+            /**
+             * Format: int64
+             * @description 이전 만기 회차에 보존된 환급 예정액. 실제 지급 완료 금액이 아님
+             */
+            pendingRefundWon?: number;
+            /**
+             * Format: int64
+             * @description 남은 활동에서 추가로 적립 가능한 금액. 미완료로 지나간 날짜 제외. 미확정이면 null
+             */
+            remainingEarnableWon?: number;
+            /**
+             * Format: int32
+             * @description 오늘 포함 미마감 KST 날짜 수. 결제 구간 미확정이면 null
+             */
+            remainingDays?: number;
+            /** Format: int64 */
+            todayEarnedWon?: number;
+            /** Format: int64 */
+            todayMaximumWon?: number;
+            todayFullyAchieved?: boolean;
+            activities?: components["schemas"]["RewardActivity"][];
+            /** Format: date-time */
+            computedAt?: string;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseStreakCalendarResponse: {
@@ -3251,6 +3688,40 @@ export interface components {
             data?: components["schemas"]["StreakCalendarResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 각 회차의 실제 인정 구간과 시나리오 적립 */
+        RewardCalendarCycleDay: {
+            /** Format: int64 */
+            cycleId?: number;
+            eligibility?: string;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            /**
+             * Format: int64
+             * @description 해당 날짜에 받은 금액. 미완료일에도 보존. 미래·미확정은 null
+             */
+            earnedWon?: number;
+            /** Format: int64 */
+            maximumWon?: number;
+            fullyAchieved?: boolean;
+            activities?: components["schemas"]["RewardActivity"][];
+        };
+        /** @description 날짜별 시나리오 적립액 기록 */
+        RewardCalendarDay: {
+            /** Format: date */
+            date?: string;
+            /** @enum {string} */
+            status?: "FULL" | "NONE" | "FUTURE" | "PENDING" | "NOT_ELIGIBLE";
+            /**
+             * Format: int64
+             * @description 해당 날짜에 받은 금액. 미완료일에도 보존. 미래·미확정은 null
+             */
+            earnedWon?: number;
+            /** Format: int64 */
+            maximumWon?: number;
+            cycles?: components["schemas"]["RewardCalendarCycleDay"][];
         };
         StreakCalendarResponse: {
             /** Format: int32 */
@@ -3269,6 +3740,181 @@ export interface components {
             /** Format: int32 */
             totalActiveDays?: number;
             activeDates?: string[];
+            rewardSummary?: components["schemas"]["RewardCalendarSummary"];
+            rewardDays?: components["schemas"]["RewardCalendarDay"][];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseRewardView: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["RewardView"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        Cycle: {
+            /** Format: int64 */
+            id?: number;
+            productId?: string;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            /** Format: int64 */
+            maximumWon?: number;
+            /** Format: int32 */
+            eligibleDays?: number;
+            /** Format: int64 */
+            balanceWon?: number;
+            phase?: string;
+            eligibility?: string;
+            reviewReason?: string;
+            days?: components["schemas"]["Day"][];
+            policyVersion?: string;
+        };
+        Day: {
+            /** Format: date */
+            date?: string;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            achieved?: boolean;
+            closed?: boolean;
+            /** Format: int64 */
+            changeWon?: number;
+            /** Format: int64 */
+            balanceWon?: number;
+            /** Format: int64 */
+            earnedWon?: number;
+            /** Format: int64 */
+            maximumWon?: number;
+            fullyAchieved?: boolean;
+            activities?: components["schemas"]["RewardActivity"][];
+        };
+        RewardToday: {
+            /** Format: date */
+            date?: string;
+            /** Format: int64 */
+            earnedWon?: number;
+            /** Format: int64 */
+            maximumWon?: number;
+            fullyAchieved?: boolean;
+            activities?: components["schemas"]["RewardActivity"][];
+        };
+        RewardView: {
+            availability?: string;
+            reason?: string;
+            currency?: string;
+            /** Format: int64 */
+            todayMaximumWon?: number;
+            todayAchieved?: boolean;
+            /** Format: date-time */
+            computedAt?: string;
+            current?: components["schemas"]["Cycle"];
+            /** Format: int64 */
+            pendingRefundWon?: number;
+            /**
+             * @description 현재 적립 회차 우선. 없으면 검토, 결제 대기, 만기 이력, 비대상 순으로 판정
+             * @enum {string}
+             */
+            state?: "ACTIVE" | "ENDED" | "PENDING" | "REVIEW" | "NONE";
+            /** Format: int64 */
+            heldRefundWon?: number;
+            today?: components["schemas"]["RewardToday"];
+            /** Format: int32 */
+            remainingDays?: number;
+            /**
+             * Format: int64
+             * @description 만료 이후 운영 결제의 출금 가능한 적립액. 샌드박스 제외, 실제 지급과 출금 신청은 별도 기능
+             */
+            withdrawableWon?: number;
+            /** @description 출금 가능한 금액이 0원보다 크면 true */
+            withdrawalAvailable?: boolean;
+            /** @description 현재 챌린지가 없고 설정·결제 검토 문제가 없으면 true */
+            purchaseAvailable?: boolean;
+            /**
+             * Format: date-time
+             * @description 진행 중 챌린지가 끝나는 시각. 이후 다시 구매할 수 있음
+             */
+            purchaseAvailableAt?: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseRewardHistoryPage: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["RewardHistoryPage"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        RewardHistoryItem: {
+            id?: string;
+            type?: string;
+            activityType?: string;
+            /** Format: date */
+            date?: string;
+            /** Format: date-time */
+            occurredAt?: string;
+            /** Format: int64 */
+            amountWon?: number;
+            /** Format: int64 */
+            balanceWon?: number;
+            /** Format: int64 */
+            cycleId?: number;
+            /** Format: int64 */
+            completionId?: number;
+        };
+        RewardHistoryPage: {
+            items?: components["schemas"]["RewardHistoryItem"][];
+            nextCursor?: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponsePage: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["Page"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        Page: {
+            cycles?: components["schemas"]["Cycle"][];
+            /** Format: int64 */
+            nextCursor?: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseCycle: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["Cycle"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseRewardCompletion: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["RewardCompletion"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseUserLearningLevelResponse: {
@@ -3347,38 +3993,6 @@ export interface components {
             data?: components["schemas"]["MailboxSentFeedbackListResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
-        };
-        Item: {
-            /**
-             * Format: int64
-             * @description 피드백 ID
-             * @example 101
-             */
-            feedbackId?: number;
-            /**
-             * @description 피드백 유형
-             * @example QUESTION
-             * @enum {string}
-             */
-            type?: "BUG_REPORT" | "FEATURE_REQUEST" | "QUESTION" | "CHEER";
-            /**
-             * @description 피드백 유형 표시 제목
-             * @example 문의
-             */
-            title?: string;
-            /** @description 피드백 미리보기. 전체 문자열을 반환 */
-            preview?: string;
-            /**
-             * @description 처리 상태
-             * @example PENDING
-             * @enum {string}
-             */
-            status?: "PENDING" | "COMPLETED";
-            /**
-             * Format: date-time
-             * @description 등록 시각
-             */
-            createdAt?: string;
         };
         /** @description 보낸 편지함 피드백 목록 응답 */
         MailboxSentFeedbackListResponse: {
@@ -4277,6 +4891,74 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        /** @description 관리자 직접 편지 발송 이력 페이지 */
+        AdminMailboxDirectLetterListResponse: {
+            items?: components["schemas"]["AdminMailboxDirectLetterSummary"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description 직접 편지 발송 요약 */
+        AdminMailboxDirectLetterSummary: {
+            /** Format: int64 */
+            letterId?: number;
+            title?: string;
+            /** Format: date-time */
+            sentAt?: string;
+            /** Format: int64 */
+            recipientCount?: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminMailboxDirectLetterListResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminMailboxDirectLetterListResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 관리자 직접 편지 발송 상세 */
+        AdminMailboxDirectLetterDetailResponse: {
+            /** Format: int64 */
+            letterId?: number;
+            title?: string;
+            bodyText?: string;
+            /** Format: date-time */
+            sentAt?: string;
+            /** Format: int32 */
+            recipientCount?: number;
+            recipients?: components["schemas"]["AdminMailboxDirectLetterRecipient"][];
+        };
+        /** @description 직접 편지 수신자 */
+        AdminMailboxDirectLetterRecipient: {
+            /** Format: int64 */
+            userProfileId?: number;
+            /**
+             * Format: date-time
+             * @description 최초 읽음 시각. 미열람이면 null
+             */
+            readAt: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminMailboxDirectLetterDetailResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminMailboxDirectLetterDetailResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
         /** @description 발음 평가 자산 커버리지 현황 */
         AdminPronunciationAssetCoverageResponse: {
             /**
@@ -4382,6 +5064,74 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                installationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushDeviceUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    updateNickname: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserNicknameUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description 변경 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseUserNicknameResponse"];
+                };
+            };
+            /** @description VALIDATION_FAILED. 본문 누락이나 형식 오류, 닉네임 누락, 공백만 입력, 20자 초과, 허용하지 않는 문자 포함 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseUserNicknameResponse"];
+                };
+            };
+            /** @description INVALID_TOKEN. 토큰이 없거나 유효하지 않거나 탈퇴한 사용자 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseUserNicknameResponse"];
+                };
+            };
+        };
+    };
     getLearningLevel: {
         parameters: {
             query?: never;
@@ -4453,7 +5203,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4657,7 +5407,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -5495,6 +6245,64 @@ export interface operations {
             };
         };
     };
+    completeSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 완료 성공 또는 이미 완료됨 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 세션 소유자 아님 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 프리톡 세션 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+            /** @description 중단된 세션 (CONFLICT) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
     analyzeSentence: {
         parameters: {
             query?: never;
@@ -6009,6 +6817,31 @@ export interface operations {
             };
         };
     };
+    getDirectLetters: {
+        parameters: {
+            query?: {
+                /** @description 0부터 시작하는 페이지 번호 */
+                page?: string;
+                /** @description 페이지 크기 */
+                size?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminMailboxDirectLetterListResponse"];
+                };
+            };
+        };
+    };
     sendDirectLetter: {
         parameters: {
             query?: never;
@@ -6193,7 +7026,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -6343,6 +7176,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseScenarioListResponse"];
+                };
+            };
+        };
+    };
+    getHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description 조회할 시나리오 ID
+                 * @example 1
+                 */
+                scenarioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseScenarioHistoryResponse"];
+                };
+            };
+            /** @description 시나리오 ID 형식 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseScenarioHistoryResponse"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseScenarioHistoryResponse"];
                 };
             };
         };
@@ -6609,6 +7486,116 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseStreakCalendarResponse"];
+                };
+            };
+        };
+    };
+    summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseRewardView"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseRewardHistoryPage"];
+                };
+            };
+        };
+    };
+    page: {
+        parameters: {
+            query?: {
+                cursor?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponsePage"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseCycle"];
+                };
+            };
+        };
+    };
+    completion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                completionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseRewardCompletion"];
                 };
             };
         };
@@ -7222,7 +8209,7 @@ export interface operations {
             };
         };
     };
-    detail: {
+    detail_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -7313,7 +8300,7 @@ export interface operations {
             };
         };
     };
-    detail_1: {
+    detail_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7484,6 +8471,37 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseAdminMailboxFeedbackDetailResponse"];
+                };
+            };
+        };
+    };
+    getDirectLetter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                letterId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminMailboxDirectLetterDetailResponse"];
+                };
+            };
+            /** @description 직접 편지 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminMailboxDirectLetterDetailResponse"];
                 };
             };
         };

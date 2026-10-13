@@ -104,3 +104,9 @@ export interface AdminPushCampaignRequest {
   audienceSql?: string;
   excludedUserProfileIds: number[];
 }
+
+/** LAN-669: springdoc의 OpenAPI 3.1 출력이 nullable readAt을 string으로 생성한다. BE Recipient 계약은 null을 허용한다. */
+export type DirectLetterRecipient = Omit<
+  Required<Schema<'AdminMailboxDirectLetterRecipient'>>,
+  'readAt'
+> & { readAt: string | null };
