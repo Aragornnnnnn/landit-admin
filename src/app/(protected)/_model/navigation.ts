@@ -1,5 +1,7 @@
 // 사이드바 내비 정의 — 그룹·순서·라벨·아이콘은 docs/admin-spec.md "셸". 상단바 제목도 여기서 찾는다
 // 아이콘은 Figma 셸의 채움형 벡터를 그대로 옮긴 것 (NavIcons.tsx) — lucide가 아니다
+import { AudioLines, Mail } from 'lucide-react';
+
 import {
   AppVersionsIcon,
   DashboardIcon,
@@ -14,7 +16,7 @@ import {
 export interface NavItem {
   href: string;
   label: string;
-  icon: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   /** develop 서버에서만 보인다 (시나리오 테스트) */
   developOnly?: boolean;
   /** 배지 — 피드백 처리중 건수 */
@@ -48,6 +50,7 @@ export const NAV_GROUPS: NavGroup[] = [
         href: '/direct-letters',
         label: '개인 편지',
         icon: DirectLetterIcon,
+        detailTitle: '상세',
       },
     ],
   },
@@ -55,6 +58,7 @@ export const NAV_GROUPS: NavGroup[] = [
     // 편지함은 사용자가 보내고 운영이 답하는 자리, 알림은 운영이 밀어 보내는 자리 — 성격이 달라 그룹을 가른다
     label: '알림',
     items: [
+      { href: '/notifications', label: '이메일·체험 알림', icon: Mail },
       {
         href: '/push-campaigns',
         label: '푸시 알림',
@@ -71,6 +75,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: '설정',
     items: [
+      { href: '/pronunciation-assets', label: '발음 에셋', icon: AudioLines },
       { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
       {
         href: '/scenario-test',

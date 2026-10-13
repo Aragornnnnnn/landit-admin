@@ -6,6 +6,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NewDirectLetterPage } from './NewDirectLetterPage';
 
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+
 const USERS = [
   { userProfileId: 1290, nickname: '하늘', status: 'ACTIVE' },
   { userProfileId: 977, nickname: '서연', status: 'ACTIVE' },
@@ -76,7 +79,7 @@ describe('NewDirectLetterPage', () => {
     expect(within(chips).queryByText('태오')).not.toBeInTheDocument();
   });
 
-  it('확인창에서 보내면 받는 사람·제목·본문을 그대로 보내고 폼을 비운다', async () => {
+  it('확인창에서 보내면 받는 사람·제목·본문을 그대로 보내고 생성된 편지 상세로 이동한다', async () => {
     const fetchMock = stubBackend(() =>
       json(201, {
         success: true,
@@ -103,7 +106,10 @@ describe('NewDirectLetterPage', () => {
       }),
     );
 
-    await waitFor(() => expect(screen.getByLabelText('제목')).toHaveValue(''));
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith('/direct-letters/58'),
+    );
+    expect(screen.getByLabelText('제목')).toHaveValue('');
     const [, init] = fetchMock.mock.calls.find(([url]) =>
       String(url).endsWith('/admin/mailbox/direct-letters'),
     )!;
