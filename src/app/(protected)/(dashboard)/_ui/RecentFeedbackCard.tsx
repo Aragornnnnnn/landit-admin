@@ -16,24 +16,30 @@ import { cn } from '@/shared/lib/cn';
 import { formatRelativeTime } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
 import { InlineError } from '@/shared/ui/InlineError';
+import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 
 const RECENT_COUNT = 5;
 
 export function RecentFeedbackCard({
   items,
   error = false,
+  pending = false,
   onRetry,
 }: {
   items: FeedbackItem[];
   /** 조회 실패 — 카드 자리는 유지하고 안에서만 알린다 */
   error?: boolean;
+  pending?: boolean;
   onRetry?: () => void;
 }) {
   const isMobile = useIsMobile();
   const shown = items.slice(0, isMobile ? 3 : RECENT_COUNT);
 
   return (
-    <section className="w-full rounded-[20px] bg-card px-4 py-5 md:px-6">
+    <section
+      aria-label="최근 피드백"
+      className="w-full rounded-[20px] bg-card px-4 py-5 md:px-6"
+    >
       <header className="flex items-baseline justify-between px-2">
         <h2 className="text-[17px] font-bold text-foreground">최근 피드백</h2>
         <Link
@@ -44,7 +50,9 @@ export function RecentFeedbackCard({
         </Link>
       </header>
 
-      {error ? (
+      {pending ? (
+        <ListSkeleton rows={3} className="pt-4" />
+      ) : error ? (
         <InlineError
           message="피드백을 불러오지 못했어요"
           onRetry={onRetry}

@@ -1,4 +1,4 @@
-// 이 파일은 `pnpm api:types`가 스웨거(https://api-develop.landit.im/v3/api-docs)에서 생성한다. 손으로 고치지 말고 재생성한다.
+// 이 파일은 `pnpm api:types`가 스웨거(develop OpenAPI + LAN-669 백엔드 통합 테스트의 가입 통계 계약)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
     "/api/v1/me/push-devices/{installationId}": {
@@ -1674,6 +1674,26 @@ export interface paths {
          * @description 회원 행과 문의·첨부파일은 유지하고 닉네임을 '탈퇴한 사용자'로 덮어쓴다. 이메일·프로필 이미지·소셜 식별 원본과 refresh token을 정리하고, 장기기억을 삭제하며 계정 소유의 모든 푸시 Token을 비활성화한다.
          */
         delete: operations["withdraw"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/signup-statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관리자 가입 통계 조회
+         * @description Asia/Seoul 기준 월요일 00:00과 매월 1일 00:00을 경계로 집계한다. 이번 주·달은 asOf까지, 지난 주·달은 시작 포함·끝 제외 기간이다. 사용자 목록과 동일하게 탈퇴·정지·관리자 프로필을 포함하며 미래 시각은 제외한다.
+         */
+        get: operations["statistics"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5052,6 +5072,33 @@ export interface components {
             success?: boolean;
             /** @description 성공 응답 데이터. 실패 시 null입니다. */
             data?: components["schemas"]["AccentLocaleOptionResponse"][];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        AdminSignupStatisticsResponse: {
+            /** Format: int64 */
+            thisWeek: number;
+            /** Format: int64 */
+            lastWeek: number;
+            /** Format: int64 */
+            thisMonth: number;
+            /** Format: int64 */
+            lastMonth: number;
+            /**
+             * Format: date-time
+             * @description 집계 기준 시각 (Asia/Seoul)
+             */
+            asOf: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminSignupStatisticsResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminSignupStatisticsResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
@@ -8591,6 +8638,44 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    statistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 집계 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                };
+            };
+            /** @description 관리자 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
                 };
             };
         };
