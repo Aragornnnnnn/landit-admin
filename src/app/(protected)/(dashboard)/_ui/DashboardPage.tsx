@@ -1,7 +1,7 @@
 'use client';
 
 // 대시보드 — 들어오자마자 "오늘 처리할 게 있나"를 본다 (Figma 1050:7662 · 7905).
-// 집계 API가 없어 목록으로 받아 세므로, 숫자가 무엇을 센 것인지 카드마다 보조 문구로 밝힌다
+// 카드별 조회 상태를 분리해 한 조회가 다른 카드의 표시를 막지 않게 한다
 import { FEEDBACK_TYPE_LABEL } from '@/features/feedback/model/feedback-label';
 import { cn } from '@/shared/lib/cn';
 import { InlineError } from '@/shared/ui/InlineError';
@@ -13,7 +13,6 @@ import {
   dailyCounts,
   formatDelta,
   oldestPending,
-  signupCounts,
   todayLabel,
 } from '../_model/dashboard-metrics';
 import { useDashboardData } from '../_model/useDashboardData';
@@ -24,14 +23,12 @@ import {
 import { RecentFeedbackCard } from './RecentFeedbackCard';
 
 export function DashboardPage() {
-  // 렌더마다 시각이 달라지면 숫자가 흔들린다 — 한 번 잡아 모든 계산이 같은 "지금"을 쓰게 한다
+  // 이번 렌더에서 표시하는 피드백 날짜와 대기 일수의 기준 시각이다.
   const now = new Date();
   const data = useDashboardData(now);
 
-  if (data.isPending) return <ListSkeleton rows={6} className="pt-4" />;
-
   const oldest = oldestPending(data.pendingFeedbacks, now);
-  const signups = signupCounts(data.users, now);
+  const signups = data.signups;
   const bars = dailyCounts(data.recentFeedbacks, now);
   const byType = countsByType(data.pendingFeedbacks);
 
@@ -43,24 +40,30 @@ export function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 md:flex md:flex-row">
         <SummaryCard
           label="답장 기다리는 피드백"
-          value={data.feedbacksError ? '—' : String(data.pendingTotal)}
+          pending={data.pendingPending}
+          error={data.pendingError}
+          onRetry={data.refetchPending}
+          value={data.pendingError ? '—' : String(data.pendingTotal)}
           hint={
-            data.feedbacksError
+            data.pendingError
               ? '불러오지 못했어요'
               : `건 · 오늘 +${countCreatedToday(data.pendingFeedbacks, now)}`
           }
         />
         <SummaryCard
           label="가장 오래 기다린 건"
+          pending={data.pendingPending}
+          error={data.pendingError}
+          onRetry={data.refetchPending}
           value={
-            data.feedbacksError
+            data.pendingError
               ? '—'
               : oldest
                 ? `${oldest.waitingDays}일`
                 : '없음'
           }
           hint={
-            data.feedbacksError
+            data.pendingError
               ? '불러오지 못했어요'
               : oldest
                 ? `· ${oldest.type ? FEEDBACK_TYPE_LABEL[oldest.type] : ''} · ${oldest.nickname ?? ''}`
@@ -70,9 +73,12 @@ export function DashboardPage() {
         <SummaryCard
           className="col-span-2 md:col-span-1"
           label="이번 주 가입"
-          value={data.usersError ? '—' : String(signups.thisWeek)}
+          pending={data.signupsPending}
+          error={data.signupsError}
+          onRetry={data.refetchSignups}
+          value={signups ? String(signups.thisWeek) : '—'}
           hint={
-            data.usersError ? (
+            !signups ? (
               '불러오지 못했어요'
             ) : (
               <>
@@ -82,9 +88,10 @@ export function DashboardPage() {
             )
           }
           footer={
-            data.usersError ? undefined : (
+            !signups ? undefined : (
               <>
-                이번 달 {signups.thisMonth} · 지난달 {signups.lastMonth}{' '}
+                서울 기준 · 이번 달 {signups.thisMonth} · 지난달{' '}
+                {signups.lastMonth}{' '}
                 <Delta
                   current={signups.thisMonth}
                   previous={signups.lastMonth}
@@ -96,27 +103,22 @@ export function DashboardPage() {
       </div>
 
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start">
-        <section className="flex w-full flex-1 flex-col gap-4 rounded-[20px] bg-card px-6 py-5">
+        <section
+          aria-label="피드백 접수"
+          className="flex w-full flex-1 flex-col gap-4 rounded-[20px] bg-card px-6 py-5"
+        >
           <header className="flex items-baseline justify-between">
             <h2 className="text-[17px] font-bold text-foreground">
               피드백 접수
             </h2>
             <span className="text-[12px] text-subtle">
-              {data.feedbacksError
+              {data.recentPending || data.recentError
                 ? '최근 7일'
                 : `최근 7일 · 총 ${data.recentTotal}건`}
             </span>
           </header>
 
-          {data.feedbacksError ? (
-            <InlineError
-              message="피드백을 불러오지 못했어요"
-              onRetry={data.refetchFeedbacks}
-              className="py-10"
-            />
-          ) : (
-            <ChartBody data={data} bars={bars} byType={byType} />
-          )}
+          <ChartBody data={data} bars={bars} byType={byType} />
         </section>
 
         {/* 오른쪽 열은 "지금 나가 있는 것" — 앱 버전과 편지함 맨 위 (프레임의 400px 열) */}
@@ -124,6 +126,8 @@ export function DashboardPage() {
           <AppVersionSummaryCard
             versions={data.appVersions}
             error={data.appVersionsError}
+            pending={data.appVersionsPending}
+            onRetry={data.refetchAppVersions}
           />
           {/* 편지함 카드도 좁은 화면 프레임에 없다 — 대시보드는 현황판이고 편지는 그 화면에서 본다 */}
           <div className="hidden md:block">
@@ -131,6 +135,8 @@ export function DashboardPage() {
               letters={data.publishedLetters}
               draftCount={data.draftLetterCount}
               error={data.lettersError}
+              pending={data.lettersPending}
+              onRetry={data.refetchLetters}
             />
           </div>
         </div>
@@ -138,8 +144,9 @@ export function DashboardPage() {
 
       <RecentFeedbackCard
         items={data.recentFeedbacks}
-        error={data.feedbacksError}
-        onRetry={data.refetchFeedbacks}
+        error={data.recentError}
+        pending={data.recentPending}
+        onRetry={data.refetchRecent}
       />
     </div>
   );
@@ -156,55 +163,79 @@ function ChartBody({
 }) {
   return (
     <>
-      <div className="flex items-end gap-2">
-        {bars.map((bar) => (
-          <span
-            key={bar.date.toISOString()}
-            className="flex flex-1 flex-col items-center gap-1.5"
-          >
+      {data.recentPending ? (
+        <ListSkeleton rows={2} />
+      ) : data.recentError ? (
+        <InlineError
+          message="피드백을 불러오지 못했어요"
+          onRetry={data.refetchRecent}
+          className="py-10"
+        />
+      ) : (
+        <div className="flex items-end gap-2">
+          {bars.map((bar) => (
             <span
-              aria-hidden
-              style={{
-                height: `${barHeight(
-                  bar.count,
-                  bars.map((one) => one.count),
-                )}px`,
-              }}
-              className={`w-full max-w-10 rounded ${bar.today ? 'bg-foreground' : 'bg-hairline'}`}
-            />
-            <span className="text-[11px] text-subtle">
-              {bar.date.getMonth() + 1}.{bar.date.getDate()}
+              key={bar.date.toISOString()}
+              className="flex flex-1 flex-col items-center gap-1.5"
+            >
+              <span
+                aria-hidden
+                style={{
+                  height: `${barHeight(
+                    bar.count,
+                    bars.map((one) => one.count),
+                  )}px`,
+                }}
+                className={`w-full max-w-10 rounded ${bar.today ? 'bg-foreground' : 'bg-hairline'}`}
+              />
+              <span className="text-[11px] text-subtle">
+                {bar.date.getMonth() + 1}.{bar.date.getDate()}
+              </span>
+              <span className="sr-only">{bar.count}건</span>
             </span>
-            <span className="sr-only">{bar.count}건</span>
-          </span>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* 좁은 화면 프레임에는 유형별 분포가 없다 — 막대만으로 추세를 본다 */}
       <div className="hidden h-px bg-muted md:block" />
 
       <div className="hidden items-baseline justify-between md:flex">
         <h3 className="text-[13px] font-medium text-strong">처리중 유형별</h3>
-        <span className="text-[12px] text-subtle">{data.pendingTotal}건</span>
+        <span className="text-[12px] text-subtle">
+          {data.pendingPending || data.pendingError
+            ? '—'
+            : `${data.pendingTotal}건`}
+        </span>
       </div>
       <div className="hidden flex-col gap-2 md:flex">
-        {byType.map(({ type, count }) => (
-          <div key={type} className="flex items-center gap-3">
-            <span className="w-[72px] shrink-0 text-[13px] text-body">
-              {FEEDBACK_TYPE_LABEL[type]}
-            </span>
-            <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-              <span
-                aria-hidden
-                style={{ width: `${share(count, byType)}%` }}
-                className="block h-full rounded-full bg-foreground"
-              />
-            </span>
-            <span className="w-6 shrink-0 text-right text-[13px] font-medium text-strong">
-              {count}
-            </span>
-          </div>
-        ))}
+        {data.pendingPending ? (
+          <ListSkeleton rows={2} />
+        ) : data.pendingError ? (
+          <InlineError
+            message="처리중 피드백을 불러오지 못했어요"
+            onRetry={data.refetchPending}
+            className="py-4"
+          />
+        ) : (
+          byType.map(({ type, count }) => (
+            <div key={type} className="flex items-center gap-3">
+              <span className="w-[72px] shrink-0 text-[13px] text-body">
+                {FEEDBACK_TYPE_LABEL[type]}
+              </span>
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <span
+                  aria-hidden
+                  style={{ width: `${share(count, byType)}%` }}
+                  className="block h-full rounded-full bg-foreground"
+                />
+              </span>
+              <span className="w-6 shrink-0 text-right text-[13px] font-medium text-strong">
+                {count}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </>
   );
@@ -216,6 +247,9 @@ function SummaryCard({
   hint,
   footer,
   className,
+  pending,
+  error,
+  onRetry,
 }: {
   label: string;
   value: string;
@@ -223,22 +257,34 @@ function SummaryCard({
   /** 큰 숫자 아래 한 줄 더 — 가입 카드의 월 비교 */
   footer?: React.ReactNode;
   className?: string;
+  pending: boolean;
+  error: boolean;
+  onRetry: () => void;
 }) {
   return (
     <section
+      aria-label={label}
       className={cn(
         'flex flex-1 flex-col gap-1 rounded-[20px] bg-card px-5 py-4.5',
         className,
       )}
     >
       <span className="text-[13px] text-subtle">{label}</span>
-      <span className="flex flex-wrap items-baseline gap-x-1.5">
-        <span className="text-[28px] leading-tight font-bold text-foreground">
-          {value}
-        </span>
-        <span className="text-[12px] text-subtle">{hint}</span>
-      </span>
-      {footer && <span className="text-[12px] text-subtle">{footer}</span>}
+      {pending ? (
+        <ListSkeleton rows={1} />
+      ) : error ? (
+        <InlineError onRetry={onRetry} className="py-3" />
+      ) : (
+        <>
+          <span className="flex flex-wrap items-baseline gap-x-1.5">
+            <span className="text-[28px] leading-tight font-bold text-foreground">
+              {value}
+            </span>
+            <span className="text-[12px] text-subtle">{hint}</span>
+          </span>
+          {footer && <span className="text-[12px] text-subtle">{footer}</span>}
+        </>
+      )}
     </section>
   );
 }
