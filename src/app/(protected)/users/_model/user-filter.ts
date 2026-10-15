@@ -55,7 +55,7 @@ export function changeUserFilter(
   return { ...filter, ...patch, page: onlyPage ? patch.page! : 0 };
 }
 
-/** 이메일·닉네임을 대소문자 없이 부분 일치로 찾는다 — 어드민이 아는 건 보통 이메일 앞부분이다 */
+/** 이메일·닉네임·사용자 ID를 부분 일치로 찾고 영문 대소문자는 구분하지 않는다 */
 export function filterUsers(
   users: UserListItem[],
   filter: UserFilter,
@@ -67,7 +67,8 @@ export function filterUsers(
     if (!keyword) return true;
     return (
       (user.email ?? '').toLowerCase().includes(keyword) ||
-      (user.nickname ?? '').toLowerCase().includes(keyword)
+      (user.nickname ?? '').toLowerCase().includes(keyword) ||
+      String(user.userProfileId ?? '').includes(keyword)
     );
   });
 }

@@ -49,7 +49,7 @@ export function UserFilters({
       <Input
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
-        placeholder="이메일·닉네임 검색"
+        placeholder="이메일·닉네임·ID 검색"
         aria-label="사용자 검색"
         className={`${FIELD} w-full placeholder:text-subtle md:w-[280px]`}
       />

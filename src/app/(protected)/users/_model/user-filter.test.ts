@@ -87,6 +87,43 @@ describe('filterUsers', () => {
     expect(filterUsers(users, { keyword: 'gmail', page: 0 })).toHaveLength(2);
   });
 
+  it('ID 일부를 공백과 함께 입력하면 해당 사용자를 찾는다', () => {
+    const candidates = [
+      user({ userProfileId: 1281 }),
+      user({ userProfileId: 2049 }),
+    ];
+
+    expect(filterUsers(candidates, { keyword: ' 281 ', page: 0 })).toEqual([
+      candidates[0],
+    ]);
+  });
+
+  it('ID 검색과 역할·상태를 지정하면 모든 조건에 맞는 사용자만 찾는다', () => {
+    const candidates = [
+      user({ userProfileId: 1281, role: 'ADMIN', status: 'WITHDRAWN' }),
+      user({ userProfileId: 1282, role: 'USER', status: 'WITHDRAWN' }),
+      user({ userProfileId: 1283, role: 'ADMIN', status: 'ACTIVE' }),
+    ];
+
+    expect(
+      filterUsers(candidates, {
+        keyword: '128',
+        role: 'ADMIN',
+        status: 'WITHDRAWN',
+        page: 0,
+      }),
+    ).toEqual([candidates[0]]);
+  });
+
+  it('ID가 없는 사용자는 undefined라는 검색어로 일치하지 않는다', () => {
+    expect(
+      filterUsers([user({ userProfileId: undefined })], {
+        keyword: 'undefined',
+        page: 0,
+      }),
+    ).toEqual([]);
+  });
+
   it('역할·상태와 함께 걸린다', () => {
     expect(
       filterUsers(users, { keyword: '', role: 'ADMIN', page: 0 }),
