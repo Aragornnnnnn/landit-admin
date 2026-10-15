@@ -1,4 +1,4 @@
-// 이 파일은 `pnpm api:types`가 스웨거(file:///private/tmp/lan683-openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
+// 이 파일은 `pnpm api:types`가 스웨거(file:///Users/sangmin8817/.codex/worktrees/c762/landit-be/build/openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
     "/api/v1/me/push-devices/{installationId}": {
@@ -1470,7 +1470,7 @@ export interface paths {
         };
         /**
          * 관리자 사용자 목록 조회
-         * @description 사용자 기본 정보를 가입일 최신순으로 페이지 조회한다. 두 필터는 AND 조건이며 생략하면 전체를 조회한다. 푸시 동의는 서버 저장값으로, 실시간 기기 권한이나 활성 Token 보유 여부를 의미하지 않는다. totalCount와 totalPages는 필터 적용 결과 기준이다. page는 0부터 시작하며 결과가 없으면 totalPages는 0이다.
+         * @description 사용자 기본 정보를 가입일 최신순으로 페이지 조회한다. 필터는 AND 조건이며 생략하면 전체를 조회한다. 검색어는 앞뒤 공백을 제거하고 이메일·닉네임 대소문자 없는 부분 일치 또는 숫자 ID 완전 일치로 검색한다. %, _, !는 와일드카드가 아닌 문자로 검색한다. 푸시 동의는 서버 저장값으로, 실시간 기기 권한이나 활성 Token 보유 여부를 의미하지 않는다. totalCount와 totalPages는 필터 적용 결과 기준이다. page는 0부터 시작하며 결과가 없으면 totalPages는 0이다.
          */
         get: operations["list_1"];
         put?: never;
@@ -8475,6 +8475,12 @@ export interface operations {
                 active?: boolean;
                 /** @description true: GRANTED, false: DENIED 또는 NOT_DETERMINED */
                 pushConsent?: boolean;
+                /** @description 이메일·닉네임 부분 일치 또는 숫자 ID 완전 일치 (최대 255자) */
+                keyword?: string;
+                /** @description 사용자 역할 */
+                role?: "USER" | "ADMIN";
+                /** @description 사용자 상태. active와 함께 지정하면 AND로 적용 */
+                status?: "ACTIVE" | "WITHDRAWN" | "BANNED";
             };
             header?: never;
             path?: never;

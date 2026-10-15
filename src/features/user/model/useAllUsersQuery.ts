@@ -1,7 +1,7 @@
 'use client';
 
-// 사용자 전체를 순차로 받아 둔다 — BE에 검색·필터·기간 집계가 없어 우리가 걸러야 하고, 거르려면 다 있어야 한다.
-// 50명씩 hasNext가 false일 때까지 이어 받는다. 사용자 목록(검색·필터)과 대시보드(가입 수)가 같이 쓴다
+// 공지·개별 편지의 대상 선택에 필요한 전체 사용자 목록을 순차로 받아 둔다.
+// 사용자 관리 목록과 대시보드는 각각 서버 페이지 조회와 가입 통계 API를 사용한다.
 import { useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 

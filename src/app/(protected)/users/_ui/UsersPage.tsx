@@ -1,12 +1,11 @@
 'use client';
 
-// 사용자 목록 화면 조립 — 필터 줄(진행 표시 포함) · 표 · 로컬 페이징(숫자 페이지 버튼) (docs/screens/users.md)
+// 사용자 목록 화면 조립 — 서버 검색 · 표 · 페이지 이동 (docs/screens/users.md)
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import type { UserListItem } from '@/features/user/api/user-list';
-import { useAllUsersQuery } from '@/features/user/model/useAllUsersQuery';
 import { cn } from '@/shared/lib/cn';
 import { formatDateDot } from '@/shared/lib/format-time';
 import { useIsMobile } from '@/shared/lib/use-mobile';
@@ -14,13 +13,12 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 import { Pagination } from '@/shared/ui/Pagination';
+import { Button } from '@/shared/ui/shadcn/button';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 import {
   changeUserFilter,
-  filterUsers,
   hasActiveUserFilter,
-  pageOfUsers,
   readUserFilter,
   USERS_PAGE_SIZE,
   writeUserFilter,
@@ -32,6 +30,7 @@ import {
   USER_STATUS_LABEL,
   usersRangeLabel,
 } from '../_model/user-label';
+import { useUsersQuery } from '../_model/useUsersQuery';
 import { UserFilters } from './UserFilters';
 import { UserTable } from './UserTable';
 
@@ -40,12 +39,11 @@ export function UsersPage() {
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const filter = readUserFilter(searchParams);
-  const { users, isPending, isError, refetch, isLoadingMore } =
-    useAllUsersQuery();
-
-  const matched = filterUsers(users, filter);
-  const shown = pageOfUsers(matched, filter.page);
-  const totalPages = Math.ceil(matched.length / USERS_PAGE_SIZE);
+  const { data, isPending, isFetching, isError, refetch } =
+    useUsersQuery(filter);
+  const shown = data?.items ?? [];
+  const totalCount = data?.totalCount ?? 0;
+  const totalPages = data?.totalPages ?? 0;
 
   const change = (patch: Partial<UserFilter>) => {
     const query = writeUserFilter(changeUserFilter(filter, patch));
@@ -56,8 +54,8 @@ export function UsersPage() {
     <div className="flex flex-col gap-4 pt-1 pb-12">
       <UserFilters
         filter={filter}
-        loaded={users.length}
-        loading={isLoadingMore}
+        total={isError ? undefined : data?.totalCount}
+        loading={isFetching}
         onChange={change}
       />
 
@@ -76,10 +74,12 @@ export function UsersPage() {
               ? '조건에 맞는 사용자가 없어요'
               : '아직 사용자가 없어요'
           }
-          description={
-            isLoadingMore
-              ? '아직 다 불러오지 못했어요. 잠시 뒤 다시 보여요'
-              : undefined
+          action={
+            filter.page > 0 ? (
+              <Button variant="outline" onClick={() => change({ page: 0 })}>
+                첫 페이지로
+              </Button>
+            ) : undefined
           }
         />
       ) : isMobile ? (
@@ -88,17 +88,13 @@ export function UsersPage() {
         <UserTable users={shown} />
       )}
 
-      {shown.length > 0 && (
+      {!isPending && !isError && shown.length > 0 && (
         <Pagination
           page={filter.page}
           size={USERS_PAGE_SIZE}
-          totalElements={matched.length}
+          totalElements={totalCount}
           totalPages={totalPages}
-          summary={usersRangeLabel(
-            filter.page,
-            USERS_PAGE_SIZE,
-            matched.length,
-          )}
+          summary={usersRangeLabel(filter.page, USERS_PAGE_SIZE, totalCount)}
           onChangePage={(next) => change({ page: next })}
         />
       )}
