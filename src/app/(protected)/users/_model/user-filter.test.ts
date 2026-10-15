@@ -1,27 +1,14 @@
+// 사용자 검색 URL과 서버 조회 조건을 검증한다.
 import { describe, expect, it } from 'vitest';
-
-import type { UserListItem } from '@/features/user/api/user-list';
 
 import {
   changeUserFilter,
   DEFAULT_USER_FILTER,
-  filterUsers,
-  pageOfUsers,
   readUserFilter,
   USERS_PAGE_SIZE,
+  userSearchParams,
   writeUserFilter,
 } from './user-filter';
-
-const user = (patch: Partial<UserListItem>): UserListItem => ({
-  userProfileId: 1,
-  email: 'sujin@gmail.com',
-  nickname: '수진',
-  role: 'USER',
-  status: 'ACTIVE',
-  pushPermissionStatus: 'GRANTED',
-  createdAt: '2026-08-18T10:00:00',
-  ...patch,
-});
 
 describe('readUserFilter · writeUserFilter', () => {
   it('빈 주소는 기본값', () => {
@@ -64,51 +51,26 @@ describe('changeUserFilter', () => {
   });
 });
 
-describe('filterUsers', () => {
-  const users = [
-    user({ userProfileId: 1, email: 'sujin@gmail.com', nickname: '수진' }),
-    user({
-      userProfileId: 2,
-      email: 'minho@naver.com',
-      nickname: '민호',
+describe('userSearchParams', () => {
+  it('검색 조건과 페이지를 서버에 넘기고 검색어 앞뒤 공백을 제거한다', () => {
+    const params = userSearchParams({
+      keyword: ' 1281 ',
       role: 'ADMIN',
-    }),
-    user({
-      userProfileId: 3,
-      email: 'old@gmail.com',
-      nickname: '',
-      status: 'WITHDRAWN',
-    }),
-  ];
-
-  it('이메일·닉네임을 대소문자 없이 부분 일치로 찾는다', () => {
-    expect(filterUsers(users, { keyword: 'SUJIN', page: 0 })).toHaveLength(1);
-    expect(filterUsers(users, { keyword: '민호', page: 0 })).toHaveLength(1);
-    expect(filterUsers(users, { keyword: 'gmail', page: 0 })).toHaveLength(2);
+      status: 'BANNED',
+      page: 3,
+    });
+    expect(Object.fromEntries(params)).toEqual({
+      keyword: '1281',
+      role: 'ADMIN',
+      status: 'BANNED',
+      page: '3',
+      size: String(USERS_PAGE_SIZE),
+    });
   });
 
-  it('역할·상태와 함께 걸린다', () => {
+  it('빈 검색어와 전체 필터는 서버 조건에서 생략한다', () => {
     expect(
-      filterUsers(users, { keyword: '', role: 'ADMIN', page: 0 }),
-    ).toHaveLength(1);
-    expect(
-      filterUsers(users, { keyword: 'gmail', status: 'WITHDRAWN', page: 0 }),
-    ).toHaveLength(1);
-  });
-
-  it('닉네임이 없어도 터지지 않는다', () => {
-    expect(filterUsers(users, { keyword: '수진', page: 0 })).toHaveLength(1);
-  });
-});
-
-describe('pageOfUsers', () => {
-  const users = Array.from({ length: 45 }, (_, index) =>
-    user({ userProfileId: index }),
-  );
-
-  it('페이지 몫만 자른다', () => {
-    expect(pageOfUsers(users, 0)).toHaveLength(USERS_PAGE_SIZE);
-    expect(pageOfUsers(users, 2)).toHaveLength(5);
-    expect(pageOfUsers(users, 9)).toHaveLength(0);
+      Object.fromEntries(userSearchParams({ keyword: '   ', page: 0 })),
+    ).toEqual({ page: '0', size: '20' });
   });
 });
