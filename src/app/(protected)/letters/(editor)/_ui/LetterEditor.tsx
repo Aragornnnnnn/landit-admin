@@ -35,6 +35,7 @@ import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { statusAfter } from '../../_model/letter-actions';
 import { useLetterActions } from '../../_model/useLetterActions';
 import { LetterActionDialog } from '../../_ui/LetterActionDialog';
+import { LetterAudienceFields } from './LetterAudienceFields';
 import { LetterBasicFields } from './LetterBasicFields';
 import { LetterBodyCard } from './LetterBodyCard';
 import { LetterPreview } from './LetterPreview';
@@ -143,6 +144,7 @@ function Editor({
             // 아직 저장 안 된 새 편지는 발행할 수 없다. 내용이 비어도 마찬가지다
             disabled={
               !id ||
+              dirty ||
               !canPublishDraft(draft) ||
               save.isPending ||
               actions.pending
@@ -159,6 +161,7 @@ function Editor({
         <div className="flex flex-1 flex-col gap-4">
           <LetterTemplateRow draft={draft} onChange={setDraft} />
           <LetterBasicFields draft={draft} onChange={setDraft} />
+          <LetterAudienceFields draft={draft} onChange={setDraft} />
           <LetterBodyCard
             body={draft.body}
             onChange={(body) => setDraft({ ...draft, body })}
@@ -183,6 +186,11 @@ function Editor({
         onSave={() => runSave(() => leave())}
       />
 
+      {id && dirty && (
+        <p className="text-sm text-subtle">
+          변경한 내용과 숨길 대상을 저장한 뒤 발행 상태를 바꿀 수 있어요.
+        </p>
+      )}
       {/* 새 편지는 저장해야 발행할 수 있다 — 버튼만 흐리게 두면 이유를 모른다 */}
       {!id && (
         <p className="text-[13px] text-subtle">
