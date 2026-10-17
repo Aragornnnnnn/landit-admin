@@ -81,6 +81,17 @@ export function PolicyEditor({
           적용되며, 기존 가입자의 약속된 혜택은 유지돼요.
         </p>
       </div>
+      {conflict && (
+        <div role="alert" className="rounded-xl border p-4 text-sm">
+          <p>
+            다른 관리자가 정책을 변경했어요. 입력한 초안을 확인하고 최신 정책을
+            불러와 다시 편집해 주세요.
+          </p>
+          <Button variant="outline" onClick={reload}>
+            초안 버리고 최신 정책 불러오기
+          </Button>
+        </div>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         <StageFields
           title="가입 완료 보상"
@@ -102,6 +113,43 @@ export function PolicyEditor({
         />
       </label>
       {invalid && <p className="text-sm text-subtle">{invalid}</p>}
+      <Button
+        disabled={!!invalid || conflict}
+        onClick={() => setOperation('save')}
+      >
+        변경 내용 확인
+      </Button>
+      {operation && (
+        <ConfirmChange
+          title={
+            operation === 'save'
+              ? '새 보상 정책을 저장할까요?'
+              : state.paused
+                ? '지급을 재개할까요?'
+                : '지급을 보류할까요?'
+          }
+          onClose={() => setOperation(null)}
+          onConfirm={confirm}
+        >
+          {operation === 'save' ? (
+            <>
+              <p>
+                가입: {stageLabel(state.policy.signup)} →{' '}
+                {stageLabel(draft.signup)}
+              </p>
+              <p>
+                결제: {stageLabel(state.policy.purchase)} →{' '}
+                {stageLabel(draft.purchase)}
+              </p>
+              <p>대상 상품: {draft.products.length}개</p>
+              <p>변경 이후 가입자부터 적용돼요.</p>
+              <p>사유: {draft.reason}</p>
+            </>
+          ) : (
+            <p>사유: {reason}</p>
+          )}
+        </ConfirmChange>
+      )}
     </div>
   );
 }
