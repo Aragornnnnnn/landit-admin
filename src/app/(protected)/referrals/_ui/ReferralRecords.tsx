@@ -92,6 +92,40 @@ function Records({ kind }: { kind: Kind }) {
           해당 내역이 없어요.
         </p>
       )}
+      <div className="space-y-3">
+        {result.data?.pages
+          .flatMap((p) => p.items)
+          .map((row) => (
+            <article
+              key={'version' in row ? row.version : row.id}
+              className="space-y-2 rounded-xl border bg-card p-4 text-sm"
+            >
+              {'version' in row ? (
+                <>
+                  <h3 className="font-semibold">정책 v{row.version}</h3>
+                  <p>가입: {stageLabel(row.signup)}</p>
+                  <p>결제: {stageLabel(row.purchase)}</p>
+                  <p>
+                    관리자 {row.createdBy ?? '시스템'} ·{' '}
+                    {formatDateTime(row.createdAt)}
+                  </p>
+                  <p>{row.reason}</p>
+                  <details>
+                    <summary>대상 상품 {row.products.length}개</summary>
+                    {row.products.map((p) => (
+                      <p
+                        className="break-all"
+                        key={`${p.appId}/${p.store}/${p.productId}`}
+                      >
+                        {p.appId} · {p.store} · {p.productId} · {p.purchaseType}
+                      </p>
+                    ))}
+                  </details>
+                </>
+              ) : null}
+            </article>
+          ))}
+      </div>
       {result.hasNextPage && (
         <Button
           variant="outline"
