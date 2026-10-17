@@ -30,11 +30,45 @@ export function PolicyEditor({
   reload: () => void;
 }) {
   const [state] = useState(incoming);
+  const queryClient = useQueryClient();
   const [draft, setDraft] = useState<PolicyDraft>({
     ...state.policy,
     reason: '',
   });
+  const [operation, setOperation] = useState<'save' | 'processing' | null>(
+    null,
+  );
+  const [reason, setReason] = useState('');
+  const [conflict, setConflict] = useState(false);
   const invalid = validatePolicy(draft);
+  async function confirm() {
+    try {
+      if (operation === 'save')
+        await referralsApi.save({
+          ...draft,
+          products: draft.products.map((p) => ({
+            ...p,
+            appId: p.appId.trim(),
+            productId: p.productId.trim(),
+            displayName: p.displayName.trim(),
+          })),
+          signup: normalizeStage(draft.signup),
+          purchase: normalizeStage(draft.purchase),
+          expectedRevision: state.revision,
+        });
+      else
+        await referralsApi.processing({
+          expectedRevision: state.revision,
+          paused: !state.paused,
+          reason,
+        });
+      await queryClient.invalidateQueries({ queryKey: ['referrals'] });
+      reload();
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 409) setConflict(true);
+      throw e;
+    }
+  }
   return (
     <div className="space-y-5">
       <div className="rounded-xl border bg-card p-5">
