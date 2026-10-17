@@ -56,3 +56,13 @@ export function validatePolicy(draft: PolicyDraft): string | null {
     return '상품 ID를 입력하고 중복 상품을 제거해 주세요.';
   return null;
 }
+export function stageLabel(stage: Stage) {
+  if (!stage.enabled) return '지급 안 함';
+  const s = normalizeStage(stage);
+  return [
+    s.inviterWon ? `초대인 ${s.inviterWon.toLocaleString()}원` : '',
+    s.inviteeWon ? `피초대인 ${s.inviteeWon.toLocaleString()}원` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
