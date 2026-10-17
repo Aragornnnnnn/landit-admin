@@ -96,7 +96,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** 내 레퍼럴 보상 내역 */
+    /**
+     * 내 레퍼럴 지급 근거
+     * @description 통합 환급 적립에 반영한 지급 근거다. 별도 잔액이나 출금 기능이 아니다.
+     */
     get: operations['rewards'];
     put?: never;
     post?: never;
@@ -135,7 +138,7 @@ export interface paths {
     };
     /**
      * 내 레퍼럴 조회
-     * @description creditedWon은 적립 순액이며 송금 완료 금액이 아니다.
+     * @description 초대 성과와 조건만 반환한다. 통합 적립액과 환급 가능액은 /api/v1/me/rewards에서 조회한다.
      */
     get: operations['me'];
     put?: never;
@@ -378,8 +381,6 @@ export interface components {
       invitedCount?: number;
       /** Format: int64 */
       convertedCount?: number;
-      /** Format: int64 */
-      creditedWon?: number;
     };
     /** @description 공통 API 응답 객체 */
     ApiResponsePageReferralPolicy: {

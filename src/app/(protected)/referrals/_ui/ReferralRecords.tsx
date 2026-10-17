@@ -102,8 +102,9 @@ function Records({ kind }: { kind: Kind }) {
         </label>
       )}
       <p className="text-sm text-subtle">
-        적립은 실제 송금 완료가 아니에요. 재처리는 저장된 근거를 다시 확인하며,
-        금액이나 수령자를 임의로 바꾸지 않아요.
+        보상은 기존 적립금에 더해져 본인의 100일 챌린지 만기 때 함께 환급돼요.
+        학습 보상 상한과 무관하게 추가되며, 적립 완료는 송금 완료가 아니에요.
+        재처리는 저장된 근거를 다시 확인해요.
       </p>
       {result.isPending && <p role="status">내역을 불러오는 중이에요.</p>}
       {result.isError && (
