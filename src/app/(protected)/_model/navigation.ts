@@ -1,6 +1,6 @@
 // 사이드바 내비 정의 — 그룹·순서·라벨·아이콘은 docs/admin-spec.md "셸". 상단바 제목도 여기서 찾는다
 // 아이콘은 Figma 셸의 채움형 벡터를 그대로 옮긴 것 (NavIcons.tsx) — lucide가 아니다
-import { AudioLines, Mail } from 'lucide-react';
+import { AudioLines, Gift, Mail } from 'lucide-react';
 
 import {
   AppVersionsIcon,
@@ -70,7 +70,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: '사용자',
-    items: [{ href: '/users', label: '사용자', icon: UsersIcon }],
+    items: [
+      { href: '/users', label: '사용자', icon: UsersIcon },
+      { href: '/referrals', label: '레퍼럴', icon: Gift },
+    ],
   },
   {
     label: '설정',
