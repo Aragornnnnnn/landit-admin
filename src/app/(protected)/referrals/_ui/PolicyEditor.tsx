@@ -152,6 +152,29 @@ export function PolicyEditor({
                 }
               />
             </label>
+            <label className="text-sm">
+              가입자에게 보여 줄 상품 이름
+              <Input
+                maxLength={100}
+                value={p.displayName}
+                onChange={(e) =>
+                  productChange(i, { displayName: e.target.value })
+                }
+              />
+            </label>
+            <label className="text-sm">
+              상품 유형
+              <select
+                className={selectClass}
+                value={p.purchaseType}
+                onChange={(e) =>
+                  productChange(i, { purchaseType: e.target.value })
+                }
+              >
+                <option value="SUBSCRIPTION">구독</option>
+                <option value="NON_RENEWING">일회성</option>
+              </select>
+            </label>
             <Button
               variant="outline"
               onClick={() =>
