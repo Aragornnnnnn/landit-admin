@@ -128,6 +128,18 @@ function Records({ kind }: { kind: Kind }) {
                     <h3 className="font-semibold">
                       #{row.id} · {statusLabels[row.status] ?? row.status}
                     </h3>
+                    {row.status !== 'IGNORED' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setReason('');
+                          setRetry(row.id);
+                        }}
+                      >
+                        재처리
+                      </Button>
+                    )}
                   </div>
                   {'amountWon' in row ? (
                     <>
@@ -176,6 +188,27 @@ function Records({ kind }: { kind: Kind }) {
         >
           더 보기
         </Button>
+      )}
+      {retry !== null && (
+        <ConfirmChange
+          title={`#${retry} 내역을 재처리할까요?`}
+          onClose={() => setRetry(null)}
+          onConfirm={async () => {
+            if (!reason.trim()) throw new Error('재처리 사유를 입력해 주세요.');
+            if (kind !== 'history')
+              await referralsApi.retry(kind, retry, reason);
+            await client.invalidateQueries({ queryKey: ['referrals'] });
+          }}
+        >
+          <label>
+            재처리 사유
+            <Input
+              maxLength={500}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </label>
+        </ConfirmChange>
       )}
     </div>
   );
