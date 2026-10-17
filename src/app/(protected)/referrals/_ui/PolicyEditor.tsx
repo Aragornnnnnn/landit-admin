@@ -225,6 +225,30 @@ export function PolicyEditor({
       >
         변경 내용 확인
       </Button>
+      <section className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">
+          지급 처리 {state.paused ? '재개' : '보류'}
+        </h2>
+        <p className="text-sm text-subtle">
+          보류 중에도 받을 금액을 기록해요. 재개하면 원래 조건으로 자동
+          처리하며, 환불 취소 반영도 이어서 처리해요.
+        </p>
+        <label className="block text-sm">
+          처리 변경 사유
+          <Input
+            value={reason}
+            maxLength={500}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </label>
+        <Button
+          variant="outline"
+          disabled={!reason.trim() || conflict}
+          onClick={() => setOperation('processing')}
+        >
+          {state.paused ? '지급 재개' : '지급 보류'}
+        </Button>
+      </section>
       {operation && (
         <ConfirmChange
           title={
