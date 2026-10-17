@@ -70,3 +70,28 @@ it('확인 전에는 요청하지 않고 충돌하면 입력한 사유를 유지
     inviteeWon: 0,
   });
 });
+
+it('서버 정책이 갱신되어도 편집 시작 시점의 revision으로 저장한다', async () => {
+  const fetcher = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: state })),
+    );
+  const client = new QueryClient();
+  const { rerender } = render(
+    <QueryClientProvider client={client}>
+      <PolicyEditor state={state} reload={() => {}} />
+    </QueryClientProvider>,
+  );
+  await userEvent.type(screen.getByLabelText('정책 변경 사유'), '편집 중');
+  rerender(
+    <QueryClientProvider client={client}>
+      <PolicyEditor state={{ ...state, revision: 99 }} reload={() => {}} />
+    </QueryClientProvider>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: '변경 내용 확인' }));
+  await userEvent.click(screen.getByRole('button', { name: '확인' }));
+  expect(
+    JSON.parse(fetcher.mock.calls[0][1]?.body as string).expectedRevision,
+  ).toBe(2);
+});
