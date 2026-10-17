@@ -129,6 +129,40 @@ function Records({ kind }: { kind: Kind }) {
                       #{row.id} · {statusLabels[row.status] ?? row.status}
                     </h3>
                   </div>
+                  {'amountWon' in row ? (
+                    <>
+                      <p>
+                        {row.stage === 'SIGNUP' ? '가입' : '첫 결제'} ·{' '}
+                        {row.recipientRole === 'INVITER'
+                          ? '초대인'
+                          : '피초대인'}{' '}
+                        #{row.recipientId}
+                      </p>
+                      <p>
+                        확정 {row.amountWon.toLocaleString()}원 / 현재 적립{' '}
+                        {row.creditedWon.toLocaleString()}원
+                      </p>
+                      <p className="text-subtle">
+                        관계 #{row.referralId} · 정책 v{row.policyVersion} ·{' '}
+                        {formatDateTime(row.createdAt)}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="break-all">
+                        {row.type} · {row.eventId}
+                      </p>
+                      <p className="text-subtle">
+                        처리 시도 {row.attempts}회 ·{' '}
+                        {formatDateTime(row.receivedAt)}
+                      </p>
+                    </>
+                  )}
+                  {row.reason && (
+                    <p className="break-all text-subtle">
+                      검토 사유: {row.reason}
+                    </p>
+                  )}
                 </>
               )}
             </article>
