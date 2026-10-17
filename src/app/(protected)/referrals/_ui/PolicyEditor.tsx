@@ -30,6 +30,10 @@ export function PolicyEditor({
   reload: () => void;
 }) {
   const [state] = useState(incoming);
+  const [draft, setDraft] = useState<PolicyDraft>({
+    ...state.policy,
+    reason: '',
+  });
   return (
     <div className="space-y-5">
       <div className="rounded-xl border bg-card p-5">
@@ -41,6 +45,18 @@ export function PolicyEditor({
           가입 시 두 단계의 혜택이 고정돼요. 정책 변경은 이후 신규 가입자부터
           적용되며, 기존 가입자의 약속된 혜택은 유지돼요.
         </p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <StageFields
+          title="가입 완료 보상"
+          value={draft.signup}
+          onChange={(signup) => setDraft({ ...draft, signup })}
+        />
+        <StageFields
+          title="첫 실제 결제 보상"
+          value={draft.purchase}
+          onChange={(purchase) => setDraft({ ...draft, purchase })}
+        />
       </div>
     </div>
   );
