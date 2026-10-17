@@ -51,8 +51,33 @@ function Records({ kind }: { kind: Kind }) {
         : undefined;
     },
   });
+  const options =
+    kind === 'rewards'
+      ? ['PENDING', 'CREDITED', 'REVERSED', 'REVIEW_REQUIRED']
+      : ['PENDING', 'PROCESSED', 'IGNORED', 'REVIEW_REQUIRED'];
   return (
     <div className="space-y-3">
+      {kind !== 'history' && (
+        <label className="block max-w-xs text-sm">
+          처리 상태
+          <select
+            className={selectClass}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">전체</option>
+            {options.map((s) => (
+              <option key={s} value={s}>
+                {statusLabels[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      <p className="text-sm text-subtle">
+        적립은 실제 송금 완료가 아니에요. 재처리는 저장된 근거를 다시 확인하며,
+        금액이나 수령자를 임의로 바꾸지 않아요.
+      </p>
       {result.isPending && <p role="status">내역을 불러오는 중이에요.</p>}
       {result.isError && (
         <div role="alert">
