@@ -28,6 +28,33 @@ const statusLabels: Record<string, string> = {
   PROCESSED: '처리 완료',
   IGNORED: '대상 제외',
 };
+export function ReferralRecords() {
+  const [kind, setKind] = useState<Kind>('rewards');
+  return (
+    <section className="mt-8 space-y-4 border-t pt-6">
+      <h2 className="text-lg font-semibold">처리 내역</h2>
+      <div className="flex flex-wrap gap-2">
+        {(
+          [
+            ['rewards', '지급 내역'],
+            ['billing-events', '결제 수신'],
+            ['history', '정책 이력'],
+          ] as const
+        ).map(([value, label]) => (
+          <Button
+            key={value}
+            variant={kind === value ? 'default' : 'outline'}
+            onClick={() => setKind(value)}
+            aria-pressed={kind === value}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+      <Records key={kind} kind={kind} />
+    </section>
+  );
+}
 function Records({ kind }: { kind: Kind }) {
   const client = useQueryClient();
   const [status, setStatus] = useState('');
