@@ -48,6 +48,32 @@ export function StageFields({
           <option value="BOTH">양쪽 모두</option>
         </select>
       </label>
+      <div className="grid grid-cols-2 gap-3">
+        {(['inviterWon', 'inviteeWon'] as const).map((key, i) => (
+          <label key={key} className="space-y-1 text-sm">
+            <span>{i === 0 ? '초대인 금액' : '피초대인 금액'} (원)</span>
+            <Input
+              type="number"
+              min={1}
+              max={1000000}
+              step={1}
+              disabled={
+                !value.enabled ||
+                (i === 0
+                  ? value.target === 'INVITEE'
+                  : value.target === 'INVITER')
+              }
+              value={Number.isNaN(value[key]) ? '' : value[key]}
+              onChange={(e) =>
+                onChange({
+                  ...value,
+                  [key]: e.target.value === '' ? NaN : Number(e.target.value),
+                })
+              }
+            />
+          </label>
+        ))}
+      </div>
     </fieldset>
   );
 }
