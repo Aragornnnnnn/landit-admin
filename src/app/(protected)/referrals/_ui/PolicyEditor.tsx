@@ -41,6 +41,14 @@ export function PolicyEditor({
   const [reason, setReason] = useState('');
   const [conflict, setConflict] = useState(false);
   const invalid = validatePolicy(draft);
+  function productChange(index: number, patch: Partial<Product>) {
+    setDraft({
+      ...draft,
+      products: draft.products.map((p, i) =>
+        i === index ? { ...p, ...patch } : p,
+      ),
+    });
+  }
   async function confirm() {
     try {
       if (operation === 'save')
@@ -115,6 +123,35 @@ export function PolicyEditor({
             key={i}
             className="grid gap-2 rounded-lg border p-3 md:grid-cols-2 xl:grid-cols-3"
           >
+            <label className="text-sm">
+              RevenueCat 앱 ID
+              <Input
+                aria-label={`상품 ${i + 1} 앱 ID`}
+                value={p.appId}
+                onChange={(e) => productChange(i, { appId: e.target.value })}
+              />
+            </label>
+            <label className="text-sm">
+              스토어
+              <select
+                className={selectClass}
+                value={p.store}
+                onChange={(e) => productChange(i, { store: e.target.value })}
+              >
+                <option value="APP_STORE">App Store</option>
+                <option value="PLAY_STORE">Google Play</option>
+              </select>
+            </label>
+            <label className="text-sm">
+              상품 ID
+              <Input
+                aria-label={`상품 ${i + 1} 상품 ID`}
+                value={p.productId}
+                onChange={(e) =>
+                  productChange(i, { productId: e.target.value })
+                }
+              />
+            </label>
             <Button
               variant="outline"
               onClick={() =>
