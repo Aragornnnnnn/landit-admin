@@ -104,6 +104,52 @@ export function PolicyEditor({
           onChange={(purchase) => setDraft({ ...draft, purchase })}
         />
       </div>
+      <section className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">결제 대상 상품</h2>
+        <p className="text-sm text-subtle">
+          실제 결제가 확인된 상품만 인정해요. 무료 체험·가족 공유는 제외하며,
+          100일 챌린지는 일회성 상품으로 명시해야 해요.
+        </p>
+        {draft.products.map((p, i) => (
+          <div
+            key={i}
+            className="grid gap-2 rounded-lg border p-3 md:grid-cols-2 xl:grid-cols-3"
+          >
+            <Button
+              variant="outline"
+              onClick={() =>
+                setDraft({
+                  ...draft,
+                  products: draft.products.filter((_, n) => n !== i),
+                })
+              }
+            >
+              상품 {i + 1} 삭제
+            </Button>
+          </div>
+        ))}
+        <Button
+          variant="outline"
+          disabled={draft.products.length >= 50}
+          onClick={() =>
+            setDraft({
+              ...draft,
+              products: [
+                ...draft.products,
+                {
+                  appId: '',
+                  store: 'APP_STORE',
+                  productId: '',
+                  displayName: '',
+                  purchaseType: 'SUBSCRIPTION',
+                },
+              ],
+            })
+          }
+        >
+          상품 추가
+        </Button>
+      </section>
       <label className="block space-y-2 text-sm">
         정책 변경 사유
         <Input
