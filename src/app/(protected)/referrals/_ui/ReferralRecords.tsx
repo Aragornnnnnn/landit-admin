@@ -122,7 +122,15 @@ function Records({ kind }: { kind: Kind }) {
                     ))}
                   </details>
                 </>
-              ) : null}
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold">
+                      #{row.id} · {statusLabels[row.status] ?? row.status}
+                    </h3>
+                  </div>
+                </>
+              )}
             </article>
           ))}
       </div>
