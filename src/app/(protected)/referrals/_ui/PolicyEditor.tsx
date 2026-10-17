@@ -34,6 +34,7 @@ export function PolicyEditor({
     ...state.policy,
     reason: '',
   });
+  const invalid = validatePolicy(draft);
   return (
     <div className="space-y-5">
       <div className="rounded-xl border bg-card p-5">
@@ -58,6 +59,15 @@ export function PolicyEditor({
           onChange={(purchase) => setDraft({ ...draft, purchase })}
         />
       </div>
+      <label className="block space-y-2 text-sm">
+        정책 변경 사유
+        <Input
+          maxLength={500}
+          value={draft.reason}
+          onChange={(e) => setDraft({ ...draft, reason: e.target.value })}
+        />
+      </label>
+      {invalid && <p className="text-sm text-subtle">{invalid}</p>}
     </div>
   );
 }
