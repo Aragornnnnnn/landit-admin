@@ -54,6 +54,28 @@ function Records({ kind }: { kind: Kind }) {
   return (
     <div className="space-y-3">
       {result.isPending && <p role="status">내역을 불러오는 중이에요.</p>}
+      {result.isError && (
+        <div role="alert">
+          <p>내역을 불러오지 못했어요.</p>
+          <Button variant="outline" onClick={() => result.refetch()}>
+            다시 시도
+          </Button>
+        </div>
+      )}
+      {result.data?.pages[0].items.length === 0 && (
+        <p className="rounded-xl border p-6 text-sm text-subtle">
+          해당 내역이 없어요.
+        </p>
+      )}
+      {result.hasNextPage && (
+        <Button
+          variant="outline"
+          disabled={result.isFetchingNextPage}
+          onClick={() => result.fetchNextPage()}
+        >
+          더 보기
+        </Button>
+      )}
     </div>
   );
 }
