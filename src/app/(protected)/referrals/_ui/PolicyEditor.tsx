@@ -29,18 +29,23 @@ export function PolicyEditor({
   state: PolicyState;
   reload: () => void;
 }) {
-  const [state] = useState(incoming);
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<PolicyDraft>({
-    ...state.policy,
-    reason: '',
-  });
-  const [operation, setOperation] = useState<'save' | 'processing' | null>(
-    null,
-  );
+  const [editing, setEditing] = useState<{
+    base: PolicyState;
+    draft: PolicyDraft;
+  } | null>(null);
+  const state = editing?.base ?? incoming;
+  const draft = editing?.draft ?? { ...incoming.policy, reason: '' };
+  const [operation, setOperation] = useState<{
+    kind: 'save' | 'processing';
+    before: PolicyState;
+  } | null>(null);
   const [reason, setReason] = useState('');
   const [conflict, setConflict] = useState(false);
   const invalid = validatePolicy(draft);
+  function setDraft(next: PolicyDraft) {
+    setEditing({ base: state, draft: next });
+  }
   function productChange(index: number, patch: Partial<Product>) {
     setDraft({
       ...draft,
@@ -50,28 +55,39 @@ export function PolicyEditor({
     });
   }
   async function confirm() {
+    if (!operation) return;
     try {
-      if (operation === 'save')
-        await referralsApi.save({
-          ...draft,
-          products: draft.products.map((p) => ({
-            ...p,
-            appId: p.appId.trim(),
-            productId: p.productId.trim(),
-            displayName: p.displayName.trim(),
-          })),
-          signup: normalizeStage(draft.signup),
-          purchase: normalizeStage(draft.purchase),
-          expectedRevision: state.revision,
-        });
-      else
-        await referralsApi.processing({
-          expectedRevision: state.revision,
-          paused: !state.paused,
-          reason,
-        });
+      const updated =
+        operation.kind === 'save'
+          ? await referralsApi.save({
+              ...draft,
+              products: draft.products.map((p) => ({
+                ...p,
+                appId: p.appId.trim(),
+                productId: p.productId.trim(),
+                displayName: p.displayName.trim(),
+              })),
+              signup: normalizeStage(draft.signup),
+              purchase: normalizeStage(draft.purchase),
+              expectedRevision: state.revision,
+            })
+          : await referralsApi.processing({
+              expectedRevision: operation.before.revision,
+              paused: !operation.before.paused,
+              reason,
+            });
+      queryClient.setQueryData(['referrals', 'policy'], updated);
+      if (operation.kind === 'save') {
+        setEditing(null);
+      } else {
+        setEditing((previous) =>
+          previous?.base.policy.version === updated.policy.version
+            ? { ...previous, base: updated }
+            : previous,
+        );
+        setReason('');
+      }
       await queryClient.invalidateQueries({ queryKey: ['referrals'] });
-      reload();
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) setConflict(true);
       throw e;
@@ -81,8 +97,8 @@ export function PolicyEditor({
     <div className="space-y-5">
       <div className="rounded-xl border bg-card p-5">
         <p className="font-semibold">
-          현재 정책 v{state.policy.version} ·{' '}
-          {state.paused ? '지급 보류 중' : '정상 처리 중'}
+          현재 정책 v{incoming.policy.version} ·{' '}
+          {incoming.paused ? '지급 보류 중' : '정상 처리 중'}
         </p>
         <p className="mt-2 text-sm text-subtle">
           가입 시 두 단계의 혜택이 고정돼요. 정책 변경은 이후 신규 가입자부터
@@ -221,13 +237,13 @@ export function PolicyEditor({
       {invalid && <p className="text-sm text-subtle">{invalid}</p>}
       <Button
         disabled={!!invalid || conflict}
-        onClick={() => setOperation('save')}
+        onClick={() => setOperation({ kind: 'save', before: state })}
       >
         변경 내용 확인
       </Button>
       <section className="space-y-3 rounded-xl border bg-card p-5">
         <h2 className="font-semibold">
-          지급 처리 {state.paused ? '재개' : '보류'}
+          지급 처리 {incoming.paused ? '재개' : '보류'}
         </h2>
         <p className="text-sm text-subtle">
           보류 중에도 받을 금액을 기록해요. 재개하면 원래 조건으로 자동
@@ -244,24 +260,24 @@ export function PolicyEditor({
         <Button
           variant="outline"
           disabled={!reason.trim() || conflict}
-          onClick={() => setOperation('processing')}
+          onClick={() => setOperation({ kind: 'processing', before: incoming })}
         >
-          {state.paused ? '지급 재개' : '지급 보류'}
+          {incoming.paused ? '지급 재개' : '지급 보류'}
         </Button>
       </section>
       {operation && (
         <ConfirmChange
           title={
-            operation === 'save'
+            operation.kind === 'save'
               ? '새 보상 정책을 저장할까요?'
-              : state.paused
+              : operation.before.paused
                 ? '지급을 재개할까요?'
                 : '지급을 보류할까요?'
           }
           onClose={() => setOperation(null)}
           onConfirm={confirm}
         >
-          {operation === 'save' ? (
+          {operation.kind === 'save' ? (
             <>
               <p>
                 가입: {stageLabel(state.policy.signup)} →{' '}
