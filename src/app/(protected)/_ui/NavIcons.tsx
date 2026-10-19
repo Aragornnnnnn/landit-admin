@@ -109,3 +109,46 @@ export function DirectLetterIcon(props: NavIconProps) {
     </svg>
   );
 }
+
+/** 이메일·체험 알림 — 채움형 봉투 + 알림 점. 피드백(봉투)과 같은 모양이라 점으로 "보내는 알림"을 가른다 (Figma 아이콘 없음 — 셸 스타일로 그림) */
+export function NotificationMailIcon(props: NavIconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden {...props}>
+      <rect x="2" y="5" width="14" height="11" rx="1.6" fill="#9B7FE6" />
+      <path
+        d="M3.5 7.1L9 11.1L14.5 7.1V8.8L9 12.8L3.5 8.8V7.1Z"
+        fill="#FFFFFF"
+      />
+      <circle cx="16" cy="5" r="3.6" fill="#FFFFFF" />
+      <circle cx="16" cy="5" r="2.6" fill="#9B7FE6" />
+    </svg>
+  );
+}
+
+/** 레퍼럴 — 채움형 선물 상자 (Figma 아이콘 없음 — 셸 스타일로 그림) */
+export function ReferralIcon(props: NavIconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden {...props}>
+      <path
+        d="M10 6.5C9 4.2 6.2 3 5.6 4.6C5.1 5.9 7 6.5 10 6.5ZM10 6.5C11 4.2 13.8 3 14.4 4.6C14.9 5.9 13 6.5 10 6.5Z"
+        fill="#EC6F96"
+      />
+      <rect x="2.5" y="6.5" width="15" height="3.6" rx="1" fill="#EC6F96" />
+      <rect x="3.5" y="10.9" width="13" height="6.6" rx="1" fill="#EC6F96" />
+      <rect x="9.2" y="6.5" width="1.6" height="11" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
+/** 발음 에셋 — 채움형 음성 파형 (Figma 아이콘 없음 — 셸 스타일로 그림) */
+export function PronunciationAssetsIcon(props: NavIconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden {...props}>
+      <rect x="2" y="7" width="2.2" height="6" rx="1.1" fill="#4FA3D9" />
+      <rect x="5.55" y="4.5" width="2.2" height="11" rx="1.1" fill="#4FA3D9" />
+      <rect x="9.1" y="2.5" width="2.2" height="15" rx="1.1" fill="#4FA3D9" />
+      <rect x="12.65" y="5.5" width="2.2" height="9" rx="1.1" fill="#4FA3D9" />
+      <rect x="16.2" y="7.5" width="2.2" height="5" rx="1.1" fill="#4FA3D9" />
+    </svg>
+  );
+}
