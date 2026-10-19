@@ -19,6 +19,8 @@ export interface LetterDraft {
   pinned: boolean;
   /** 본문 마크다운 — 저장할 때 PARAGRAPH 블록 하나로 감싼다 */
   body: string;
+  excludedUserIds: number[];
+  excludedAudiences: NonNullable<LetterItem['excludedAudiences']>;
 }
 
 /** 미리보기 문구는 목록 한 줄에 들어가야 한다 — FE 규칙(BE 제한 값은 미확정) */
@@ -30,6 +32,8 @@ export const EMPTY_LETTER_DRAFT: LetterDraft = {
   preview: '',
   pinned: false,
   body: '',
+  excludedUserIds: [],
+  excludedAudiences: [],
 };
 
 /** 서버가 준 편지를 초안으로 — 아는 블록만 남기고 마크다운 한 덩어리로 편다 */
@@ -40,6 +44,8 @@ export function toLetterDraft(item: LetterItem): LetterDraft {
     preview: item.preview ?? '',
     pinned: Boolean(item.pinned),
     body: blocksToMarkdown(readBlocks(item.contentBlocks)),
+    excludedUserIds: item.excludedUserIds ?? [],
+    excludedAudiences: item.excludedAudiences ?? [],
   };
 }
 
@@ -121,6 +127,8 @@ export function toLetterRequest(draft: LetterDraft) {
     title: draft.title.trim(),
     preview: draft.preview.trim(),
     pinned: draft.pinned,
+    excludedUserIds: draft.excludedUserIds,
+    excludedAudiences: draft.excludedAudiences,
     contentBlocks: body ? [{ type: 'PARAGRAPH' as const, text: body }] : [],
   };
 }
