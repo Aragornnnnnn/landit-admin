@@ -21,7 +21,7 @@ export function SentReplyView({ feedback, onClose }: SentReplyViewProps) {
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="flex w-full flex-col gap-4 rounded-l-[20px] p-7 data-[side=right]:sm:max-w-[520px]"
+        className="flex w-full flex-col gap-4 overflow-y-auto rounded-l-[20px] p-7 data-[side=right]:sm:max-w-[520px]"
       >
         <SheetTitle className="sr-only">보낸 답장</SheetTitle>
 

@@ -1,7 +1,7 @@
 'use client';
 
 // 피드백 목록 화면 조립 — 필터 줄 · 목록 · 페이지네이션 (docs/screens/feedbacks.md)
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -53,6 +53,18 @@ export function FeedbackListPage() {
     : undefined;
   const openFeedback = detail.data ?? fallbackFeedback;
 
+  // 뒤로가기로 닫는 건 목록에서 연 상세뿐이다 — 대시보드·새 탭·딥링크로 들어왔으면
+  // 직전 기록이 이 목록이 아니라(다른 화면이거나 아예 없어) 뒤로가기가 엉뚱한 데로 가거나 아무 일도 안 한다
+  const [openedFromList, setOpenedFromList] = useState(false);
+  const closeDetail = () => {
+    if (openedFromList) {
+      router.back();
+      return;
+    }
+    const query = writeFeedbackFilter(filter);
+    router.replace(query ? `?${query}` : '/feedbacks', { scroll: false });
+  };
+
   // 폴백조차 없으면(삭제된 건 등) 알리고 open만 걷어낸다 — 시트가 없으니 자리 오류를 그릴 곳이 없다
   const detailFailed = detail.isError && !fallbackFeedback;
   useEffect(() => {
@@ -85,8 +97,9 @@ export function FeedbackListPage() {
         onRetry={() => feedbacks.refetch()}
         onResetFilter={reset}
         // 열림·닫힘을 주소에 남긴다 — 모바일 전체화면도 기기 뒤로가기로 닫힌다.
-        // 보고 있던 필터를 함께 싣는다 — open만 남기면 뒤 목록이 기본 필터(처리중)로 돌아가 버린다
+        // 보고 있던 필터를 함께 싣는다 — open만 남기면 뒤 목록이 기본 필터로 돌아가 버린다
         onSelect={(feedbackId) => {
+          setOpenedFromList(true);
           const query = writeFeedbackFilter(filter);
           router.push(
             query ? `?${query}&open=${feedbackId}` : `?open=${feedbackId}`,
@@ -100,7 +113,7 @@ export function FeedbackListPage() {
         <FeedbackReply
           key={openFeedback.feedbackId}
           feedback={openFeedback}
-          onClose={() => router.back()}
+          onClose={closeDetail}
         />
       )}
 
