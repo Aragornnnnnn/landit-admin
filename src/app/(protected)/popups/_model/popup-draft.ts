@@ -115,11 +115,10 @@ export function validatePopupImage(
     'image/png': /\.png$/i,
     'image/jpeg': /\.jpe?g$/i,
     'image/webp': /\.webp$/i,
-    'image/gif': /\.gif$/i,
   };
   return file.size > 0 &&
     file.size <= MAX_IMAGE_BYTES &&
     extensions[file.type]?.test(file.name)
     ? null
-    : 'PNG·JPEG·WebP·GIF 이미지(0바이트 초과, 10 MiB 이하)를 선택해 주세요.';
+    : 'PNG·JPEG·WebP 이미지(0바이트 초과, 10 MiB 이하)를 선택해 주세요.';
 }
