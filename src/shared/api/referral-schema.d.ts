@@ -26,9 +26,52 @@ export interface paths {
     };
     /** 현재 레퍼럴 정책 */
     get: operations['current'];
-    /** 레퍼럴 정책 버전 생성 */
+    /**
+     * 레퍼럴 정책 버전 생성
+     * @description inviterLimit은 UNLIMITED(value=null), INVITE_COUNT(등록 순서상 최초 N명), TOTAL_AMOUNT(가입·결제 초대인 보상의 평생 누적 원 금액) 중 선택합니다. 생략하면 기존 한도를 유지합니다. 피초대인 보상은 한도에 포함하지 않습니다. 새 한도는 기존 관계의 미지급 보상에도 적용하고 잔여 금액만 부분 지급합니다. 기존 지급액은 보존하며 환불·복구로 한도가 초기화되지 않습니다.
+     */
     put: operations['update_2'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/referrals/registration': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 온보딩 초대 코드 등록
+     * @description 신규 가입자의 PENDING 상태에서만 등록한다. 같은 코드 재전송은 멱등하다. 현재 미리보기의 policyVersion을 보내며 변경 시 409로 재확인한다. 등록 시 두 단계 정책을 고정하고 가입 보상을 적립한다. 등록 전 결제는 소급하지 않는다.
+     */
+    post: operations['register'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/referrals/registration/skip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 온보딩 초대 코드 건너뛰기
+     * @description 온보딩에서 건너뛰면 반드시 호출한다. 이후 등록할 수 없으며 재전송은 멱등하다.
+     */
+    post: operations['skip'];
     delete?: never;
     options?: never;
     head?: never;
@@ -46,7 +89,7 @@ export interface paths {
     put?: never;
     /**
      * 내 초대 코드 발급
-     * @description 멱등하게 같은 코드를 반환한다.
+     * @description 8자리 대문자 영문·숫자 코드를 멱등하게 반환한다. 이전 형식 코드는 새 코드로 교체한다.
      */
     post: operations['issue'];
     delete?: never;
@@ -117,8 +160,8 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * 가입 전 초대 조건 확인
-     * @description 가입 요청에 code와 policyVersion을 전달한다. 정책 변경 시 409로 재확인한다.
+     * 초대 코드와 보상 조건 확인
+     * @description 로그인 후 8자리 코드를 확인하고 온보딩 등록 요청에 code와 policyVersion을 전달한다. 대소문자를 구분하지 않는다. 정책 변경 시 409로 재확인한다.
      */
     get: operations['preview'];
     put?: never;
@@ -174,7 +217,7 @@ export interface paths {
       cookie?: never;
     };
     /** 레퍼럴 정책 변경 이력 */
-    get: operations['history_1'];
+    get: operations['history_2'];
     put?: never;
     post?: never;
     delete?: never;
@@ -234,6 +277,7 @@ export interface components {
       signup?: components['schemas']['ReferralStage'];
       purchase?: components['schemas']['ReferralStage'];
       products?: components['schemas']['ReferralProduct'][];
+      inviterLimit?: components['schemas']['ReferralInviterLimit'];
       /** Format: int64 */
       createdBy?: number;
       /** Format: date-time */
@@ -256,6 +300,13 @@ export interface components {
       displayName: string;
       purchaseType: string;
     };
+    /** @description 가입·결제의 초대인 보상에 합산 적용하는 평생 한도 */
+    ReferralInviterLimit: {
+      /** @enum {string} */
+      type: 'UNLIMITED' | 'INVITE_COUNT' | 'TOTAL_AMOUNT';
+      /** Format: int64 */
+      value?: number;
+    };
     /** @description 공통 오류 응답 객체 */
     ErrorResponse: {
       /**
@@ -275,7 +326,25 @@ export interface components {
       signup: components['schemas']['ReferralStage'];
       purchase: components['schemas']['ReferralStage'];
       products: components['schemas']['ReferralProduct'][];
+      inviterLimit?: components['schemas']['ReferralInviterLimit'];
       reason: string;
+    };
+    ReferralRegistrationRequest: {
+      code: string;
+      /** Format: int64 */
+      policyVersion: number;
+    };
+    /** @description 공통 API 응답 객체 */
+    ApiResponseVoid: {
+      /**
+       * @description 요청 처리 성공 여부
+       * @example true
+       */
+      success?: boolean;
+      /** @description 성공 응답 데이터. 실패 시 null입니다. */
+      data?: unknown;
+      /** @description 실패 오류 정보. 성공 시 null입니다. */
+      error?: components['schemas']['ErrorResponse'];
     };
     /** @description 공통 API 응답 객체 */
     ApiResponseString: {
@@ -291,18 +360,6 @@ export interface components {
     };
     ReferralRetryRequest: {
       reason: string;
-    };
-    /** @description 공통 API 응답 객체 */
-    ApiResponseVoid: {
-      /**
-       * @description 요청 처리 성공 여부
-       * @example true
-       */
-      success?: boolean;
-      /** @description 성공 응답 데이터. 실패 시 null입니다. */
-      data?: unknown;
-      /** @description 실패 오류 정보. 성공 시 null입니다. */
-      error?: components['schemas']['ErrorResponse'];
     };
     /** @description 공통 API 응답 객체 */
     ApiResponsePageReferralReward: {
@@ -374,13 +431,14 @@ export interface components {
     };
     ReferralSummary: {
       code?: string;
-      shareUrl?: string;
       currentOffer?: components['schemas']['ReferralPreview'];
       enrolledOffer?: components['schemas']['ReferralPreview'];
       /** Format: int64 */
       invitedCount?: number;
       /** Format: int64 */
       convertedCount?: number;
+      /** @enum {string} */
+      registrationStatus?: 'PENDING' | 'REGISTERED' | 'SKIPPED' | 'UNAVAILABLE';
     };
     /** @description 공통 API 응답 객체 */
     ApiResponsePageReferralPolicy: {
@@ -499,6 +557,50 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseReferralPolicyState'];
+        };
+      };
+    };
+  };
+  register: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReferralRegistrationRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  skip: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
@@ -665,7 +767,7 @@ export interface operations {
       };
     };
   };
-  history_1: {
+  history_2: {
     parameters: {
       query?: {
         before?: number;

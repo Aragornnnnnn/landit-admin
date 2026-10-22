@@ -1,5 +1,12 @@
 // 스웨거가 잘못 표현한 타입을 손으로 바로잡는 자리 — BE가 고치면 항목을 지우고 schema.d.ts만 쓴다
+import type { components as ReferralComponents } from './referral-schema';
 import type { components, paths } from './schema';
+
+// BE #310은 UNLIMITED의 value=null을 허용하지만 springdoc에 nullable이 누락되어 있다.
+export type ReferralInviterLimit = Omit<
+  ReferralComponents['schemas']['ReferralInviterLimit'],
+  'value'
+> & { value?: number | null };
 
 /** `components.schemas.<이름>`을 짧게 부른다 — `Schema<'AdminUserDetailResponse'>` */
 export type Schema<K extends keyof components['schemas']> =
