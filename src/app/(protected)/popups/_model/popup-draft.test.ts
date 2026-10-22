@@ -72,6 +72,7 @@ describe('팝업 입력', () => {
   });
   it.each([
     ['x.svg', 'image/svg+xml', 10],
+    ['x.gif', 'image/gif', 10],
     ['x.png', 'image/jpeg', 10],
     ['x.png', 'image/png', 0],
     ['x.png', 'image/png', 10485761],
