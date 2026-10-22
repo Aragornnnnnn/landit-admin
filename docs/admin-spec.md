@@ -26,6 +26,7 @@ Figma는 화면마다 페이지(탭)를 나눴다 — 각 페이지 왼쪽이 �
 ## LAN-669 추가 화면
 
 - `/direct-letters`, `/direct-letters/[id]`: 개인 편지 발송 내역과 수신자별 읽음 현황. [개인 편지](screens/direct-letters.md).
+- `/popups`: 팝업 목록·등록·수정·이미지 업로드·노출 기간 및 우선순위 설정. [팝업 관리](screens/popups.md).
 - `/notifications`: 테스트 이메일 발송·작업 조회, 무료 체험 푸시·이메일 설정. [이메일·체험 알림](screens/notifications.md).
 - `/pronunciation-assets`: 발음 기준 데이터·TTS 임포트와 억양별 누락 현황. [발음 에셋](screens/pronunciation-assets.md).
 - NPS는 기존 제외 결정을 유지한다.

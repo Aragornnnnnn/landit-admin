@@ -1,5 +1,7 @@
 // 사이드바 내비 정의 — 그룹·순서·라벨·아이콘은 docs/admin-spec.md "셸". 상단바 제목도 여기서 찾는다
-// 아이콘은 Figma 셸의 채움형 벡터를 그대로 옮긴 것 (NavIcons.tsx) — lucide가 아니다
+// 기존 아이콘은 Figma 셸의 벡터다. 전용 시안이 없는 팝업은 lucide 창 아이콘을 쓴다.
+import { PanelsTopLeft } from 'lucide-react';
+
 import {
   AppVersionsIcon,
   DashboardIcon,
@@ -59,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
     // 편지함은 사용자가 보내고 운영이 답하는 자리, 알림은 운영이 밀어 보내는 자리 — 성격이 달라 그룹을 가른다
     label: '알림',
     items: [
+      { href: '/popups', label: '팝업', icon: PanelsTopLeft },
       {
         href: '/notifications',
         label: '이메일·체험 알림',

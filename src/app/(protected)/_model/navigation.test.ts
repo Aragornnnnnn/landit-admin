@@ -30,6 +30,7 @@ describe('pageTitleFor', () => {
     ['/direct-letters/new', '개인 편지 / 새 편지'],
     ['/direct-letters/58', '개인 편지 / 상세'],
     ['/notifications', '이메일·체험 알림'],
+    ['/popups', '팝업'],
     ['/pronunciation-assets', '발음 에셋'],
     ['/users/12', '사용자'],
     ['/push-campaigns', '푸시 알림'],
