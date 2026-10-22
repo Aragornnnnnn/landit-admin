@@ -21,10 +21,11 @@ landit-be PR #319의 `GET/POST /api/v1/admin/popups`, `PATCH /api/v1/admin/popup
 
 ## 검증 기록
 
-- Node 22에서 ESLint, TypeScript, 프로덕션 빌드와 Vitest 전체 577개를 통과했다. 팝업 입력 규칙·이미지 제한 21개, 화면 동작 3개를 포함한다.
+- Node 22에서 ESLint, TypeScript, 프로덕션 빌드와 Vitest 전체 578개를 통과했다. 팝업 입력 규칙·이미지 제한 22개, 화면 동작 3개를 포함한다.
 - 독립 리뷰에서 발견한 백그라운드 재조회 실패 시 입력 유실과 기존 마이크로초 기간 재검증 오류를 재현 테스트 후 수정했다. `/popups` 메뉴 누락도 보완했고 재검토에서 추가 결함은 없었다.
 - 데스크톱 1440px·모바일 390px에서 목 API로 편집창·이미지 미리보기·스크롤을 확인했다. 실제 BE·S3·사용자 앱·운영 DB 검증이나 배포는 수행하지 않았다.
 - `schema.d.ts`는 BE PR #319 작업 트리의 통합 테스트가 내보낸 `build/openapi.json`에서 기존 `api:types` 스크립트로 재생성했다. 생성 파일이며 수동 타입 정의를 추가하지 않았다.
 - Playwright 브라우저에서 신규 등록 POST(필수 필드·KST→UTC), 콘텐츠 이미지 presign/PUT 목 업로드, 링크 제거·끄기 PATCH가 성공하고 목록이 갱신되는 것을 확인했다. 증거 이미지는 `docs/images/screens/popups*.png`에 보관한다.
 
 - 후속 독립 리뷰에서 발견한 GIF 업로드 계약 불일치를 수정했다. 백엔드가 지원하는 JPEG·PNG·WebP만 허용하고 GIF 거부 회귀 테스트를 추가했다.
+- GIF 차단 수정 후 전체 테스트 578개·린트·타입 검사를 통과했다. 브라우저에서 파일 필터를 우회해 GIF를 선택해도 오류 안내와 함께 presign/업로드 요청이 발생하지 않는 것을 확인했다.

@@ -102,7 +102,7 @@ export function PopupEditor({
               이미지 업로드
               <Input
                 type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
+                accept="image/png,image/jpeg,image/webp"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   e.target.value = '';
@@ -110,7 +110,7 @@ export function PopupEditor({
                 }}
               />
               <span className="text-xs text-subtle">
-                {uploading ? '업로드 중…' : 'PNG·JPEG·WebP·GIF, 최대 10 MiB'}
+                {uploading ? '업로드 중…' : 'PNG·JPEG·WebP, 최대 10 MiB'}
               </span>
             </label>
             {draft.imageUrl.startsWith('https://') && (
