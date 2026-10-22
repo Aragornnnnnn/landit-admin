@@ -25,3 +25,4 @@ landit-be PR #319의 `GET/POST /api/v1/admin/popups`, `PATCH /api/v1/admin/popup
 - 독립 리뷰에서 발견한 백그라운드 재조회 실패 시 입력 유실과 기존 마이크로초 기간 재검증 오류를 재현 테스트 후 수정했다. `/popups` 메뉴 누락도 보완했고 재검토에서 추가 결함은 없었다.
 - 데스크톱 1440px·모바일 390px에서 목 API로 편집창·이미지 미리보기·스크롤을 확인했다. 실제 BE·S3·사용자 앱·운영 DB 검증이나 배포는 수행하지 않았다.
 - `schema.d.ts`는 BE PR #319 작업 트리의 통합 테스트가 내보낸 `build/openapi.json`에서 기존 `api:types` 스크립트로 재생성했다. 생성 파일이며 수동 타입 정의를 추가하지 않았다.
+- Playwright 브라우저에서 신규 등록 POST(필수 필드·KST→UTC), 콘텐츠 이미지 presign/PUT 목 업로드, 링크 제거·끄기 PATCH가 성공하고 목록이 갱신되는 것을 확인했다. 증거 이미지는 `docs/images/screens/popups*.png`에 보관한다.
