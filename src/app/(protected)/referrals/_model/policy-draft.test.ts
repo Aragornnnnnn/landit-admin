@@ -13,6 +13,7 @@ const valid = {
   signup: stage,
   purchase: { ...stage, enabled: false },
   products: [],
+  inviterLimit: { type: 'UNLIMITED' as const, value: null },
   reason: '혜택 변경',
 };
 
@@ -42,4 +43,32 @@ describe('레퍼럴 정책 입력', () => {
   it('가입 보상만 유효하면 저장할 수 있다', () => {
     expect(validatePolicy(valid)).toBeNull();
   });
+});
+
+it.each([-1, 0.5, NaN, null, Number.MAX_SAFE_INTEGER + 1])(
+  '한도 %s가 유효하지 않으면 저장을 막는다',
+  (value) => {
+    expect(
+      validatePolicy({
+        ...valid,
+        inviterLimit: { type: 'TOTAL_AMOUNT', value },
+      }),
+    ).toContain('한도');
+  },
+);
+it('금액 한도 0은 지급 중단 설정으로 허용한다', () => {
+  expect(
+    validatePolicy({
+      ...valid,
+      inviterLimit: { type: 'TOTAL_AMOUNT', value: 0 },
+    }),
+  ).toBeNull();
+});
+it('초대 수 제한 정책은 새로 저장하지 못한다', () => {
+  expect(
+    validatePolicy({
+      ...valid,
+      inviterLimit: { type: 'INVITE_COUNT', value: 10 },
+    }),
+  ).toContain('금액');
 });

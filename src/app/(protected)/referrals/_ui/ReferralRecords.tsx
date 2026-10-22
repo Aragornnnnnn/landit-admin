@@ -15,7 +15,7 @@ import {
   type Policy,
   type Reward,
 } from '../_api/referrals';
-import { stageLabel } from '../_model/policy-draft';
+import { limitLabel, stageLabel } from '../_model/policy-draft';
 import { ConfirmChange } from './ConfirmChange';
 import { selectClass } from './StageFields';
 
@@ -133,6 +133,7 @@ function Records({ kind }: { kind: Kind }) {
                   <h3 className="font-semibold">정책 v{row.version}</h3>
                   <p>가입: {stageLabel(row.signup)}</p>
                   <p>결제: {stageLabel(row.purchase)}</p>
+                  <p>초대인 한도: {limitLabel(row.inviterLimit)}</p>
                   <p>
                     관리자 {row.createdBy ?? '시스템'} ·{' '}
                     {formatDateTime(row.createdAt)}
@@ -179,7 +180,7 @@ function Records({ kind }: { kind: Kind }) {
                         #{row.recipientId}
                       </p>
                       <p>
-                        확정 {row.amountWon.toLocaleString()}원 / 현재 적립{' '}
+                        약정 금액 {row.amountWon.toLocaleString()}원 / 현재 적립{' '}
                         {row.creditedWon.toLocaleString()}원
                       </p>
                       <p className="text-subtle">
@@ -200,7 +201,9 @@ function Records({ kind }: { kind: Kind }) {
                   )}
                   {row.reason && (
                     <p className="break-all text-subtle">
-                      검토 사유: {row.reason}
+                      {row.reason === 'INVITER_LIMIT_REACHED'
+                        ? '초대인 한도에 따라 부분 또는 0원 지급했어요. 한도 상향·재처리로 소급 증액하지 않아요.'
+                        : `검토 사유: ${row.reason}`}
                     </p>
                   )}
                 </>

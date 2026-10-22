@@ -14,12 +14,14 @@ import {
   type Product,
 } from '../_api/referrals';
 import {
+  limitLabel,
   normalizeStage,
   stageLabel,
   validatePolicy,
   type PolicyDraft,
 } from '../_model/policy-draft';
 import { ConfirmChange } from './ConfirmChange';
+import { InviterLimitFields } from './InviterLimitFields';
 import { selectClass, StageFields } from './StageFields';
 
 export function PolicyEditor({
@@ -61,6 +63,10 @@ export function PolicyEditor({
         operation.kind === 'save'
           ? await referralsApi.save({
               ...draft,
+              inviterLimit:
+                draft.inviterLimit?.type === 'UNLIMITED'
+                  ? { type: 'UNLIMITED', value: null }
+                  : draft.inviterLimit,
               products: draft.products.map((p) => ({
                 ...p,
                 appId: p.appId.trim(),
@@ -101,8 +107,9 @@ export function PolicyEditor({
           {incoming.paused ? '지급 보류 중' : '정상 처리 중'}
         </p>
         <p className="mt-2 text-sm text-subtle">
-          가입 시 두 단계의 혜택이 고정돼요. 정책 변경은 이후 신규 가입자부터
-          적용되며, 기존 가입자의 약속된 혜택은 유지돼요.
+          코드 등록 시 두 단계의 대상·금액·상품이 고정돼요. 단계 정책 변경은
+          이후 등록자부터, 초대인 한도 변경은 기존 관계의 다음 지급부터
+          적용돼요.
         </p>
       </div>
       {conflict && (
@@ -128,6 +135,10 @@ export function PolicyEditor({
           onChange={(purchase) => setDraft({ ...draft, purchase })}
         />
       </div>
+      <InviterLimitFields
+        value={draft.inviterLimit}
+        onChange={(inviterLimit) => setDraft({ ...draft, inviterLimit })}
+      />
       <section className="space-y-3 rounded-xl border bg-card p-5">
         <h2 className="font-semibold">결제 대상 상품</h2>
         <p className="text-sm text-subtle">
@@ -246,8 +257,8 @@ export function PolicyEditor({
           지급 처리 {incoming.paused ? '재개' : '보류'}
         </h2>
         <p className="text-sm text-subtle">
-          보류 중에도 받을 금액을 기록해요. 재개하면 원래 조건으로 자동
-          처리하며, 환불 취소 반영도 이어서 처리해요.
+          보류 중에도 보상 근거를 기록해요. 재개하면 등록 당시 단계 조건과 재개
+          시점의 초대인 한도로 처리하며, 환불 취소 반영도 이어서 처리해요.
         </p>
         <label className="block text-sm">
           처리 변경 사유
@@ -288,7 +299,15 @@ export function PolicyEditor({
                 {stageLabel(draft.purchase)}
               </p>
               <p>대상 상품: {draft.products.length}개</p>
-              <p>변경 이후 가입자부터 적용돼요.</p>
+              <p>
+                초대인 한도: {limitLabel(state.policy.inviterLimit)} →{' '}
+                {limitLabel(draft.inviterLimit)}
+              </p>
+              <p>
+                단계 정책은 이후 등록자부터, 한도는 기존 관계의 다음 지급부터
+                적용돼요.
+              </p>
+              <p>이미 지급한 적립금은 유지하며, 남은 한도만 지급해요.</p>
               <p>사유: {draft.reason}</p>
             </>
           ) : (

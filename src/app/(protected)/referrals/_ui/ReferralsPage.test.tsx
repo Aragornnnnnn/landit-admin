@@ -20,6 +20,7 @@ const initial = {
     signup: stage,
     purchase: { enabled: false, target: 'NONE', inviterWon: 0, inviteeWon: 0 },
     products: [],
+    inviterLimit: { type: 'TOTAL_AMOUNT', value: 15000 },
     createdBy: 1,
     createdAt: '2026-10-18T00:00:00Z',
     reason: 'initial',
@@ -88,6 +89,8 @@ it('지급 보류만 저장하면 정책 초안을 보존하고 새 revision으�
   const amount = screen.getAllByLabelText('초대인 금액 (원)')[0];
   await userEvent.clear(amount);
   await userEvent.type(amount, '3000');
+  await userEvent.clear(screen.getByLabelText('초대 적립금 한도 (원)'));
+  await userEvent.type(screen.getByLabelText('초대 적립금 한도 (원)'), '5000');
   await userEvent.type(
     screen.getByLabelText('정책 변경 사유'),
     '혜택 조정 초안',
@@ -100,6 +103,7 @@ it('지급 보류만 저장하면 정책 초안을 보존하고 새 revision으�
   await userEvent.click(screen.getByRole('button', { name: '확인' }));
   await screen.findByText('현재 정책 v3 · 지급 보류 중');
   expect(screen.getByLabelText('정책 변경 사유')).toHaveValue('혜택 조정 초안');
+  expect(screen.getByLabelText('초대 적립금 한도 (원)')).toHaveValue(5000);
   expect(screen.getAllByLabelText('초대인 금액 (원)')[0]).toHaveValue(3000);
   await userEvent.click(screen.getByRole('button', { name: '변경 내용 확인' }));
   await userEvent.click(screen.getByRole('button', { name: '확인' }));
@@ -118,6 +122,7 @@ it('지급 보류만 저장하면 정책 초안을 보존하고 새 revision으�
   expect(JSON.parse(saved![1]!.body as string)).toMatchObject({
     expectedRevision: 3,
     signup: { inviterWon: 3000 },
+    inviterLimit: { type: 'TOTAL_AMOUNT', value: 5000 },
     reason: '혜택 조정 초안',
   });
 });
@@ -155,11 +160,17 @@ it('다른 관리자가 정책을 바꾼 뒤 보류를 변경하면 초안의 �
   );
   await screen.findByText('현재 정책 v3 · 정상 처리 중');
   await userEvent.type(screen.getByLabelText('정책 변경 사유'), '보존할 초안');
+  await userEvent.clear(screen.getByLabelText('초대 적립금 한도 (원)'));
+  await userEvent.type(screen.getByLabelText('초대 적립금 한도 (원)'), '5000');
   current = {
     ...initial,
     revision: 4,
     paused: true,
-    policy: { ...initial.policy, version: 4 },
+    policy: {
+      ...initial.policy,
+      version: 4,
+      inviterLimit: { type: 'INVITE_COUNT', value: 10 },
+    },
   };
   await qc.invalidateQueries({ queryKey: ['referrals', 'policy'] });
   await screen.findByText('현재 정책 v4 · 지급 보류 중');
@@ -175,6 +186,7 @@ it('다른 관리자가 정책을 바꾼 뒤 보류를 변경하면 초안의 �
   expect(requests[0]).toMatchObject({
     expectedRevision: 2,
     reason: '보존할 초안',
+    inviterLimit: { type: 'TOTAL_AMOUNT', value: 5000 },
   });
   expect(
     await screen.findByText('다른 관리자가 정책을 변경했어요.'),

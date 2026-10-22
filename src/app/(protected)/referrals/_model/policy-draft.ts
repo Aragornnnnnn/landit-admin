@@ -1,10 +1,11 @@
 // 정책 입력을 서버의 대상·금액 제약에 맞게 검증하고 정규화한다.
-import type { Product, Stage } from '../_api/referrals';
+import type { InviterLimit, Product, Stage } from '../_api/referrals';
 
 export type PolicyDraft = {
   signup: Stage;
   purchase: Stage;
   products: Product[];
+  inviterLimit?: InviterLimit;
   reason: string;
 };
 export function normalizeStage(stage: Stage): Stage {
@@ -17,6 +18,17 @@ export function normalizeStage(stage: Stage): Stage {
   };
 }
 export function validatePolicy(draft: PolicyDraft): string | null {
+  const limit = draft.inviterLimit;
+  if (limit?.type === 'INVITE_COUNT')
+    return '초대 적립금 한도를 금액으로 설정해 주세요.';
+  if (
+    limit &&
+    limit.type !== 'UNLIMITED' &&
+    (limit.value == null ||
+      !Number.isSafeInteger(limit.value) ||
+      limit.value < 0)
+  )
+    return '초대인 한도는 0 이상의 정수로 입력해 주세요.';
   for (const value of [draft.signup, draft.purchase]) {
     const stage = normalizeStage(value);
     if (!stage.enabled) continue;
@@ -55,6 +67,14 @@ export function validatePolicy(draft: PolicyDraft): string | null {
   )
     return '상품 ID를 입력하고 중복 상품을 제거해 주세요.';
   return null;
+}
+export function limitLabel(limit?: InviterLimit) {
+  if (!limit) return '설정 정보 없음';
+  if (limit.type === 'UNLIMITED') return '제한 없음';
+  const value = limit.value?.toLocaleString() ?? '미입력';
+  return limit.type === 'INVITE_COUNT'
+    ? `최대 초대 ${value}명`
+    : `누적 초대 적립금 ${value}원`;
 }
 export function stageLabel(stage: Stage) {
   if (!stage.enabled) return '지급 안 함';

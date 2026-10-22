@@ -1,6 +1,7 @@
 // 생성된 OpenAPI 계약으로 레퍼럴 관리자 API를 호출한다.
 import { api } from '@/shared/api/client';
 import type { components } from '@/shared/api/referral-schema';
+import type { ReferralInviterLimit } from '@/shared/api/schema-patch';
 
 type Schema<K extends keyof components['schemas']> = components['schemas'][K];
 
@@ -11,11 +12,27 @@ type Complete<T> = T extends (infer U)[]
     : T;
 export type Stage = Complete<Schema<'ReferralStage'>>;
 export type Product = Complete<Schema<'ReferralProduct'>>;
-export type Policy = Complete<Schema<'ReferralPolicy'>>;
-export type PolicyState = Complete<Schema<'ReferralPolicyState'>>;
+export type InviterLimit = ReferralInviterLimit;
+export type Policy = Omit<
+  Complete<Schema<'ReferralPolicy'>>,
+  'inviterLimit'
+> & {
+  inviterLimit?: InviterLimit;
+};
+export type PolicyState = Omit<
+  Complete<Schema<'ReferralPolicyState'>>,
+  'policy'
+> & {
+  policy: Policy;
+};
 export type Reward = Complete<Schema<'ReferralReward'>>;
 export type Billing = Complete<Schema<'ReferralBillingEvent'>>;
-export type PolicyInput = Schema<'ReferralPolicyUpdateRequest'>;
+export type PolicyInput = Omit<
+  Schema<'ReferralPolicyUpdateRequest'>,
+  'inviterLimit'
+> & {
+  inviterLimit?: InviterLimit;
+};
 export type Page<T> = { items: T[]; hasNext: boolean };
 const base = '/api/v1/admin';
 export const referralsApi = {
