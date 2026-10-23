@@ -45,3 +45,9 @@ landit-be PR #319의 `GET/POST /api/v1/admin/popups`, `PATCH /api/v1/admin/popup
 - Playwright 목 API로 1440px·390px의 검색·선택·확인창과 `PATCH {excludedUserIds:[7,12]}` 저장을 확인했다. `docs/images/screens/popup-exclusions-*.png`는 가상 사용자로 만든 구현 증거다. 전용 Figma 프레임 부재는 기존 디자인 근거와 같으며 Figma 일치를 주장하지 않는다.
 - `schema.d.ts`는 BE LAN-740 사용자 숨김 구현의 로컬 `build/openapi.json`으로 생성했다. 생성 파일이며 변경되지 않은 API를 포함한 현재 develop 계약도 함께 갱신한다.
 - 실제 서버 저장·운영 DB 적용·배포·실기기 노출은 수행하지 않았다.
+
+### PR CI의 기존 의존성 취약점 보완
+
+- PR CI가 Next.js 16.3.8의 기존 취약점 3건에서 중단되어 `next`와 `eslint-config-next`를 16.4.1로 맞췄다. [이미지 최적화](https://github.com/advisories/GHSA-2464-fhr4-w9xw), [캐시 함수](https://github.com/advisories/GHSA-673q-mjm6-r5xr), [Server Actions](https://github.com/advisories/GHSA-p3m5-59mp-jv5r) 공식 권고의 수정 버전이다.
+- `minimumReleaseAge`와 빌드 스크립트 허용 규칙을 유지했다. 독립 리뷰에서 버전 일치·lockfile·정책 보존을 확인했으며 확정 결함은 없었다.
+- 갱신 후 `pnpm audit --prod --audit-level=high` 알려진 취약점 0건, 전체 테스트 584건·포맷·린트·타입 검사·프로덕션 빌드 통과. 브라우저 스크린샷 검증은 앞선 16.3.8 실행 결과다.
