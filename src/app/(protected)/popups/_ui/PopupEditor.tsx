@@ -3,6 +3,10 @@
 // 팝업 입력·이미지 업로드와 노출 설정 저장 확인을 제공한다.
 import { useEffect, useState } from 'react';
 
+import {
+  SUBSCRIPTION_AUDIENCE_LABELS,
+  SubscriptionAudienceFields,
+} from '@/features/subscription/ui/SubscriptionAudienceFields';
 import { ActionConfirmDialog } from '@/shared/ui/ActionConfirmDialog';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
@@ -186,6 +190,21 @@ export function PopupEditor({
                 onCheckedChange={(enabled) => setDraft({ ...draft, enabled })}
               />
             </label>
+            <section className="space-y-4 rounded-xl border border-hairline p-4">
+              <div>
+                <h2 className="text-sm font-semibold">숨길 대상</h2>
+                <p className="mt-1 text-xs text-subtle">
+                  선택한 유형 또는 사용자에게 이 팝업을 숨겨요. 구독 상태는
+                  팝업을 조회할 때 판단해요.
+                </p>
+              </div>
+              <SubscriptionAudienceFields
+                selected={draft.excludedAudiences}
+                onChange={(excludedAudiences) =>
+                  setDraft({ ...draft, excludedAudiences })
+                }
+              />
+            </section>
             <PopupExcludedUsers
               selected={draft.excludedUserIds}
               onChange={(excludedUserIds) =>
@@ -226,6 +245,12 @@ export function PopupEditor({
             <>
               <p>{draft.title}</p>
               <p>숨길 사용자 · {draft.excludedUserIds.length}명</p>
+              <p>
+                숨길 구독 유형 ·{' '}
+                {draft.excludedAudiences
+                  .map((audience) => SUBSCRIPTION_AUDIENCE_LABELS[audience])
+                  .join(', ') || '없음'}
+              </p>
               <p>
                 {draft.startsAt.replace('T', ' ')} ~{' '}
                 {draft.endsAt.replace('T', ' ')} (KST)

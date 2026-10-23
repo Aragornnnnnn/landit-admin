@@ -5,9 +5,10 @@ import type { Popup, PopupCreate, PopupPatch } from '../_api/popups';
 
 export type PopupDraft = Omit<
   PopupCreate,
-  'priority' | 'linkUrl' | 'excludedUserIds'
+  'priority' | 'linkUrl' | 'excludedUserIds' | 'excludedAudiences'
 > & {
   excludedUserIds: number[];
+  excludedAudiences: NonNullable<PopupCreate['excludedAudiences']>;
   priority: string;
   linkUrl: string;
 };
@@ -20,12 +21,14 @@ export const EMPTY_POPUP: PopupDraft = {
   endsAt: '',
   priority: '0',
   excludedUserIds: [],
+  excludedAudiences: [],
 };
 export const toKstInput = (iso: string) =>
   new Date(Date.parse(iso) + 9 * 3600000).toISOString().slice(0, 16);
 export function toPopupDraft(popup: Popup): PopupDraft {
   return {
     excludedUserIds: popup.excludedUserIds ?? [],
+    excludedAudiences: popup.excludedAudiences ?? [],
     title: popup.title,
     imageUrl: popup.imageUrl,
     linkUrl: popup.linkUrl ?? '',
@@ -65,8 +68,14 @@ export function toPopupRequest(
               draft.excludedUserIds.some(
                 (id) => !initial.excludedUserIds.includes(id),
               )
-            : draft[key as keyof PopupDraft] !==
-              initial[key as keyof PopupDraft],
+            : key === 'excludedAudiences'
+              ? draft.excludedAudiences.length !==
+                  initial.excludedAudiences.length ||
+                draft.excludedAudiences.some(
+                  (audience) => !initial.excludedAudiences.includes(audience),
+                )
+              : draft[key as keyof PopupDraft] !==
+                initial[key as keyof PopupDraft],
         ),
       )
     : body;
@@ -142,6 +151,7 @@ export function hasPopupChanges(
   const normalize = (value: PopupDraft) => ({
     ...value,
     excludedUserIds: [...value.excludedUserIds].sort((a, b) => a - b),
+    excludedAudiences: [...value.excludedAudiences].sort(),
   });
   return (
     JSON.stringify(normalize(draft)) !== JSON.stringify(normalize(initial))
