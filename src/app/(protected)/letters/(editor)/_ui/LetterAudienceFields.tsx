@@ -3,6 +3,7 @@
 // 공지를 숨길 구독 유형과 개별 사용자를 복수 선택한다.
 import { useState } from 'react';
 
+import { SubscriptionAudienceFields } from '@/features/subscription/ui/SubscriptionAudienceFields';
 import { useAllUsersQuery } from '@/features/user/model/useAllUsersQuery';
 import { InlineError } from '@/shared/ui/InlineError';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -11,15 +12,6 @@ import { Input } from '@/shared/ui/shadcn/input';
 
 import type { LetterDraft } from '../_model/letter-draft';
 
-const AUDIENCES: Record<LetterDraft['excludedAudiences'][number], string> = {
-  MONTHLY: '월간',
-  YEARLY: '연간',
-  PASS_100_DAYS: '100일 이용권',
-  TRIAL: '무료 체험',
-  NONE: '미구독',
-  ADMIN_GRANTED: '관리자 부여',
-  OTHER: '기타 구독',
-};
 export function LetterAudienceFields({
   draft,
   onChange,
@@ -55,31 +47,12 @@ export function LetterAudienceFields({
           조회할 때 판단해요.
         </p>
       </div>
-      <fieldset className="flex flex-wrap gap-x-5 gap-y-3">
-        <legend className="mb-3 text-sm font-medium">구독 유형</legend>
-        {Object.entries(AUDIENCES).map(([value, label]) => {
-          const audience = value as LetterDraft['excludedAudiences'][number];
-          return (
-            <label key={value} className="flex items-center gap-2 text-sm">
-              <Checkbox
-                checked={draft.excludedAudiences.includes(audience)}
-                onCheckedChange={(checked) =>
-                  onChange({
-                    ...draft,
-                    excludedAudiences:
-                      checked === true
-                        ? [...draft.excludedAudiences, audience]
-                        : draft.excludedAudiences.filter(
-                            (item) => item !== audience,
-                          ),
-                  })
-                }
-              />
-              {label}
-            </label>
-          );
-        })}
-      </fieldset>
+      <SubscriptionAudienceFields
+        selected={draft.excludedAudiences}
+        onChange={(excludedAudiences) =>
+          onChange({ ...draft, excludedAudiences })
+        }
+      />
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium">
           개별 사용자 · {draft.excludedUserIds.length}명

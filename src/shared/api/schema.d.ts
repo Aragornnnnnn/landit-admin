@@ -1163,7 +1163,7 @@ export interface paths {
         head?: never;
         /**
          * 관리자 팝업 부분 수정
-         * @description 생략한 필드는 유지합니다. linkUrl: null은 링크를 제거하며 다른 필드의 null은 거부합니다. excludedUserIds: []로 사용자 숨김을 전체 해제할 수 있습니다. enabled: false로 노출을 중단할 수 있습니다. 시작 시각은 종료 시각보다 빨라야 합니다.
+         * @description 생략한 필드는 유지합니다. linkUrl: null은 링크를 제거하며 다른 필드의 null은 거부합니다. excludedUserIds/excludedAudiences는 각각 []로 숨김을 전체 해제할 수 있습니다. enabled: false로 노출을 중단할 수 있습니다. 시작 시각은 종료 시각보다 빨라야 합니다.
          */
         patch: operations["update_4"];
         trace?: never;
@@ -1431,7 +1431,7 @@ export interface paths {
         };
         /**
          * 현재 노출 팝업 조회
-         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
+         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 개별 ID 또는 현재 구독 유형에 해당하는 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
          */
         get: operations["getActive"];
         put?: never;
@@ -2902,7 +2902,7 @@ export interface components {
             improvement?: string;
         };
         DomainScore: {
-            /** @description 영역별 점수. 상위 scoreMax 척도를 따르며 미관찰 시 null */
+            /** @description 공개 응답에서 항상 숫자로 제공하는 영역 점수. scoreMax 척도를 따르며 미관찰·실패는 0. 가이드 의존은 100점 척도에서 21~40점이며 독립 근거와 구분한다 */
             score?: number;
             /** @description 관찰 근거 비율. 정답 확률이 아님 */
             confidence?: number;
@@ -3851,6 +3851,8 @@ export interface components {
             priority: number;
             /** @description 숨길 활성 사용자 ID, 최대 1000명. 생략하면 숨김 없음 */
             excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 조회 시점에 판단하며 개별 사용자 숨김과 OR로 적용 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
         };
         AdminPopupResponse: {
             /** Format: int64 */
@@ -3868,6 +3870,7 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             excludedUserIds: number[];
+            excludedAudiences: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminPopupResponse: {
@@ -4217,6 +4220,8 @@ export interface components {
             priority?: number;
             /** @description 숨길 사용자 ID, 최대 1000명. 생략하면 유지, 빈 배열이면 전체 해제 */
             excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 생략하면 유지, 빈 배열이면 전체 해제 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
             /** @description 생략하면 유지, null이면 링크 제거 */
             linkUrl?: string | null;
         };

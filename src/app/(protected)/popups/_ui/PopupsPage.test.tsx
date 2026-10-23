@@ -191,3 +191,65 @@ it('숨김 사용자를 해제했다 다시 선택하면 저장이나 폐기 확
   expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
+
+it('공지와 같은 일곱 유형에서 월간과 연간을 선택하면 확인 후 유형만 저장한다', async () => {
+  const user = userEvent.setup();
+  const requests: object[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url, init) => {
+      if (init.method === 'PATCH') {
+        requests.push(JSON.parse(init.body));
+        return Response.json({
+          success: true,
+          data: { ...popup, excludedAudiences: ['MONTHLY', 'YEARLY'] },
+        });
+      }
+      return Response.json({
+        success: true,
+        data: String(url).includes('/users')
+          ? { items: [], hasNext: false }
+          : [popup],
+      });
+    }),
+  );
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <PopupsPage />
+    </QueryClientProvider>,
+  );
+  await user.click(
+    await screen.findByRole('button', { name: '기존 팝업 수정' }),
+  );
+  for (const name of [
+    '월간',
+    '연간',
+    '100일 이용권',
+    '무료 체험',
+    '미구독',
+    '관리자 부여',
+    '기타 구독',
+  ]) {
+    expect(screen.getByRole('checkbox', { name })).toBeInTheDocument();
+  }
+  await user.click(screen.getByRole('checkbox', { name: '월간' }));
+  await user.click(screen.getByRole('checkbox', { name: '연간' }));
+  await user.click(screen.getByRole('button', { name: '저장' }));
+  expect(
+    within(screen.getByRole('alertdialog')).getByText(
+      '숨길 구독 유형 · 월간, 연간',
+    ),
+  ).toBeInTheDocument();
+  await user.click(
+    within(screen.getByRole('alertdialog')).getByRole('button', {
+      name: '확인',
+    }),
+  );
+  await waitFor(() =>
+    expect(requests).toEqual([{ excludedAudiences: ['MONTHLY', 'YEARLY'] }]),
+  );
+});

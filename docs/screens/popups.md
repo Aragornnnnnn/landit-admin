@@ -36,7 +36,8 @@ landit-be PR #319의 `GET/POST /api/v1/admin/popups`, `PATCH /api/v1/admin/popup
 - 선택한 사용자는 해당 팝업의 노출 후보에서 제외한다. 다른 후보가 있으면 다음 우선순위 팝업을, 없으면 아무 팝업도 보여주지 않는다.
 - 숨김 설정이 있는 팝업은 비로그인 요청에도 노출하지 않는다. 기존 숨김 없는 팝업과 공개 응답 형태는 유지한다.
 - 생성 시 `excludedUserIds`를 보내고, 수정 시 변경된 경우에만 보낸다. 빈 배열은 전체 해제, 생략은 기존 유지다. 저장 확인창에 숨길 사용자 수를 표시한다.
-- 이 변경은 개별 사용자 숨김만 다루며 구독 유형별 숨김은 포함하지 않는다. BE의 사용자 숨김 API를 먼저 배포한 뒤 어드민을 반영한다.
+- 공지와 같은 월간·연간·100일 이용권·무료 체험·미구독·관리자 부여·기타 구독 유형을 복수 선택한다. 개별 사용자 또는 선택 유형 중 하나라도 일치하면 숨긴다. 현재 구독 상태는 팝업 조회 시 판단한다.
+- `excludedAudiences`도 생성 시 전송하며 PATCH 생략은 유지, 빈 배열은 해제다. 선택 순서만 달라지면 변경으로 보지 않는다. 확인창에는 선택한 유형 이름을 표시한다. BE의 유형별 숨김 API를 먼저 전체 배포한 뒤 어드민을 반영한다.
 
 ### 사용자 숨김 검증
 
@@ -51,3 +52,11 @@ landit-be PR #319의 `GET/POST /api/v1/admin/popups`, `PATCH /api/v1/admin/popup
 - PR CI가 Next.js 16.3.8의 기존 취약점 3건에서 중단되어 `next`와 `eslint-config-next`를 16.4.1로 맞췄다. [이미지 최적화](https://github.com/advisories/GHSA-2464-fhr4-w9xw), [캐시 함수](https://github.com/advisories/GHSA-673q-mjm6-r5xr), [Server Actions](https://github.com/advisories/GHSA-p3m5-59mp-jv5r) 공식 권고의 수정 버전이다.
 - `minimumReleaseAge`와 빌드 스크립트 허용 규칙을 유지했다. 독립 리뷰에서 버전 일치·lockfile·정책 보존을 확인했으며 확정 결함은 없었다.
 - 갱신 후 `pnpm audit --prod --audit-level=high` 알려진 취약점 0건, 전체 테스트 584건·포맷·린트·타입 검사·프로덕션 빌드 통과. 브라우저 스크린샷 검증은 앞선 16.3.8 실행 결과다.
+
+### 공지와 동일한 구독 유형 숨김 검증
+
+- 공지와 팝업이 같은 `SubscriptionAudienceFields`를 사용한다. 7개 선택지·복수 선택·저장 확인과 개별 사용자 숨김을 함께 지원한다.
+- Node 22 / pnpm 10에서 전체 588개 테스트, 린트·타입 검사·프로덕션 빌드 통과. 유형만 해제해도 개별 사용자 설정을 보존하며, 같은 유형을 순서만 바꿔 선택하면 PATCH하지 않는다.
+- 별도 `popup_exclusions_review` 에이전트가 UI·생성 계약·배포 순서를 독립 리뷰했고 확정 결함은 없었다. 공지·팝업 관련 55개 테스트를 독립 실행해 통과했다.
+- Playwright 모의 API로 1440px·390px의 7개 옵션과 저장 확인을 확인했다. 재편집 시 월간·연간이 유지되고, 100일 이용권 추가 시 `PATCH {excludedAudiences:["MONTHLY","YEARLY","PASS_100_DAYS"]}`만 전송됨을 검증했다. `docs/images/screens/popup-audiences-*.png`는 가상 사용자로 만든 화면이다.
+- BE LAN-740 구독 유형 숨김 구현의 `build/openapi.json`에서 API 타입을 재생성했다. 실제 서버 저장·배포·실기기 노출은 수행하지 않았다. BE 전체 교체 후 어드민 배포가 필요하다.

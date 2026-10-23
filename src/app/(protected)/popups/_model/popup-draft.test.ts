@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  hasPopupChanges,
   toPopupDraft,
   toPopupRequest,
   validatePopupDraft,
@@ -10,6 +11,7 @@ import {
 
 const popup = {
   popupId: 1,
+  excludedAudiences: [],
   excludedUserIds: [12, 34],
   title: '안내',
   imageUrl: 'https://cdn.example.com/a.png',
@@ -21,6 +23,38 @@ const popup = {
   updatedAt: '2026-10-22T00:00:00Z',
 };
 describe('팝업 입력', () => {
+  it('구독 유형을 해제하면 개별 사용자를 유지하고 빈 유형 배열만 보낸다', () => {
+    const source = {
+      ...popup,
+      excludedAudiences: ['MONTHLY' as const, 'YEARLY' as const],
+    };
+    expect(
+      toPopupRequest(
+        { ...toPopupDraft(source), excludedAudiences: [] },
+        source,
+      ),
+    ).toEqual({ excludedAudiences: [] });
+  });
+  it('같은 유형을 다른 순서로 선택하면 수정과 변경 감지에서 제외한다', () => {
+    const source = {
+      ...popup,
+      excludedAudiences: ['MONTHLY' as const, 'YEARLY' as const],
+    };
+    const initial = toPopupDraft(source);
+    const draft = {
+      ...initial,
+      excludedAudiences: ['YEARLY' as const, 'MONTHLY' as const],
+    };
+    expect(toPopupRequest(draft, source)).toEqual({});
+    expect(hasPopupChanges(draft, initial)).toBe(false);
+  });
+  it('구독 유형을 선택하고 등록하면 사용자 ID와 함께 보낸다', () => {
+    const source = { ...popup, excludedAudiences: ['TRIAL' as const] };
+    expect(toPopupRequest(toPopupDraft(source))).toMatchObject({
+      excludedAudiences: ['TRIAL'],
+      excludedUserIds: [12, 34],
+    });
+  });
   it('숨김 대상을 모두 해제하면 빈 배열만 보낸다', () => {
     expect(
       toPopupRequest({ ...toPopupDraft(popup), excludedUserIds: [] }, popup),
