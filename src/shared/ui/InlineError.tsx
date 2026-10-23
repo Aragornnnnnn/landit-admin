@@ -28,7 +28,7 @@ export function InlineError({
     >
       <p className="text-[15px] font-medium text-body">{message}</p>
       {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry}>
+        <Button type="button" variant="outline" size="sm" onClick={onRetry}>
           다시 시도
         </Button>
       )}

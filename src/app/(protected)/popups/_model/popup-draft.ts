@@ -3,7 +3,11 @@ import { MAX_IMAGE_BYTES } from '@/features/content-image/api/upload-content-ima
 
 import type { Popup, PopupCreate, PopupPatch } from '../_api/popups';
 
-export type PopupDraft = Omit<PopupCreate, 'priority' | 'linkUrl'> & {
+export type PopupDraft = Omit<
+  PopupCreate,
+  'priority' | 'linkUrl' | 'excludedUserIds'
+> & {
+  excludedUserIds: number[];
   priority: string;
   linkUrl: string;
 };
@@ -15,11 +19,13 @@ export const EMPTY_POPUP: PopupDraft = {
   startsAt: '',
   endsAt: '',
   priority: '0',
+  excludedUserIds: [],
 };
 export const toKstInput = (iso: string) =>
   new Date(Date.parse(iso) + 9 * 3600000).toISOString().slice(0, 16);
 export function toPopupDraft(popup: Popup): PopupDraft {
   return {
+    excludedUserIds: popup.excludedUserIds ?? [],
     title: popup.title,
     imageUrl: popup.imageUrl,
     linkUrl: popup.linkUrl ?? '',
@@ -53,9 +59,14 @@ export function toPopupRequest(
   };
   return initial
     ? Object.fromEntries(
-        Object.entries(body).filter(
-          ([key]) =>
-            draft[key as keyof PopupDraft] !== initial[key as keyof PopupDraft],
+        Object.entries(body).filter(([key]) =>
+          key === 'excludedUserIds'
+            ? draft.excludedUserIds.length !== initial.excludedUserIds.length ||
+              draft.excludedUserIds.some(
+                (id) => !initial.excludedUserIds.includes(id),
+              )
+            : draft[key as keyof PopupDraft] !==
+              initial[key as keyof PopupDraft],
         ),
       )
     : body;
@@ -121,4 +132,18 @@ export function validatePopupImage(
     extensions[file.type]?.test(file.name)
     ? null
     : 'PNG·JPEG·WebP 이미지(0바이트 초과, 10 MiB 이하)를 선택해 주세요.';
+}
+
+/** 사용자 숨김 배열의 선택 순서와 관계없이 실제 변경 여부를 판단한다. */
+export function hasPopupChanges(
+  draft: PopupDraft,
+  initial: PopupDraft,
+): boolean {
+  const normalize = (value: PopupDraft) => ({
+    ...value,
+    excludedUserIds: [...value.excludedUserIds].sort((a, b) => a - b),
+  });
+  return (
+    JSON.stringify(normalize(draft)) !== JSON.stringify(normalize(initial))
+  );
 }

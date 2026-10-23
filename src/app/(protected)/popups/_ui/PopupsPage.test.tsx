@@ -148,3 +148,46 @@ it('편집 중 목록 재조회가 실패해도 입력을 유지한다', async (
   );
   expect(screen.getByLabelText('제목')).toHaveValue('기존 팝업 초안');
 });
+
+it('숨김 사용자를 해제했다 다시 선택하면 저장이나 폐기 확인 없이 원래 상태가 된다', async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url) =>
+      Response.json({
+        success: true,
+        data: String(url).includes('/users')
+          ? {
+              items: [
+                {
+                  userProfileId: 12,
+                  nickname: '민수',
+                  email: 'test@example.com',
+                  status: 'ACTIVE',
+                },
+              ],
+              hasNext: false,
+            }
+          : [{ ...popup, excludedUserIds: [12, 34] }],
+      }),
+    ),
+  );
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
+      <PopupsPage />
+    </QueryClientProvider>,
+  );
+  await user.click(
+    await screen.findByRole('button', { name: '기존 팝업 수정' }),
+  );
+  await user.click(await screen.findByRole('checkbox', { name: /민수/ }));
+  await user.click(screen.getByRole('checkbox', { name: /민수/ }));
+  expect(screen.getByRole('button', { name: '저장' })).toBeDisabled();
+  await user.click(screen.getByRole('button', { name: '닫기' }));
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});

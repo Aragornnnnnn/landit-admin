@@ -17,11 +17,13 @@ import { Switch } from '@/shared/ui/shadcn/switch';
 import type { Popup } from '../_api/popups';
 import {
   EMPTY_POPUP,
+  hasPopupChanges,
   toPopupDraft,
   validatePopupDraft,
 } from '../_model/popup-draft';
 import { useSavePopupMutation } from '../_model/useSavePopupMutation';
 import { useUploadPopupImage } from '../_model/useUploadPopupImage';
+import { PopupExcludedUsers } from './PopupExcludedUsers';
 
 export function PopupEditor({
   original,
@@ -38,7 +40,7 @@ export function PopupEditor({
   const [confirm, setConfirm] = useState<'save' | 'discard' | null>(null);
   const save = useSavePopupMutation(onClose);
   const busy = uploading || save.isPending;
-  const dirty = JSON.stringify(draft) !== JSON.stringify(initial);
+  const dirty = hasPopupChanges(draft, initial);
   const invalid = validatePopupDraft(draft, original);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
@@ -184,6 +186,12 @@ export function PopupEditor({
                 onCheckedChange={(enabled) => setDraft({ ...draft, enabled })}
               />
             </label>
+            <PopupExcludedUsers
+              selected={draft.excludedUserIds}
+              onChange={(excludedUserIds) =>
+                setDraft({ ...draft, excludedUserIds })
+              }
+            />
             {invalid && <p className="text-xs text-subtle">{invalid}</p>}
           </fieldset>
           <div className="mt-5 flex justify-end gap-2">
@@ -217,6 +225,7 @@ export function PopupEditor({
           {confirm === 'save' ? (
             <>
               <p>{draft.title}</p>
+              <p>숨길 사용자 · {draft.excludedUserIds.length}명</p>
               <p>
                 {draft.startsAt.replace('T', ' ')} ~{' '}
                 {draft.endsAt.replace('T', ' ')} (KST)
