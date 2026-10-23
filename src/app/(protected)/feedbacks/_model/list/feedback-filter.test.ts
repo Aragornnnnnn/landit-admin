@@ -13,11 +13,15 @@ import {
 const read = (query: string) => readFeedbackFilter(new URLSearchParams(query));
 
 describe('readFeedbackFilter', () => {
-  it('빈 주소면 기본값 — 처리중·최근 30일·최신순', () => {
+  it('빈 주소면 기본값 — 전체 상태·최근 30일·최신순', () => {
     expect(read('')).toEqual(DEFAULT_FEEDBACK_FILTER);
   });
 
-  it('status=ALL은 전체(조건 없음)로 읽는다 — 기본값이 처리중이라 "전체"를 표현할 값이 필요하다', () => {
+  it('빈 주소면 처리완료까지 전부 보인다 — 처리중만 걸러 두면 지난 건을 찾을 때마다 필터를 풀어야 한다', () => {
+    expect(read('').status).toBeUndefined();
+  });
+
+  it('status=ALL은 전체로 읽는다 — 기본값이 처리중이던 때 저장된 주소도 열린다', () => {
     expect(read('status=ALL').status).toBeUndefined();
   });
 
@@ -39,7 +43,7 @@ describe('readFeedbackFilter', () => {
     ).toEqual({
       keyword: '녹음',
       type: 'BUG_REPORT',
-      status: 'PENDING',
+      status: undefined,
       days: 7,
       sort: 'OLDEST',
       page: 2,
@@ -52,13 +56,13 @@ describe('writeFeedbackFilter', () => {
     expect(writeFeedbackFilter(DEFAULT_FEEDBACK_FILTER)).toBe('');
   });
 
-  it('전체 상태는 ALL로 적는다 — 기본값(처리중)과 구분해야 한다', () => {
+  it('처리중은 주소에 적는다 — 기본값(전체)과 구분해야 한다', () => {
     const query = writeFeedbackFilter({
       ...DEFAULT_FEEDBACK_FILTER,
-      status: undefined,
+      status: 'PENDING',
     });
 
-    expect(query).toBe('status=ALL');
+    expect(query).toBe('status=PENDING');
   });
 
   it('읽기와 쓰기가 서로를 되돌린다', () => {
@@ -98,7 +102,7 @@ describe('hasActiveFeedbackFilter', () => {
   it.each([
     ['keyword', { keyword: '녹음' }],
     ['type', { type: 'CHEER' as const }],
-    ['status', { status: undefined }],
+    ['status', { status: 'PENDING' as const }],
     ['days', { days: 7 }],
   ])(
     '%s를 바꾸면 true — 빈 상태 문구를 "조건에 맞는 게 없어요"로 낸다',

@@ -10,7 +10,7 @@ export interface FeedbackFilter {
   keyword: string;
   /** 없으면 전체 */
   type?: FeedbackType;
-  /** 없으면 전체. 기본은 처리중 — 어드민이 매일 여는 화면이라 할 일이 먼저 보여야 한다 */
+  /** 없으면 전체(기본) — 처리중만 걸러 두면 지난 건을 찾을 때마다 필터를 풀어야 했다. 할 일 수는 우측 카운트·사이드바 배지가 알려준다 */
   status?: FeedbackStatus;
   /** 최근 며칠. 0이면 전체 기간 */
   days: number;
@@ -23,7 +23,6 @@ export const FEEDBACK_PAGE_SIZE = 20;
 
 export const DEFAULT_FEEDBACK_FILTER: FeedbackFilter = {
   keyword: '',
-  status: 'PENDING',
   days: 30,
   sort: 'NEWEST',
   page: 0,
@@ -53,12 +52,10 @@ export function readFeedbackFilter(
     type: TYPES.includes(type as FeedbackType)
       ? (type as FeedbackType)
       : undefined,
-    status:
-      status === 'ALL'
-        ? undefined
-        : STATUSES.includes(status as FeedbackStatus)
-          ? (status as FeedbackStatus)
-          : DEFAULT_FEEDBACK_FILTER.status,
+    // status=ALL은 기본값이 처리중이던 때의 주소다 — 모르는 값과 같이 전체로 읽힌다
+    status: STATUSES.includes(status as FeedbackStatus)
+      ? (status as FeedbackStatus)
+      : DEFAULT_FEEDBACK_FILTER.status,
     days: DAY_OPTIONS.includes(days) ? days : DEFAULT_FEEDBACK_FILTER.days,
     sort: get('sort') === 'OLDEST' ? 'OLDEST' : 'NEWEST',
     page: Number.isInteger(page) && page > 0 ? page : 0,
@@ -70,10 +67,7 @@ export function writeFeedbackFilter(filter: FeedbackFilter): string {
   const params = new URLSearchParams();
   if (filter.keyword) params.set('keyword', filter.keyword);
   if (filter.type) params.set('type', filter.type);
-  // 전체(undefined)는 기본값(처리중)과 다르므로 명시해야 한다
-  if (filter.status !== DEFAULT_FEEDBACK_FILTER.status) {
-    params.set('status', filter.status ?? 'ALL');
-  }
+  if (filter.status) params.set('status', filter.status);
   if (filter.days !== DEFAULT_FEEDBACK_FILTER.days) {
     params.set('days', String(filter.days));
   }

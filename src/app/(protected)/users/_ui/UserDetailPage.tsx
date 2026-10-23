@@ -30,6 +30,7 @@ import {
   useUserDetailQuery,
   useUserFeedbacksQuery,
 } from '../_model/useUserDetailQuery';
+import { SubscriptionGrantsCard } from './SubscriptionGrantsCard';
 
 export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
   const user = useUserDetailQuery(userProfileId);
@@ -79,6 +80,10 @@ export function UserDetailPage({ userProfileId }: { userProfileId: number }) {
         </span>
       </header>
 
+      <SubscriptionGrantsCard
+        userId={userProfileId}
+        active={detail.status === 'ACTIVE'}
+      />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <Card title="프로필" className="lg:flex-1">
           <Row label="학습 목표 언어" value={detail.targetLocale} />

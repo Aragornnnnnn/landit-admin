@@ -33,21 +33,25 @@ export function FeedbackReplySheet({
         {/* 보이는 제목은 닉네임이지만, 읽어주는 이름은 이 시트가 무엇인지여야 한다 */}
         <SheetTitle className="sr-only">답장하기</SheetTitle>
 
-        <ReplyFields
-          feedback={feedback}
-          draft={draft}
-          variant="sheet"
-          trailing={
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="닫기"
-              className="rounded-md p-1 text-subtle hover:text-foreground"
-            >
-              <X className="size-5" aria-hidden />
-            </button>
-          }
-        />
+        {/* 내용만 스크롤하고 보내기 버튼은 아래에 고정한다 — 원문·함께 답장이 길면 버튼이 화면 밖으로 밀려났다.
+            좌우 패딩을 스크롤 영역 안으로 옮겨 스크롤바는 시트 끝에, 입력 포커스 링은 잘리지 않게 둔다 */}
+        <div className="-mx-7 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-7">
+          <ReplyFields
+            feedback={feedback}
+            draft={draft}
+            variant="sheet"
+            trailing={
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="닫기"
+                className="rounded-md p-1 text-subtle hover:text-foreground"
+              >
+                <X className="size-5" aria-hidden />
+              </button>
+            }
+          />
+        </div>
 
         {draft.sent ? (
           <p

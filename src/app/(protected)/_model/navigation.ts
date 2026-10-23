@@ -1,6 +1,6 @@
 // 사이드바 내비 정의 — 그룹·순서·라벨·아이콘은 docs/admin-spec.md "셸". 상단바 제목도 여기서 찾는다
-// 아이콘은 Figma 셸의 채움형 벡터를 그대로 옮긴 것 (NavIcons.tsx) — lucide가 아니다
-import { AudioLines, Mail } from 'lucide-react';
+// 기존 아이콘은 Figma 셸의 벡터다. 전용 시안이 없는 팝업은 lucide 창 아이콘을 쓴다.
+import { PanelsTopLeft } from 'lucide-react';
 
 import {
   AppVersionsIcon,
@@ -8,7 +8,10 @@ import {
   DirectLetterIcon,
   FeedbackIcon,
   LettersIcon,
+  NotificationMailIcon,
+  PronunciationAssetsIcon,
   PushIcon,
+  ReferralIcon,
   ScenarioTestIcon,
   UsersIcon,
 } from '../_ui/NavIcons';
@@ -58,7 +61,12 @@ export const NAV_GROUPS: NavGroup[] = [
     // 편지함은 사용자가 보내고 운영이 답하는 자리, 알림은 운영이 밀어 보내는 자리 — 성격이 달라 그룹을 가른다
     label: '알림',
     items: [
-      { href: '/notifications', label: '이메일·체험 알림', icon: Mail },
+      { href: '/popups', label: '팝업', icon: PanelsTopLeft },
+      {
+        href: '/notifications',
+        label: '이메일·체험 알림',
+        icon: NotificationMailIcon,
+      },
       {
         href: '/push-campaigns',
         label: '푸시 알림',
@@ -70,12 +78,19 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: '사용자',
-    items: [{ href: '/users', label: '사용자', icon: UsersIcon }],
+    items: [
+      { href: '/users', label: '사용자', icon: UsersIcon },
+      { href: '/referrals', label: '레퍼럴', icon: ReferralIcon },
+    ],
   },
   {
     label: '설정',
     items: [
-      { href: '/pronunciation-assets', label: '발음 에셋', icon: AudioLines },
+      {
+        href: '/pronunciation-assets',
+        label: '발음 에셋',
+        icon: PronunciationAssetsIcon,
+      },
       { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
       {
         href: '/scenario-test',

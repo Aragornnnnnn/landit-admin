@@ -1,4 +1,4 @@
-// 이 파일은 `pnpm api:types`가 스웨거(develop OpenAPI + LAN-669 백엔드 통합 테스트의 가입 통계 계약)에서 생성한다. 손으로 고치지 말고 재생성한다.
+// 이 파일은 `pnpm api:types`가 스웨거(file:///Users/sangmin8817/.codex/worktrees/df3a/landit-be/build/openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
     "/api/v1/me/push-devices/{installationId}": {
@@ -133,6 +133,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/referral-processing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 레퍼럴 지급 보류 또는 재개 */
+        put: operations["processing"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 현재 레퍼럴 정책 */
+        get: operations["current"];
+        /**
+         * 레퍼럴 정책 버전 생성
+         * @description inviterLimit은 UNLIMITED(value=null), INVITE_COUNT(등록 순서상 최초 N명), TOTAL_AMOUNT(가입·결제 초대인 보상의 평생 누적 원 금액) 중 선택합니다. 생략하면 기존 한도를 유지합니다. 피초대인 보상은 한도에 포함하지 않습니다. 새 한도는 기존 관계의 미지급 보상에도 적용하고 잔여 금액만 부분 지급합니다. 기존 지급액은 보존하며 환불·복구로 한도가 초기화되지 않습니다.
+         */
+        put: operations["update_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/notifications/trial-reminder-settings": {
         parameters: {
             query?: never;
@@ -146,7 +184,47 @@ export interface paths {
          * 무료 체험 알림 채널 설정 변경
          * @description DB에 채널별 ON/OFF를 저장하고 예약 등록 및 발송 직전에 확인합니다. 서버 재시작은 필요 없으며 이미 외부에 접수된 알림은 취소되지 않습니다.
          */
-        put: operations["update_2"];
+        put: operations["update_3"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/lineup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 라인업 행 수정
+         * @description LINEUP_READY 배치의 라인업 행을 저장한다. rows는 배치가 예약한 Day를 모두 한 번씩 담아야 한다(400). 다른 상태면 409.
+         */
+        put: operations["updateLineup"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Day 검수 저장
+         * @description OK는 Day를 OK로 바꾸고 열린 FIX 코멘트를 해결 처리한다. FIX는 코멘트가 하나 이상 필요하며(400) Day를 NEEDS_FIX로 둔다. 생성이 끝나지 않은 Day면 409.
+         */
+        put: operations["review"];
         post?: never;
         delete?: never;
         options?: never;
@@ -165,7 +243,7 @@ export interface paths {
         put?: never;
         /**
          * 사용자 발화 제출
-         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다. 신규 환급 참여자의 정상 완료에만 reward를 제공한다. clientMessageId를 유지한 재전송은 최초 영수증을 반환하며 completionId로 중복 안내를 방지한다. /api/v1/me/rewards/completions/{completionId}로 대기 결과를 재조회한다.
+         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다. 신규 환급 참여자의 정상 완료에만 reward를 제공한다. clientMessageId를 유지한 재전송은 최초 영수증을 반환하며 completionId로 중복 안내를 방지한다. 첫 진단 시나리오에서 해당 답변 작성·녹음 전/중 가이드를 열었다면 guideViewed=true를 보낸다. 생략 또는 false이면 기존 평가를 유지하며, 재전송에는 같은 열람 여부를 유지한다. /api/v1/me/rewards/completions/{completionId}로 대기 결과를 재조회한다.
          */
         post: operations["submitMessage"];
         delete?: never;
@@ -248,6 +326,66 @@ export interface paths {
          * @description currentQuestionId에 제출합니다. 허용 정답 배열과 토큰 값·순서·개수가 일치하면 정답입니다. 첫 오답은 큐 뒤로 이동하고 정답 또는 두 번째 오답이면 문제가 종료됩니다. 모든 문제가 종료되면 COMPLETED이며 currentQuestionId는 null입니다. 두 번째 오답도 correct는 false입니다. 네트워크 재시도는 같은 submissionId와 내용을 사용합니다.
          */
         post: operations["answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 온보딩 초대 코드 등록
+         * @description 신규 가입자의 PENDING 상태에서만 등록한다. 같은 코드 재전송은 멱등하다. 현재 미리보기의 policyVersion을 보내며 변경 시 409로 재확인한다. 등록 시 두 단계 정책을 고정하고 가입 보상을 적립한다. 등록 전 결제는 소급하지 않는다.
+         */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/registration/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 온보딩 초대 코드 건너뛰기
+         * @description 온보딩에서 건너뛰면 반드시 호출한다. 이후 등록할 수 없으며 재전송은 멱등하다.
+         */
+        post: operations["skip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 내 초대 코드 발급
+         * @description 8자리 대문자 영문·숫자 코드를 멱등하게 반환한다. 이전 형식 코드는 새 코드로 교체한다.
+         */
+        post: operations["issue"];
         delete?: never;
         options?: never;
         head?: never;
@@ -515,6 +653,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users/{userProfileId}/subscription-grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 사용자 수동 권한 이력 */
+        get: operations["history"];
+        put?: never;
+        /**
+         * 상품 무료 이용 권한 부여
+         * @description 요청 UUID로 멱등 처리합니다. 유효한 수동 권한 중복 부여는 거절합니다. 기존 유료 결제는 보존합니다.
+         */
+        post: operations["grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/scenarios/{scenarioId}/sessions": {
         parameters: {
             query?: never;
@@ -529,6 +688,40 @@ export interface paths {
          * @description develop 환경에서 진행 순서와 하루 제한 없이 활성 시나리오 테스트 세션을 시작한다.
          */
         post: operations["start_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-rewards/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 지급 근거 재확인 */
+        post: operations["retryReward"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-billing-events/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 결제 수신 재처리 */
+        post: operations["retryEvent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -653,6 +846,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/popups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 관리자 팝업 목록 조회 */
+        get: operations["list_1"];
+        put?: never;
+        /**
+         * 관리자 팝업 등록
+         * @description 이미지는 기존 content-images/presigned-url로 업로드한 imageUrl을 사용할 수 있습니다. 시각은 Z 또는 +09:00 등 시간대를 포함해야 하며 마이크로초 정밀도로 저장합니다.
+         */
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/notifications/email-tests": {
         parameters: {
             query?: never;
@@ -723,7 +937,7 @@ export interface paths {
         put?: never;
         /**
          * 특정 사용자에게 직접 편지 발송
-         * @description 활성 사용자 1~100명에게 DIRECT 편지를 즉시 발송한다. 푸시는 보내지 않는다. 중복 ID는 400 INVALID_REQUEST, 잘못된 입력은 400 VALIDATION_FAILED, 존재하지 않거나 탈퇴한 수신자는 404 RESOURCE_NOT_FOUND다. 수신자 하나라도 유효하지 않으면 전체 발송을 취소한다. 같은 요청을 다시 보내면 새 편지가 생성된다.
+         * @description 활성 사용자 1~100명에게 DIRECT 편지를 즉시 발송한다. 저장 완료 후 수신자에게 편지 상세로 연결되는 푸시 알림을 요청한다. 중복 ID는 400 INVALID_REQUEST, 잘못된 입력은 400 VALIDATION_FAILED, 존재하지 않거나 탈퇴한 수신자는 404 RESOURCE_NOT_FOUND다. 수신자 하나라도 유효하지 않으면 전체 발송을 취소한다. 같은 요청을 다시 보내면 새 편지가 생성된다.
          */
         post: operations["sendDirectLetter"];
         delete?: never;
@@ -772,6 +986,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/content-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 제작 규칙 목록
+         * @description scope·status로 거를 수 있다. 둘 다 생략하면 전체(은퇴 포함)를 코드 순으로 돌려준다.
+         */
+        get: operations["list_2"];
+        put?: never;
+        /**
+         * 제작 규칙 등록(코멘트 승격)
+         * @description scope 접두어 + 다음 번호로 코드를 매기고 ACTIVE로 등록한다. 다음 AI 호출부터(진행 중 배치 포함) 들어간다. sourceCommentId가 있으면 그 코멘트에서 승격한 것으로 남긴다(없는 코멘트면 404).
+         */
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/content-images/presigned-url": {
         parameters: {
             query?: never;
@@ -783,6 +1021,107 @@ export interface paths {
         put?: never;
         /** 콘텐츠 이미지 업로드 URL 발급 */
         post: operations["createPresignedUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 콘텐츠 제작 배치 목록 */
+        get: operations["list_3"];
+        put?: never;
+        /**
+         * 콘텐츠 제작 배치 생성
+         * @description 시작 Day는 서버가 정한다. 캐릭터별 Day 수의 합은 dayCount와 같아야 한다.
+         */
+        post: operations["create_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/proceed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 라인업 확정 → Day 생성 시작
+         * @description LINEUP_READY 배치만 GENERATING으로 바꾸고 Day 생성을 제출한다. 다른 상태면 409.
+         */
+        post: operations["proceed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/lineup/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 코멘트로 라인업 재생성
+         * @description LINEUP_READY 배치를 REQUESTED로 돌리고 코멘트를 누적해 라인업 생성을 다시 제출한다. 다른 상태면 409.
+         */
+        post: operations["regenerateLineup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Day 재생성
+         * @description scope가 ALL이면 전부, QUESTIONS_AND_EXPRESSIONS:{level}이면 그 레벨 질문 3개와 표현 4개, EXPRESSIONS:{level}이면 그 레벨 표현 4개, STAR_MESSAGES면 별점 문구만 다시 만든다. 미해결 FIX 코멘트가 프롬프트에 들어간다. 배치가 REVIEW_READY가 아니거나 Day가 생성 중이면 409, scope 표기가 틀리면 400.
+         */
+        post: operations["regenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 배치 승인 + 표현 id 예약
+         * @description REVIEW_READY 배치의 모든 Day가 OK일 때 APPROVED로 바꾸고 Day마다 writing_expression id 12개를 예약한다. OK가 아닌 Day가 있거나 다른 승인과 id가 겹치면 409.
+         */
+        post: operations["approve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -809,6 +1148,26 @@ export interface paths {
         patch: operations["endSession"];
         trace?: never;
     };
+    "/api/v1/admin/popups/{popupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 관리자 팝업 부분 수정
+         * @description 생략한 필드는 유지합니다. linkUrl: null은 링크를 제거하며 다른 필드의 null은 거부합니다. excludedUserIds/excludedAudiences는 각각 []로 숨김을 전체 해제할 수 있습니다. enabled: false로 노출을 중단할 수 있습니다. 시작 시각은 종료 시각보다 빨라야 합니다.
+         */
+        patch: operations["update_4"];
+        trace?: never;
+    };
     "/api/v1/admin/mailbox/letters/{letterId}": {
         parameters: {
             query?: never;
@@ -826,6 +1185,26 @@ export interface paths {
         patch: operations["updateLetter"];
         trace?: never;
     };
+    "/api/v1/admin/content-rules/{ruleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * 제작 규칙 은퇴
+         * @description status는 RETIRED만 받는다(400). 이미 은퇴한 규칙이면 409. 행은 이력으로 남고 프롬프트에서만 빠진다.
+         */
+        patch: operations["changeStatus"];
+        trace?: never;
+    };
     "/api/v1/admin/app-versions/{platform}": {
         parameters: {
             query?: never;
@@ -840,7 +1219,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** 관리자 앱 버전 정책 수정 */
-        patch: operations["update_3"];
+        patch: operations["update_5"];
         trace?: never;
     };
     "/api/v1/sessions/{sessionId}/messages/{messageId}/inner-thought": {
@@ -932,7 +1311,7 @@ export interface paths {
         };
         /**
          * 날짜별 시나리오 조회
-         * @description 오늘 배정된 시나리오 또는 과거 날짜에 최초 완료한 시나리오를 조회한다. date를 생략하면 Asia/Seoul 기준 오늘을 조회한다.
+         * @description 오늘 배정된 시나리오 또는 과거 학습 인정일의 시나리오를 조회한다. 새 정책 세션은 시작일, 기존 세션은 완료일을 인정일로 사용한다. date를 생략하면 Asia/Seoul 기준 오늘을 조회한다.
          */
         get: operations["getDailyScenario"];
         put?: never;
@@ -952,7 +1331,7 @@ export interface paths {
         };
         /**
          * 시나리오 캘린더 조회
-         * @description 기준 날짜가 포함된 창의 모든 칸을 반환한다. WEEK은 그 날짜가 속한 주(일요일 시작) 7칸이며 이웃 달 날짜가 섞일 수 있다. MONTH은 그 달 1일부터 말일까지만 반환한다. 완료한 날은 완료 시나리오 ID와 썸네일이 담기고, 미완료 오늘 칸은 배정된 시나리오 ID만 담긴다. 그 외 칸은 비어 있다.
+         * @description 기준 날짜가 포함된 창의 모든 칸을 반환한다. WEEK은 그 날짜가 속한 주(일요일 시작) 7칸이며 이웃 달 날짜가 섞일 수 있다. MONTH은 그 달 1일부터 말일까지만 반환한다. 학습 인정일에는 완료 시나리오 ID와 썸네일이 담긴다. 새 정책 세션은 시작일, 기존 세션은 완료일이다. 미완료 오늘 칸은 배정된 시나리오 ID만 담기고 그 외 칸은 비어 있다.
          */
         get: operations["getCalendar"];
         put?: never;
@@ -975,6 +1354,86 @@ export interface paths {
          * @description READY는 시작 전, IN_PROGRESS는 진행 중, COMPLETED는 완료, EXPIRED는 만료입니다. 완료 결과는 구독 만료 후에도 조회합니다.
          */
         get: operations["get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 레퍼럴 지급 근거
+         * @description recipientRole=INVITER로 내가 친구를 초대해 얻은 보상을 조회한다. 필터는 페이지 구분 전에 적용하며 다음 before에는 마지막 항목 id를 보낸다. 표시 금액은 creditedWon이며 stage와 createdAt으로 문구·날짜를 구성한다. 보류·검토·환불·한도 초과 0원 내역도 포함하므로 status와 reason을 함께 확인한다.
+         */
+        get: operations["rewards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 초대 코드와 보상 조건 확인
+         * @description 로그인 후 8자리 코드를 확인하고 온보딩 등록 요청에 code와 policyVersion을 전달한다. 대소문자를 구분하지 않는다. 정책 변경 시 409로 재확인한다.
+         */
+        get: operations["preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 내 레퍼럴 조회
+         * @description 초대 인원, 초대인 적립 순액(inviterCreditedWon), 현재 한도와 사용량·잔여량을 반환한다. 한도 사용액은 환불로 줄지 않아 적립 순액과 다를 수 있다. 무제한이면 value/used/remaining은 null이다. 초대인 적립 순액은 검토 중 보존액을 포함하며 별도 지갑·출금 가능액이 아니다. 통합 적립액과 환급 가능액은 /api/v1/me/rewards에서 조회한다.
+         */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/popups/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 현재 노출 팝업 조회
+         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 개별 ID 또는 현재 구독 유형에 해당하는 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
+         */
+        get: operations["getActive"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1071,10 +1530,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 학습 보상 현황
-         * @description 100일 챌린지 현황과 만료 이후 출금 가능한 금액·상태, 재구매 가능 여부를 반환한다. 결제 확인 시 구매일 KST 00시부터 완료한 학습도 적립한다. 오늘의 시나리오 완료는 하루 한 번 결제액의 100분의 1을 적립하며 표현·스몰톡은 적립하지 않는다. 미완료일에도 누적액을 보존하며 만료 자정부터 출금 가능한 금액을 제공한다. 실제 지급 완료가 아니다.
+         * 통합 적립과 환급 현황
+         * @description 100일 챌린지 현황과 만료 이후 출금 가능한 금액·상태, 재구매 가능 여부를 반환한다. 결제 확인 시 구매일 KST 00시부터 완료한 학습도 적립한다. 오늘의 시나리오 완료는 하루 한 번 구매 시 확정한 상품 정가의 100분의 1을 적립하며 표현·스몰톡은 적립하지 않는다. 미완료일에도 누적액을 보존하며 만료 자정부터 출금 가능한 금액을 제공한다. 실제 지급 완료가 아니다. balanceWon은 학습과 레퍼럴의 통합 적립액이다. 레퍼럴은 구매 전에도 보존하고 본인의 최초 적격 100일 회차 만기 후 함께 환급한다. current.balanceWon과 pendingRefundWon, withdrawableWon에도 합산한다. develop 프로필에서만 샌드박스 회차에도 레퍼럴을 연결해 표시하며, 샌드박스는 출금 가능액에서 제외한다. 학습 상한 maximumWon은 그대로이며 학습 50000원과 레퍼럴 3000원은 총 53000원이다. 무료 사용자의 preview는 과거 오늘의 시나리오 완료까지 포함하여 하루 500원을 기한 없이 누적한 표시용 금액이다. 챌린지 구매 후에는 preview=null이며 만료 후에도 숨긴다. 출금·환급액과 이력에 합산하지 않는다.
          */
         get: operations["summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rewards/preview/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 무료 적립 기록
+         * @description 소급분과 오늘 적립분을 포함한 날짜 내림차순 기록이다. date는 KST yyyy-MM-dd, amountWon은 저장된 표시용 금액이다. 보상 현황의 preview가 null이면 빈 목록을 반환한다. limit은 1~100이며 기본 40이다. nextCursor는 마지막 날짜이며 다음 페이지는 해당 날짜 이전 기록을 반환한다. 마지막 페이지는 null이다. 실제 환급액이나 출금액이 아니며 조회는 적립·재정산을 수행하지 않는다.
+         */
+        get: operations["previewHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1091,10 +1570,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 학습 보상 상세 내역
-         * @description 시각·문자열 ID 역순. 시나리오 적립·만기를 모든 회차에서 조회한다. 0원 완료·미확정·검토 중 회차는 제외한다. 같은 시각에는 완료, 만기 순서다. 잔액은 해당 회차 기준이며 보정 후에도 ID는 유지한다. 지연 확정 내역은 첫 페이지부터 갱신한다. 조회는 재정산하지 않으며 날짜 마감은 주기 정산 후 반영된다.
+         * 통합 적립 상세 내역
+         * @description 시각·문자열 ID 역순. 시나리오·레퍼럴 적립과 만기를 모든 회차에서 조회한다. EARN의 activityType은 SCENARIO, REFERRAL_SIGNUP, REFERRAL_PURCHASE다. 구매 대기 적립의 cycleId는 null이다. 0원 완료·미확정·검토 중 회차와 적립은 제외한다. 같은 시각에는 레퍼럴, 학습 완료, 만기 순서다. 잔액은 해당 회차 기준이며 보정 후에도 ID는 유지한다. 지연 확정 내역은 첫 페이지부터 갱신한다. 조회는 재정산하지 않으며 날짜 마감은 주기 정산 후 반영된다.
          */
-        get: operations["history"];
+        get: operations["history_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1352,7 +1831,7 @@ export interface paths {
         };
         /**
          * 시나리오별 원어민 표현 전체 조회
-         * @description 표현 목록과 사용자별 완료 여부 및 잠금 상태를 반환한다.
+         * @description 표현 목록과 사용자별 완료 여부, 순서 잠금 상태, 무료 체험 표현 여부(freeTrial)를 반환한다. 무료 사용자는 freeTrial=true인 표현 1개만 학습할 수 있다.
          */
         get: operations["getExpressions"];
         put?: never;
@@ -1429,9 +1908,9 @@ export interface paths {
         };
         /**
          * 관리자 사용자 목록 조회
-         * @description 사용자 기본 정보를 가입일 최신순으로 페이지 조회한다. 두 필터는 AND 조건이며 생략하면 전체를 조회한다. 푸시 동의는 서버 저장값으로, 실시간 기기 권한이나 활성 Token 보유 여부를 의미하지 않는다. totalCount와 totalPages는 필터 적용 결과 기준이다. page는 0부터 시작하며 결과가 없으면 totalPages는 0이다.
+         * @description 사용자 기본 정보를 가입일 최신순으로 페이지 조회한다. 필터는 AND 조건이며 생략하면 전체를 조회한다. 검색어는 앞뒤 공백을 제거하고 이메일·닉네임 대소문자 없는 부분 일치 또는 숫자 ID 완전 일치로 검색한다. %, _, !는 와일드카드가 아닌 문자로 검색한다. 푸시 동의는 서버 저장값으로, 실시간 기기 권한이나 활성 Token 보유 여부를 의미하지 않는다. totalCount와 totalPages는 필터 적용 결과 기준이다. page는 0부터 시작하며 결과가 없으면 totalPages는 0이다.
          */
-        get: operations["list_1"];
+        get: operations["list_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1460,6 +1939,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users/signup-statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 관리자 가입 통계 조회
+         * @description Asia/Seoul 기준 월요일 00:00과 매월 1일 00:00을 경계로 집계한다. 이번 주·달은 asOf까지, 지난 주·달은 시작 포함·끝 제외 기간이다. 사용자 목록과 동일하게 탈퇴·정지·관리자 프로필을 포함하며 미래 시각은 제외한다.
+         */
+        get: operations["statistics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscription/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 무료 부여 상품 목록
+         * @description 실제 청구·자동 갱신·환급 권리를 생성하지 않습니다.
+         */
+        get: operations["products"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/scenarios": {
         parameters: {
             query?: never;
@@ -1471,7 +1990,58 @@ export interface paths {
          * 관리자 테스트용 시나리오 목록 조회
          * @description develop 환경에서 활성 상태인 시나리오 콘텐츠만 관리자 테스트 목록으로 조회한다.
          */
-        get: operations["list_2"];
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 관리자 레퍼럴 지급 내역 */
+        get: operations["rewards_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-policy/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 레퍼럴 정책 변경 이력 */
+        get: operations["history_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/referral-billing-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 레퍼럴 결제 수신 상태 */
+        get: operations["events"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1505,7 +2075,7 @@ export interface paths {
             cookie?: never;
         };
         /** 캠페인 예상 대상 조회 */
-        get: operations["preview"];
+        get: operations["preview_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1525,7 +2095,7 @@ export interface paths {
          * 관리자 NPS 목록 조회
          * @description NPS 응답을 제출 시각 최신순으로 페이지 조회하고 작성자 정보를 함께 반환한다.
          */
-        get: operations["list_3"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1625,6 +2195,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/content-batches/{batchId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 콘텐츠 제작 배치 상세 */
+        get: operations["detail_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Day 초안 상세
+         * @description 시나리오·표현·별점 payload, 검증기 결과, AI 검수 결함, 담당자 코멘트를 돌려준다. 배치에 그 초안이 없으면 404.
+         */
+        get: operations["draftDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/next-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 다음 Day와 기존 시나리오 현황
+         * @description 발행된 마지막 Day와 미발행 배치가 예약한 마지막 Day 중 큰 값 + 1을 다음 Day로 돌려준다.
+         */
+        get: operations["nextDay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/app-versions": {
         parameters: {
             query?: never;
@@ -1633,7 +2260,7 @@ export interface paths {
             cookie?: never;
         };
         /** 관리자 앱 버전 정책 목록 */
-        get: operations["list_4"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1679,21 +2306,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/users/signup-statistics": {
+    "/api/v1/admin/users/{userProfileId}/subscription-grants/{grantId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * 관리자 가입 통계 조회
-         * @description Asia/Seoul 기준 월요일 00:00과 매월 1일 00:00을 경계로 집계한다. 이번 주·달은 asOf까지, 지난 주·달은 시작 포함·끝 제외 기간이다. 사용자 목록과 동일하게 탈퇴·정지·관리자 프로필을 포함하며 미래 시각은 제외한다.
-         */
-        get: operations["statistics"];
+        get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * 수동 이용 권한 회수
+         * @description 지정한 부여 건만 회수하며 유료 결제는 유지합니다.
+         */
+        delete: operations["revoke"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1826,6 +2453,75 @@ export interface components {
              */
             accentLocale: "EN_US" | "EN_AU" | "EN_GB";
         };
+        ReferralProcessingRequest: {
+            /** Format: int64 */
+            expectedRevision?: number;
+            paused?: boolean;
+            reason: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseReferralPolicyState: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["ReferralPolicyState"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 가입·결제의 초대인 보상에 합산 적용하는 평생 한도 */
+        ReferralInviterLimit: {
+            /** @enum {string} */
+            type: "UNLIMITED" | "INVITE_COUNT" | "TOTAL_AMOUNT";
+            /** Format: int64 */
+            value?: number;
+        };
+        ReferralPolicy: {
+            /** Format: int64 */
+            version?: number;
+            signup?: components["schemas"]["ReferralStage"];
+            purchase?: components["schemas"]["ReferralStage"];
+            products?: components["schemas"]["ReferralProduct"][];
+            inviterLimit?: components["schemas"]["ReferralInviterLimit"];
+            /** Format: int64 */
+            createdBy?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            reason?: string;
+        };
+        ReferralPolicyState: {
+            policy?: components["schemas"]["ReferralPolicy"];
+            /** Format: int64 */
+            revision?: number;
+            paused?: boolean;
+        };
+        ReferralProduct: {
+            appId: string;
+            store: string;
+            productId: string;
+            displayName: string;
+            purchaseType: string;
+        };
+        ReferralStage: {
+            enabled?: boolean;
+            /** @enum {string} */
+            target: "NONE" | "INVITER" | "INVITEE" | "BOTH";
+            /** Format: int64 */
+            inviterWon?: number;
+            /** Format: int64 */
+            inviteeWon?: number;
+        };
+        ReferralPolicyUpdateRequest: {
+            /** Format: int64 */
+            expectedRevision?: number;
+            signup: components["schemas"]["ReferralStage"];
+            purchase: components["schemas"]["ReferralStage"];
+            products: components["schemas"]["ReferralProduct"][];
+            inviterLimit?: components["schemas"]["ReferralInviterLimit"];
+            reason: string;
+        };
         TrialReminderSettings: {
             pushEnabled: boolean;
             emailEnabled: boolean;
@@ -1842,6 +2538,144 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        /** @description 라인업 행 수정 요청 */
+        AdminContentLineupRowRequest: {
+            /** Format: int32 */
+            day?: number;
+            title: string;
+            /** Format: int32 */
+            categoryDisplayOrder?: number;
+            proposedCategory?: string;
+            /** @enum {string} */
+            difficulty: "EASY" | "NORMAL" | "HARD";
+            /** @enum {string} */
+            firstSpeaker: "AI" | "USER";
+            characterId: string;
+            beats: string[];
+        };
+        /** @description 라인업 수정 요청 */
+        AdminContentLineupUpdateRequest: {
+            rows: components["schemas"]["AdminContentLineupRowRequest"][];
+        };
+        AdminContentBatchResponse: {
+            batch: components["schemas"]["AdminContentBatchSummary"];
+            days: components["schemas"]["AdminContentDraftSummary"][];
+        };
+        AdminContentBatchSummary: {
+            /** Format: int64 */
+            batchId: number;
+            /** @enum {string} */
+            status: "REQUESTED" | "LINEUP_GENERATING" | "LINEUP_READY" | "GENERATING" | "REVIEW_READY" | "APPROVED" | "ASSETS_READY" | "PUBLISHED" | "FAILED";
+            /** Format: int32 */
+            startDay: number;
+            /** Format: int32 */
+            endDay: number;
+            /** Format: int32 */
+            dayCount: number;
+            characterRatio: components["schemas"]["ContentCharacterRatio"];
+            note: string | null;
+            autoProceed: boolean;
+            /** Format: int64 */
+            requestedBy: number;
+            errorMessage: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AdminContentDraftSummary: {
+            /** Format: int64 */
+            draftId: number;
+            /** Format: int32 */
+            plannedDay: number | null;
+            /** @enum {string} */
+            status: "LINEUP" | "GENERATING" | "REVIEW_READY" | "OK" | "NEEDS_FIX" | "APPROVED" | "PUBLISHED" | "FAILED";
+            title: string | null;
+            errorMessage: string | null;
+            /** @description 라인업 행 JSON(design.md 5절 모양). 라인업 전이면 null */
+            lineupRow?: unknown;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminContentBatchResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentBatchResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        ContentCharacterRatio: {
+            /** Format: int32 */
+            chloe?: number;
+            /** Format: int32 */
+            marco?: number;
+            /** Format: int32 */
+            teddy?: number;
+        };
+        /** @description Day 검수 저장 요청 */
+        AdminContentDraftReviewRequest: {
+            /** @enum {string} */
+            verdict: "OK" | "FIX";
+            comments?: components["schemas"]["AdminContentReviewCommentRequest"][];
+        };
+        /** @description 검수 코멘트 */
+        AdminContentReviewCommentRequest: {
+            /** @example expressions[LEVEL_4_TO_5][1] */
+            targetPath?: string;
+            /** @example 질문에 이미 나온 말을 표현으로 뽑았다. */
+            comment: string;
+        };
+        AdminContentDraftDetail: {
+            /** Format: int64 */
+            draftId: number;
+            /** Format: int64 */
+            batchId: number;
+            /** Format: int32 */
+            plannedDay: number | null;
+            /** @enum {string} */
+            status: "LINEUP" | "GENERATING" | "REVIEW_READY" | "OK" | "NEEDS_FIX" | "APPROVED" | "PUBLISHED" | "FAILED";
+            lineupRow?: unknown;
+            scenarioPayload?: unknown;
+            /** @description 표현 12개 목록 */
+            expressionPayload?: string;
+            /** @description 별점 문구 5개 목록 */
+            starMessagePayload?: string;
+            validationResult?: unknown;
+            /** @description AI 검수 결함 목록. 통과면 빈 배열 */
+            reviewResult?: string;
+            reservedExpressionIds?: number[];
+            errorMessage: string | null;
+            comments: components["schemas"]["AdminContentReviewCommentResponse"][];
+        };
+        AdminContentReviewCommentResponse: {
+            /** Format: int64 */
+            commentId: number;
+            targetPath: string | null;
+            /** @enum {string} */
+            verdict: "OK" | "FIX";
+            comment: string | null;
+            /** Format: date-time */
+            resolvedAt: string | null;
+            /** Format: int64 */
+            authorId: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminContentDraftDetail: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentDraftDetail"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
         /** @description 사용자 발화 제출 요청 */
         SessionMessageSubmitRequest: {
             /** @description 사용자 메시지 본문 */
@@ -1853,6 +2687,21 @@ export interface components {
             inputType?: "VOICE" | "TEXT" | "GENERATED";
             /** @description 재전송 시 유지할 클라이언트 메시지 UUID. 구버전 요청은 생략 가능 */
             clientMessageId?: string;
+            /** @description 첫 시나리오의 해당 답변 작성·녹음 전/중 가이드 열람 여부. 재전송 시 유지 */
+            guideViewed?: boolean;
+        };
+        /** @description 첫 시나리오의 답변 가이드 */
+        AnswerGuide: {
+            /**
+             * @description 그대로 따라 말할 수 있는 영어 답변
+             * @example I want to go to Gyeongju. I like history.
+             */
+            content?: string;
+            /**
+             * @description 반말로 제공하는 한국어 뜻
+             * @example 경주에 가고 싶어. 역사를 좋아해.
+             */
+            translatedContent?: string;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseSessionMessageSubmitResponse: {
@@ -1895,6 +2744,8 @@ export interface components {
             fixedQuestionText?: string | null;
             /** @description 이어서 재생할 고정 질문 음원 URL */
             questionAudioUrl?: string;
+            /** @description 다음 질문의 답변 가이드. 종료 메시지와 미설정 질문은 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
         };
         RewardActivity: {
             activityType?: string;
@@ -1909,7 +2760,7 @@ export interface components {
             nextEarnableWon?: number;
             /**
              * Format: int64
-             * @description 오늘의 시나리오 미완료 시 결제액의 100분의 1, 완료 또는 마감 시 0원
+             * @description 오늘의 시나리오 미완료 시 구매 시 확정한 상품 정가의 100분의 1, 완료 또는 마감 시 0원
              */
             remainingWon?: number;
         };
@@ -1922,7 +2773,10 @@ export interface components {
             /** Format: int64 */
             cycleId?: number;
             activityType?: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description 학습 인정 날짜. 새 정책 세션은 시작일, 기존 세션은 완료일
+             */
             learningDate?: string;
             /**
              * @description 미확정 PENDING은 금액 null, 확정 0원은 NO_ADDITIONAL_REWARD
@@ -1943,13 +2797,13 @@ export interface components {
             balanceWon?: number;
             /**
              * Format: int64
-             * @description 완료 날짜의 전체 적립액
+             * @description 학습 인정 날짜의 전체 적립액
              * @example 300
              */
             todayEarnedWon?: number;
             /**
              * Format: int64
-             * @description 완료 날짜의 실제 한도
+             * @description 학습 인정 날짜의 실제 한도
              * @example 300
              */
             todayMaximumWon?: number;
@@ -2048,7 +2902,7 @@ export interface components {
             improvement?: string;
         };
         DomainScore: {
-            /** @description 영역별 점수. 상위 scoreMax 척도를 따르며 미관찰 시 null */
+            /** @description 공개 응답에서 항상 숫자로 제공하는 영역 점수. scoreMax 척도를 따르며 미관찰·실패는 0. 가이드 의존은 100점 척도에서 21~40점이며 독립 근거와 구분한다 */
             score?: number;
             /** @description 관찰 근거 비율. 정답 확률이 아님 */
             confidence?: number;
@@ -2131,17 +2985,21 @@ export interface components {
             vocabulary?: components["schemas"]["DomainScore"];
             discourse?: components["schemas"]["DomainScore"];
             interactionPragmatics?: components["schemas"]["DomainScore"];
-            /** @description 종합 점수. scoreMax로 척도를 구분하며 미평가 시 null */
+            /** @description 관찰된 영역의 가중치를 재정규화한 종합 점수. scoreMax로 척도를 구분하며 미평가 시 null */
             assessedScore?: number;
             /**
              * Format: int32
-             * @description 종합 점수에 대응하는 학습 레벨
+             * @description 학습 레벨. 정상 모델 평가에서 전부 가이드 의존이면 시작 수준 2, 영어 미관찰이면 1
              */
             assessedLevel?: number;
+            /** @description 기존 FE 호환용 결과 표시 가능 여부. 계산된 레벨 또는 영어 미관찰의 시작 레벨이 있으면 true. 전부 가이드 의존인 시작 수준 2도 표시하며 실제 근거 충족 여부와는 다름 */
             sufficientEvidence?: boolean;
             /** @enum {string} */
             source?: "MODEL" | "FALLBACK";
-            /** @enum {string} */
+            /**
+             * @description 평가에 따른 수준 변경. 가이드 의존·영어 미관찰의 시작 수준 배정은 NOT_APPLIED
+             * @enum {string}
+             */
             changeType?: "INITIALIZED" | "PROMOTED" | "DEMOTED" | "UNCHANGED" | "NOT_APPLIED";
             /** Format: int32 */
             previousLevel?: number;
@@ -2149,14 +3007,14 @@ export interface components {
             currentLevel?: number;
             details?: components["schemas"]["Details"];
             assessmentVersion?: string;
-            /** Format: int32 */
-            displayLevel?: number;
             /**
              * Format: int32
              * @description 영역별 점수와 종합 점수의 상한. 과거 평가는 5, 신규 평가는 100
              * @enum {integer}
              */
             scoreMax?: "5" | "100";
+            /** Format: int32 */
+            displayLevel?: number;
         };
         /** @description 수준 평가 상태와 결과. 비활성 또는 도입 전 완료 세션이면 data 자체가 null */
         SessionLevelAssessmentResponse: {
@@ -2217,6 +3075,8 @@ export interface components {
             innerThought?: string;
             /** @description 속마음 유형 */
             innerThoughtType?: string;
+            /** @description 현재 질문의 답변 가이드. 없으면 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
         };
         /** @description 시나리오 세션 시작 응답 */
         SessionStartResponse: {
@@ -2389,6 +3249,23 @@ export interface components {
         ReviewAnswerResponse: {
             correct?: boolean;
             review?: components["schemas"]["ReviewResponse"];
+        };
+        ReferralRegistrationRequest: {
+            code: string;
+            /** Format: int64 */
+            policyVersion: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseString: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: string;
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
         };
         /** @description NPS 제출 요청 */
         NpsSubmitRequest: {
@@ -2835,6 +3712,44 @@ export interface components {
             /** Format: uuid */
             installationId?: string;
         };
+        AdminSubscriptionGrantRequest: {
+            /** Format: uuid */
+            requestId: string;
+            /** @enum {string} */
+            product: "MONTHLY" | "YEARLY" | "PASS_30000" | "PASS_50000" | "PASS_100000" | "PASS_200000";
+            reason: string;
+        };
+        AdminSubscriptionGrantResponse: {
+            /** Format: int64 */
+            grantId?: number;
+            /** @enum {string} */
+            product?: "MONTHLY" | "YEARLY" | "PASS_30000" | "PASS_50000" | "PASS_100000" | "PASS_200000";
+            productId?: string;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: date-time */
+            revokedAt?: string;
+            reason?: string;
+            /** Format: int64 */
+            grantedBy?: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminSubscriptionGrantResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminSubscriptionGrantResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        ReferralRetryRequest: {
+            reason: string;
+        };
         AdminPushCampaignRequest: {
             title: string;
             body: string;
@@ -2915,6 +3830,60 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        AdminPopupCreateRequest: {
+            title: string;
+            imageUrl: string;
+            linkUrl?: string | null;
+            enabled: boolean;
+            /**
+             * Format: date-time
+             * @description 시간대가 포함된 시작 시각
+             * @example 2026-10-22T09:00:00+09:00
+             */
+            startsAt: string;
+            /**
+             * Format: date-time
+             * @description 시간대가 포함된 종료 시각
+             * @example 2026-10-29T09:00:00+09:00
+             */
+            endsAt: string;
+            /** Format: int32 */
+            priority: number;
+            /** @description 숨길 활성 사용자 ID, 최대 1000명. 생략하면 숨김 없음 */
+            excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 조회 시점에 판단하며 개별 사용자 숨김과 OR로 적용 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+        };
+        AdminPopupResponse: {
+            /** Format: int64 */
+            popupId: number;
+            title: string;
+            imageUrl: string;
+            linkUrl: string | null;
+            enabled: boolean;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: string;
+            /** Format: int32 */
+            priority: number;
+            /** Format: date-time */
+            updatedAt: string;
+            excludedUserIds: number[];
+            excludedAudiences: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminPopupResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminPopupResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
         AdminEmailTestRequest: {
             /** Format: email */
             recipient: string;
@@ -2983,6 +3952,10 @@ export interface components {
             contentBlocks: unknown[];
             /** @description 목록 미리보기 */
             preview: string;
+            /** @description 숨길 사용자 ID. 빈 배열은 숨김 해제 */
+            excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 빈 배열은 숨김 해제 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
         };
         /** @description 편지함 어드민 공지·업데이트 응답 */
         AdminMailboxLetterResponse: {
@@ -3003,6 +3976,8 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            excludedUserIds?: number[];
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminMailboxLetterResponse: {
@@ -3104,6 +4079,44 @@ export interface components {
              */
             reason?: string;
         };
+        /** @description 제작 규칙 등록 요청 */
+        AdminContentRuleCreateRequest: {
+            /** @enum {string} */
+            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+            /** @example 질문에 이미 나온 말을 표현으로 뽑지 않는다. */
+            ruleText: string;
+            /**
+             * Format: int64
+             * @example 40
+             */
+            sourceCommentId?: number;
+        };
+        AdminContentRuleResponse: {
+            /** Format: int64 */
+            ruleId: number;
+            ruleCode: string;
+            /** @enum {string} */
+            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+            ruleText: string;
+            /** Format: int64 */
+            sourceCommentId: number | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "RETIRED";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminContentRuleResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentRuleResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
         /** @description 관리자 콘텐츠 이미지 업로드 URL 발급 요청 */
         AdminContentImagePresignRequest: {
             /**
@@ -3147,6 +4160,71 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        /** @description 관리자 콘텐츠 제작 배치 생성 요청 */
+        AdminContentBatchCreateRequest: {
+            /**
+             * Format: int32
+             * @description 만들 Day 수
+             * @example 10
+             */
+            dayCount?: number;
+            characterRatio: components["schemas"]["AdminContentCharacterRatioRequest"];
+            /**
+             * @description 프롬프트에 넣을 메모
+             * @example 찡찡대는 주제는 1개까지
+             */
+            note?: string;
+            /**
+             * @description 라인업 확인 없이 바로 Day 생성
+             * @example false
+             */
+            autoProceed?: boolean;
+        };
+        /** @description 캐릭터별 Day 수. 합은 dayCount와 같아야 한다. */
+        AdminContentCharacterRatioRequest: {
+            /**
+             * Format: int32
+             * @example 4
+             */
+            chloe?: number;
+            /**
+             * Format: int32
+             * @example 3
+             */
+            marco?: number;
+            /**
+             * Format: int32
+             * @example 3
+             */
+            teddy?: number;
+        };
+        /** @description 라인업 재생성 요청 */
+        AdminContentLineupRegenerateRequest: {
+            /** @example 직장 장면이 너무 많다. 친구 장면을 2개 늘려 줘. */
+            comment: string;
+        };
+        /** @description Day 재생성 요청 */
+        AdminContentDraftRegenerateRequest: {
+            /** @example EXPRESSIONS:LEVEL_2_TO_3 */
+            scope: string;
+        };
+        AdminPopupPatchRequest: {
+            title?: string;
+            imageUrl?: string;
+            enabled?: boolean;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: string;
+            /** Format: int32 */
+            priority?: number;
+            /** @description 숨길 사용자 ID, 최대 1000명. 생략하면 유지, 빈 배열이면 전체 해제 */
+            excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 생략하면 유지, 빈 배열이면 전체 해제 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+            /** @description 생략하면 유지, null이면 링크 제거 */
+            linkUrl?: string | null;
+        };
         /** @description 편지함 어드민 공지·업데이트 수정 요청 */
         AdminMailboxLetterPatchRequest: {
             /**
@@ -3167,6 +4245,18 @@ export interface components {
             publicationStatus?: "DRAFT" | "PUBLISHED" | "UNPUBLISHED";
             /** @description 상단 고정 여부 */
             pinned?: boolean;
+            /** @description 숨길 사용자 ID. 빈 배열은 숨김 해제 */
+            excludedUserIds?: number[];
+            /** @description 숨길 구독 유형. 빈 배열은 숨김 해제 */
+            excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+        };
+        /** @description 제작 규칙 상태 변경 요청 */
+        AdminContentRuleStatusRequest: {
+            /**
+             * @example RETIRED
+             * @enum {string}
+             */
+            status: "ACTIVE" | "RETIRED";
         };
         AdminAppVersionUpdateRequest: {
             versionName: string;
@@ -3285,6 +4375,8 @@ export interface components {
             aiOpeningMessage?: string;
             /** @description 첫 AI 메시지 번역 */
             aiOpeningMessageTranslation?: string;
+            /** @description 첫 질문의 답변 가이드. 없으면 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
             /** @description USER first 시 사용자 시작 안내 */
             userOpeningInstruction?: string;
             /** @description 첫 화면에 보여줄 상대 역할의 속마음 */
@@ -3476,6 +4568,117 @@ export interface components {
             startedAt?: string;
             /** @description 창의 모든 칸. WEEK 7개, MONTH은 그 달 일수(28~31개), 날짜 오름차순 */
             days?: components["schemas"]["CalendarDayResponse"][];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponsePageReferralReward: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["PageReferralReward"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        PageReferralReward: {
+            items?: components["schemas"]["ReferralReward"][];
+            hasNext?: boolean;
+        };
+        ReferralReward: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            referralId?: number;
+            /** Format: int64 */
+            policyVersion?: number;
+            /** Format: int64 */
+            recipientId?: number;
+            stage?: string;
+            recipientRole?: string;
+            /** Format: int64 */
+            amountWon?: number;
+            /** Format: int64 */
+            creditedWon?: number;
+            status?: string;
+            reason?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseReferralPreview: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["ReferralPreview"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        ReferralPreview: {
+            code?: string;
+            /** Format: int64 */
+            policyVersion?: number;
+            signup?: components["schemas"]["ReferralStage"];
+            purchase?: components["schemas"]["ReferralStage"];
+            purchaseProductNames?: string[];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseReferralSummary: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["ReferralSummary"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        ReferralInviterLimitProgress: {
+            /** @enum {string} */
+            type?: "UNLIMITED" | "INVITE_COUNT" | "TOTAL_AMOUNT";
+            /** Format: int64 */
+            value?: number;
+            /** Format: int64 */
+            used?: number;
+            /** Format: int64 */
+            remaining?: number;
+        };
+        ReferralSummary: {
+            code?: string;
+            currentOffer?: components["schemas"]["ReferralPreview"];
+            enrolledOffer?: components["schemas"]["ReferralPreview"];
+            /** Format: int64 */
+            invitedCount?: number;
+            /** Format: int64 */
+            convertedCount?: number;
+            /** @enum {string} */
+            registrationStatus?: "PENDING" | "REGISTERED" | "SKIPPED" | "UNAVAILABLE";
+            /** Format: int64 */
+            inviterCreditedWon?: number;
+            inviterLimit?: components["schemas"]["ReferralInviterLimitProgress"];
+        };
+        /** @description 현재 표시할 팝업. 대상이 없으면 data는 null이다. */
+        ActivePopupResponse: {
+            /** Format: int64 */
+            popupId: number;
+            imageUrl: string;
+            linkUrl: string | null;
+        } | null;
+        /** @description 공통 API 응답 객체 */
+        ApiResponseActivePopupResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["ActivePopupResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseUserSubscriptionResponse: {
@@ -3815,6 +5018,18 @@ export interface components {
             fullyAchieved?: boolean;
             activities?: components["schemas"]["RewardActivity"][];
         };
+        /** @description 무료 학습의 표시용 금액. 결제 후에도 출금액이나 유료 적립금으로 전환되지 않는다 */
+        RewardPreview: {
+            /** Format: int64 */
+            balanceWon?: number;
+            /** Format: int64 */
+            completedDays?: number;
+            /** Format: int64 */
+            todayEarnedWon?: number;
+            /** Format: int64 */
+            dailyAmountWon?: number;
+            accruing?: boolean;
+        };
         RewardToday: {
             /** Format: date */
             date?: string;
@@ -3861,6 +5076,35 @@ export interface components {
              * @description 진행 중 챌린지가 끝나는 시각. 이후 다시 구매할 수 있음
              */
             purchaseAvailableAt?: string;
+            /** @description 결제했으면 받을 수 있었던 표시용 금액. 출금·환급액에 포함되지 않으며 결제 후에도 전환되지 않음 */
+            preview?: components["schemas"]["RewardPreview"];
+            /**
+             * Format: int64
+             * @description 학습과 레퍼럴의 통합 적립액. 구매 전에도 보존되며 본인 100일 챌린지 만기 후 환급 가능. 무료 학습 preview 제외
+             */
+            balanceWon?: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseRewardPreviewHistoryPage: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["RewardPreviewHistoryPage"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        RewardPreviewHistoryItem: {
+            /** Format: date */
+            date?: string;
+            /** Format: int64 */
+            amountWon?: number;
+        };
+        RewardPreviewHistoryPage: {
+            items?: components["schemas"]["RewardPreviewHistoryItem"][];
+            nextCursor?: string;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseRewardHistoryPage: {
@@ -3878,7 +5122,10 @@ export interface components {
             id?: string;
             type?: string;
             activityType?: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description 시나리오 학습 인정 날짜. 실제 완료 시각의 날짜와 다를 수 있음
+             */
             date?: string;
             /** Format: date-time */
             occurredAt?: string;
@@ -4423,7 +5670,7 @@ export interface components {
              */
             baseExpressionMeaningText?: string;
             /**
-             * @description 학습 완료 여부
+             * @description 일일 시나리오 정책 도입 이후 학습 완료 여부
              * @example true
              */
             completed?: boolean;
@@ -4432,6 +5679,11 @@ export interface components {
              * @example false
              */
             locked?: boolean;
+            /**
+             * @description 무료 사용자가 결제 없이 학습할 수 있는 체험 표현 여부. 사용자당 1개만 true
+             * @example false
+             */
+            freeTrial?: boolean;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseExpressionPracticeResponse: {
@@ -4598,7 +5850,7 @@ export interface components {
              */
             targetExpressionAudioUrl?: string;
             /**
-             * @description 이 표현의 학습 완료 여부. 시나리오·프리톡 어느 경로의 표현이든 완료 이력이 있으면 true
+             * @description 이 표현의 학습 완료 여부. 시나리오는 일일 정책 도입 이후 완료·재완료, 프리톡은 누적 완료 기준
              * @example true
              */
             completed?: boolean;
@@ -4728,6 +5980,64 @@ export interface components {
             /** Format: date */
             lastLearningDate: string | null;
         };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseListAdminSubscriptionGrantResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminSubscriptionGrantResponse"][];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        AdminSignupStatisticsResponse: {
+            /** Format: int64 */
+            thisWeek: number;
+            /** Format: int64 */
+            lastWeek: number;
+            /** Format: int64 */
+            thisMonth: number;
+            /** Format: int64 */
+            lastMonth: number;
+            /**
+             * Format: date-time
+             * @description 집계 기준 시각 (Asia/Seoul)
+             */
+            asOf: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminSignupStatisticsResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminSignupStatisticsResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        AdminSubscriptionProductResponse: {
+            /** @enum {string} */
+            product?: "MONTHLY" | "YEARLY" | "PASS_30000" | "PASS_50000" | "PASS_100000" | "PASS_200000";
+            productId?: string;
+            label?: string;
+            durationLabel?: string;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseListAdminSubscriptionProductResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminSubscriptionProductResponse"][];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
         AdminScenarioListResponse: {
             categories?: components["schemas"]["CategoryResponse"][];
         };
@@ -4742,6 +6052,50 @@ export interface components {
             data?: components["schemas"]["AdminScenarioListResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponsePageReferralPolicy: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["PageReferralPolicy"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        PageReferralPolicy: {
+            items?: components["schemas"]["ReferralPolicy"][];
+            hasNext?: boolean;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponsePageReferralBillingEvent: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["PageReferralBillingEvent"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        PageReferralBillingEvent: {
+            items?: components["schemas"]["ReferralBillingEvent"][];
+            hasNext?: boolean;
+        };
+        ReferralBillingEvent: {
+            /** Format: int64 */
+            id?: number;
+            eventId?: string;
+            type?: string;
+            status?: string;
+            reason?: string;
+            /** Format: int32 */
+            attempts?: number;
+            /** Format: date-time */
+            receivedAt?: string;
         };
         AdminPushCampaignPage: {
             items?: components["schemas"]["AdminPushCampaignView"][];
@@ -4784,6 +6138,18 @@ export interface components {
             success?: boolean;
             /** @description 성공 응답 데이터. 실패 시 null입니다. */
             data?: components["schemas"]["AdminPushAudiencePreview"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseListAdminPopupResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminPopupResponse"][];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
@@ -5039,6 +6405,72 @@ export interface components {
             audioMissing?: number[];
         };
         /** @description 공통 API 응답 객체 */
+        ApiResponseListAdminContentRuleResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentRuleResponse"][];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        AdminContentBatchPage: {
+            items: components["schemas"]["AdminContentBatchSummary"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            hasNext: boolean;
+            /** Format: int64 */
+            totalCount: number;
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminContentBatchPage: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentBatchPage"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        AdminContentNextDayResponse: {
+            /**
+             * Format: int32
+             * @example 301
+             */
+            nextDay: number;
+            /**
+             * Format: int64
+             * @example 300
+             */
+            publishedScenarioCount: number;
+            /**
+             * Format: int64
+             * @example 0
+             */
+            reservedDayCount: number;
+            characterCounts: {
+                [key: string]: number;
+            };
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseAdminContentNextDayResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["AdminContentNextDayResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 공통 API 응답 객체 */
         ApiResponseListAdminAppVersionResponse: {
             /**
              * @description 요청 처리 성공 여부
@@ -5072,33 +6504,6 @@ export interface components {
             success?: boolean;
             /** @description 성공 응답 데이터. 실패 시 null입니다. */
             data?: components["schemas"]["AccentLocaleOptionResponse"][];
-            /** @description 실패 오류 정보. 성공 시 null입니다. */
-            error?: components["schemas"]["ErrorResponse"];
-        };
-        AdminSignupStatisticsResponse: {
-            /** Format: int64 */
-            thisWeek: number;
-            /** Format: int64 */
-            lastWeek: number;
-            /** Format: int64 */
-            thisMonth: number;
-            /** Format: int64 */
-            lastMonth: number;
-            /**
-             * Format: date-time
-             * @description 집계 기준 시각 (Asia/Seoul)
-             */
-            asOf: string;
-        };
-        /** @description 공통 API 응답 객체 */
-        ApiResponseAdminSignupStatisticsResponse: {
-            /**
-             * @description 요청 처리 성공 여부
-             * @example true
-             */
-            success?: boolean;
-            /** @description 성공 응답 데이터. 실패 시 null입니다. */
-            data?: components["schemas"]["AdminSignupStatisticsResponse"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
@@ -5434,6 +6839,74 @@ export interface operations {
             };
         };
     };
+    processing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralProcessingRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseReferralPolicyState"];
+                };
+            };
+        };
+    };
+    current: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseReferralPolicyState"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralPolicyUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseReferralPolicyState"];
+                };
+            };
+        };
+    };
     settings: {
         parameters: {
             query?: never;
@@ -5454,7 +6927,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5474,6 +6947,59 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseTrialReminderSettings"];
+                };
+            };
+        };
+    };
+    updateLineup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentLineupUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
+    review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentDraftReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
                 };
             };
         };
@@ -5799,6 +7325,70 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseReviewAnswerResponse"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralRegistrationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    skip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    issue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseString"];
                 };
             };
         };
@@ -6393,7 +7983,7 @@ export interface operations {
                     "*/*": components["schemas"]["ApiResponsePronunciationAnalysisResponse"];
                 };
             };
-            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED) */
+            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED). 표현 목록의 freeTrial=true 표현은 무료 사용자도 허용 */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6439,7 +8029,7 @@ export interface operations {
                     "*/*": components["schemas"]["ApiResponseMapStringObject"];
                 };
             };
-            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED) */
+            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED). 목록의 freeTrial=true 표현은 무료 사용자도 허용 */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6540,6 +8130,54 @@ export interface operations {
             };
         };
     };
+    history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userProfileId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListAdminSubscriptionGrantResponse"];
+                };
+            };
+        };
+    };
+    grant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userProfileId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminSubscriptionGrantRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSubscriptionGrantResponse"];
+                };
+            };
+        };
+    };
     start_1: {
         parameters: {
             query?: never;
@@ -6585,6 +8223,58 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseSessionStartResponse"];
+                };
+            };
+        };
+    };
+    retryReward: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralRetryRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    retryEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralRetryRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
@@ -6760,6 +8450,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseListLong"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListAdminPopupResponse"];
+                };
+            };
+        };
+    };
+    create_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPopupCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminPopupResponse"];
                 };
             };
         };
@@ -6965,6 +8699,53 @@ export interface operations {
             };
         };
     };
+    list_2: {
+        parameters: {
+            query?: {
+                scope?: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+                status?: "ACTIVE" | "RETIRED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListAdminContentRuleResponse"];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentRuleCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentRuleResponse"];
+                };
+            };
+        };
+    };
     createPresignedUrl: {
         parameters: {
             query?: never;
@@ -6985,6 +8766,150 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseAdminContentImagePresignResponse"];
+                };
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchPage"];
+                };
+            };
+        };
+    };
+    create_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentBatchCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
+    proceed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
+    regenerateLineup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentLineupRegenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
+    regenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentDraftRegenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
+                };
+            };
+        };
+    };
+    approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
                 };
             };
         };
@@ -7047,6 +8972,32 @@ export interface operations {
             };
         };
     };
+    update_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                popupId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPopupPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminPopupResponse"];
+                };
+            };
+        };
+    };
     updateLetter: {
         parameters: {
             query?: never;
@@ -7073,7 +9024,33 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentRuleStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentRuleResponse"];
+                };
+            };
+        };
+    };
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -7401,6 +9378,92 @@ export interface operations {
             };
         };
     };
+    rewards: {
+        parameters: {
+            query?: {
+                before?: number;
+                size?: number;
+                recipientRole?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponsePageReferralReward"];
+                };
+            };
+        };
+    };
+    preview: {
+        parameters: {
+            query: {
+                code: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseReferralPreview"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseReferralSummary"];
+                };
+            };
+        };
+    };
+    getActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseActivePopupResponse"];
+                };
+            };
+        };
+    };
     getSubscription: {
         parameters: {
             query?: never;
@@ -7557,7 +9620,30 @@ export interface operations {
             };
         };
     };
-    history: {
+    previewHistory: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseRewardPreviewHistoryPage"];
+                };
+            };
+        };
+    };
+    history_1: {
         parameters: {
             query?: {
                 cursor?: string;
@@ -8094,7 +10180,7 @@ export interface operations {
                     "*/*": components["schemas"]["ApiResponseExpressionPracticeResponse"];
                 };
             };
-            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED) */
+            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED). 목록의 freeTrial=true 표현은 무료 사용자도 허용 */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8134,7 +10220,7 @@ export interface operations {
                     "*/*": components["schemas"]["ApiResponseExpressionLearningResponse"];
                 };
             };
-            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED) */
+            /** @description 프리미엄 구독 필요 (PREMIUM_REQUIRED). 목록의 freeTrial=true 표현은 무료 사용자도 허용 */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8194,7 +10280,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_4: {
         parameters: {
             query?: {
                 /**
@@ -8211,6 +10297,12 @@ export interface operations {
                 active?: boolean;
                 /** @description true: GRANTED, false: DENIED 또는 NOT_DETERMINED */
                 pushConsent?: boolean;
+                /** @description 이메일·닉네임 부분 일치 또는 숫자 ID 완전 일치 (최대 255자) */
+                keyword?: string;
+                /** @description 사용자 역할 */
+                role?: "USER" | "ADMIN";
+                /** @description 사용자 상태. active와 함께 지정하면 AND로 적용 */
+                status?: "ACTIVE" | "WITHDRAWN" | "BANNED";
             };
             header?: never;
             path?: never;
@@ -8309,7 +10401,65 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    statistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 집계 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                };
+            };
+            /** @description 관리자 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                };
+            };
+        };
+    };
+    products: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListAdminSubscriptionProductResponse"];
+                };
+            };
+        };
+    };
+    list_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -8347,6 +10497,78 @@ export interface operations {
             };
         };
     };
+    rewards_1: {
+        parameters: {
+            query?: {
+                userId?: number;
+                before?: number;
+                size?: number;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponsePageReferralReward"];
+                };
+            };
+        };
+    };
+    history_2: {
+        parameters: {
+            query?: {
+                before?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponsePageReferralPolicy"];
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: {
+                before?: number;
+                size?: number;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponsePageReferralBillingEvent"];
+                };
+            };
+        };
+    };
     detail_2: {
         parameters: {
             query?: never;
@@ -8369,7 +10591,7 @@ export interface operations {
             };
         };
     };
-    preview: {
+    preview_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -8391,7 +10613,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_6: {
         parameters: {
             query?: {
                 /**
@@ -8573,7 +10795,72 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    detail_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
+    draftDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
+                };
+            };
+        };
+    };
+    nextDay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentNextDayResponse"];
+                };
+            };
+        };
+    };
+    list_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -8642,40 +10929,25 @@ export interface operations {
             };
         };
     };
-    statistics: {
+    revoke: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                userProfileId: number;
+                grantId: number;
+            };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description 집계 성공 */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
-                };
-            };
-            /** @description 인증 실패 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
-                };
-            };
-            /** @description 관리자 권한 없음 */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseAdminSignupStatisticsResponse"];
+                    "*/*": components["schemas"]["ApiResponseAdminSubscriptionGrantResponse"];
                 };
             };
         };

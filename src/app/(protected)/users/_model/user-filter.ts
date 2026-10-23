@@ -1,5 +1,4 @@
-// 사용자 목록 필터 — BE에 검색·필터가 없어 불러온 목록에서 우리가 거른다 (docs/screens/users.md).
-// 그래서 이 파일이 곧 "검색 기능"이다. BE 검색이 생기면 여기를 서버 쿼리로 바꾼다
+// 사용자 검색 URL과 서버 페이지 요청을 구성한다.
 import type { UserListItem } from '@/features/user/api/user-list';
 
 export type UserRole = NonNullable<UserListItem['role']>;
@@ -10,7 +9,7 @@ export interface UserFilter {
   /** 없으면 전체 */
   role?: UserRole;
   status?: UserStatus;
-  /** 0부터 — 로컬 페이징 */
+  /** 0부터 시작하는 서버 페이지 */
   page: number;
 }
 
@@ -55,34 +54,18 @@ export function changeUserFilter(
   return { ...filter, ...patch, page: onlyPage ? patch.page! : 0 };
 }
 
-/** 이메일·닉네임을 대소문자 없이 부분 일치로 찾는다 — 어드민이 아는 건 보통 이메일 앞부분이다 */
-export function filterUsers(
-  users: UserListItem[],
-  filter: UserFilter,
-): UserListItem[] {
-  const keyword = filter.keyword.trim().toLowerCase();
-  return users.filter((user) => {
-    if (filter.role && user.role !== filter.role) return false;
-    if (filter.status && user.status !== filter.status) return false;
-    if (!keyword) return true;
-    return (
-      (user.email ?? '').toLowerCase().includes(keyword) ||
-      (user.nickname ?? '').toLowerCase().includes(keyword)
-    );
-  });
-}
-
-/** 로컬 페이징 — 지금 페이지에 그릴 몫만 자른다 */
-export function pageOfUsers(
-  users: UserListItem[],
-  page: number,
-): UserListItem[] {
-  const from = page * USERS_PAGE_SIZE;
-  return users.slice(from, from + USERS_PAGE_SIZE);
+/** 서버에서 검색·필터를 적용한 뒤 요청한 페이지를 반환하도록 조건을 만든다. */
+export function userSearchParams(filter: UserFilter): URLSearchParams {
+  const params = new URLSearchParams(
+    writeUserFilter({ ...filter, keyword: filter.keyword.trim() }),
+  );
+  params.set('page', String(filter.page));
+  params.set('size', String(USERS_PAGE_SIZE));
+  return params;
 }
 
 export const hasActiveUserFilter = (filter: UserFilter) =>
-  Boolean(filter.keyword || filter.role || filter.status);
+  Boolean(filter.keyword.trim() || filter.role || filter.status);
 
 interface ReadonlyURLSearchParamsLike {
   get(key: string): string | null;

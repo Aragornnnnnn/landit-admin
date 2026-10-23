@@ -42,18 +42,18 @@ export const USER_STATUS_OPTIONS = [
   { value: 'BANNED', label: '정지' },
 ];
 
-/**
- * 필터 줄 오른쪽 안내. BE가 전체 수를 주지 않아(hasNext만 준다) 진행률을 %로 말할 수 없다 —
- * 대신 지금까지 몇 명을 받았는지와, 검색이 그 범위 안에서만 이뤄진다는 사실을 밝힌다
- */
-export function usersProgressLabel(loaded: number, loading: boolean): string {
-  const count = loaded.toLocaleString('ko-KR');
-  return loading
-    ? `${count}명 불러오는 중 · 검색은 불러온 범위에서`
-    : `${count}명`;
+/** 현재 요청의 로딩 상태 또는 서버가 계산한 검색 결과 건수를 표시한다. */
+export function usersProgressLabel(
+  total: number | undefined,
+  loading: boolean,
+): string {
+  if (loading) return '검색 중…';
+  return total === undefined
+    ? ''
+    : `검색 결과 ${total.toLocaleString('ko-KR')}명`;
 }
 
-/** "1–20 / 1,284 (로컬 페이징)" — 지금 보고 있는 몫 */
+/** "1–20 / 1,284" — 지금 보고 있는 몫 */
 export function usersRangeLabel(
   page: number,
   size: number,
@@ -62,5 +62,5 @@ export function usersRangeLabel(
   if (total === 0) return '0';
   const from = page * size + 1;
   const to = Math.min((page + 1) * size, total);
-  return `${from}–${to} / ${total.toLocaleString('ko-KR')} (로컬 페이징)`;
+  return `${from}–${to} / ${total.toLocaleString('ko-KR')}`;
 }
