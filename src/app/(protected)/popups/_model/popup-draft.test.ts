@@ -10,6 +10,7 @@ import {
 
 const popup = {
   popupId: 1,
+  excludedUserIds: [12, 34],
   title: '안내',
   imageUrl: 'https://cdn.example.com/a.png',
   linkUrl: '/learn',
@@ -20,6 +21,24 @@ const popup = {
   updatedAt: '2026-10-22T00:00:00Z',
 };
 describe('팝업 입력', () => {
+  it('숨김 대상을 모두 해제하면 빈 배열만 보낸다', () => {
+    expect(
+      toPopupRequest({ ...toPopupDraft(popup), excludedUserIds: [] }, popup),
+    ).toEqual({ excludedUserIds: [] });
+  });
+  it('같은 숨김 대상을 다른 순서로 선택하면 수정에서 제외한다', () => {
+    expect(
+      toPopupRequest(
+        { ...toPopupDraft(popup), excludedUserIds: [34, 12] },
+        popup,
+      ),
+    ).toEqual({});
+  });
+  it('숨김 대상을 선택하고 등록하면 사용자 ID를 보낸다', () => {
+    expect(toPopupRequest(toPopupDraft(popup))).toMatchObject({
+      excludedUserIds: [12, 34],
+    });
+  });
   it('같은 분 안의 기간을 수정하지 않으면 원래 정밀도로 검증한다', () => {
     const short = { ...popup, endsAt: '2026-10-22T00:00:00.123457Z' };
     expect(

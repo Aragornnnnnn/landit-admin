@@ -1,4 +1,4 @@
-// 이 파일은 `pnpm api:types`가 스웨거(file:///Users/sangmin8817/.codex/worktrees/642e/landit-be/build/openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
+// 이 파일은 `pnpm api:types`가 스웨거(file:///Users/sangmin8817/.codex/worktrees/df3a/landit-be/build/openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
     "/api/v1/me/push-devices/{installationId}": {
@@ -159,7 +159,10 @@ export interface paths {
         };
         /** 현재 레퍼럴 정책 */
         get: operations["current"];
-        /** 레퍼럴 정책 버전 생성 */
+        /**
+         * 레퍼럴 정책 버전 생성
+         * @description inviterLimit은 UNLIMITED(value=null), INVITE_COUNT(등록 순서상 최초 N명), TOTAL_AMOUNT(가입·결제 초대인 보상의 평생 누적 원 금액) 중 선택합니다. 생략하면 기존 한도를 유지합니다. 피초대인 보상은 한도에 포함하지 않습니다. 새 한도는 기존 관계의 미지급 보상에도 적용하고 잔여 금액만 부분 지급합니다. 기존 지급액은 보존하며 환불·복구로 한도가 초기화되지 않습니다.
+         */
         put: operations["update_2"];
         post?: never;
         delete?: never;
@@ -240,7 +243,7 @@ export interface paths {
         put?: never;
         /**
          * 사용자 발화 제출
-         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다. 신규 환급 참여자의 정상 완료에만 reward를 제공한다. clientMessageId를 유지한 재전송은 최초 영수증을 반환하며 completionId로 중복 안내를 방지한다. /api/v1/me/rewards/completions/{completionId}로 대기 결과를 재조회한다.
+         * @description 사용자 메시지를 저장하고 다음 AI 메시지 또는 종료 메시지를 생성한다. 정상 완료한 시나리오는 이후 복습할 수 있다. 신규 환급 참여자의 정상 완료에만 reward를 제공한다. clientMessageId를 유지한 재전송은 최초 영수증을 반환하며 completionId로 중복 안내를 방지한다. 첫 진단 시나리오에서 해당 답변 작성·녹음 전/중 가이드를 열었다면 guideViewed=true를 보낸다. 생략 또는 false이면 기존 평가를 유지하며, 재전송에는 같은 열람 여부를 유지한다. /api/v1/me/rewards/completions/{completionId}로 대기 결과를 재조회한다.
          */
         post: operations["submitMessage"];
         delete?: never;
@@ -329,6 +332,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/referrals/registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 온보딩 초대 코드 등록
+         * @description 신규 가입자의 PENDING 상태에서만 등록한다. 같은 코드 재전송은 멱등하다. 현재 미리보기의 policyVersion을 보내며 변경 시 409로 재확인한다. 등록 시 두 단계 정책을 고정하고 가입 보상을 적립한다. 등록 전 결제는 소급하지 않는다.
+         */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/referrals/registration/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 온보딩 초대 코드 건너뛰기
+         * @description 온보딩에서 건너뛰면 반드시 호출한다. 이후 등록할 수 없으며 재전송은 멱등하다.
+         */
+        post: operations["skip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/referrals/code": {
         parameters: {
             query?: never;
@@ -340,7 +383,7 @@ export interface paths {
         put?: never;
         /**
          * 내 초대 코드 발급
-         * @description 멱등하게 같은 코드를 반환한다.
+         * @description 8자리 대문자 영문·숫자 코드를 멱등하게 반환한다. 이전 형식 코드는 새 코드로 교체한다.
          */
         post: operations["issue"];
         delete?: never;
@@ -1120,7 +1163,7 @@ export interface paths {
         head?: never;
         /**
          * 관리자 팝업 부분 수정
-         * @description 생략한 필드는 유지합니다. linkUrl: null은 링크를 제거하며 다른 필드의 null은 거부합니다. enabled: false로 노출을 중단할 수 있습니다. 시작 시각은 종료 시각보다 빨라야 합니다.
+         * @description 생략한 필드는 유지합니다. linkUrl: null은 링크를 제거하며 다른 필드의 null은 거부합니다. excludedUserIds: []로 사용자 숨김을 전체 해제할 수 있습니다. enabled: false로 노출을 중단할 수 있습니다. 시작 시각은 종료 시각보다 빨라야 합니다.
          */
         patch: operations["update_4"];
         trace?: never;
@@ -1268,7 +1311,7 @@ export interface paths {
         };
         /**
          * 날짜별 시나리오 조회
-         * @description 오늘 배정된 시나리오 또는 과거 날짜에 최초 완료한 시나리오를 조회한다. date를 생략하면 Asia/Seoul 기준 오늘을 조회한다.
+         * @description 오늘 배정된 시나리오 또는 과거 학습 인정일의 시나리오를 조회한다. 새 정책 세션은 시작일, 기존 세션은 완료일을 인정일로 사용한다. date를 생략하면 Asia/Seoul 기준 오늘을 조회한다.
          */
         get: operations["getDailyScenario"];
         put?: never;
@@ -1288,7 +1331,7 @@ export interface paths {
         };
         /**
          * 시나리오 캘린더 조회
-         * @description 기준 날짜가 포함된 창의 모든 칸을 반환한다. WEEK은 그 날짜가 속한 주(일요일 시작) 7칸이며 이웃 달 날짜가 섞일 수 있다. MONTH은 그 달 1일부터 말일까지만 반환한다. 완료한 날은 완료 시나리오 ID와 썸네일이 담기고, 미완료 오늘 칸은 배정된 시나리오 ID만 담긴다. 그 외 칸은 비어 있다.
+         * @description 기준 날짜가 포함된 창의 모든 칸을 반환한다. WEEK은 그 날짜가 속한 주(일요일 시작) 7칸이며 이웃 달 날짜가 섞일 수 있다. MONTH은 그 달 1일부터 말일까지만 반환한다. 학습 인정일에는 완료 시나리오 ID와 썸네일이 담긴다. 새 정책 세션은 시작일, 기존 세션은 완료일이다. 미완료 오늘 칸은 배정된 시나리오 ID만 담기고 그 외 칸은 비어 있다.
          */
         get: operations["getCalendar"];
         put?: never;
@@ -1328,7 +1371,7 @@ export interface paths {
         };
         /**
          * 내 레퍼럴 지급 근거
-         * @description 통합 환급 적립에 반영한 지급 근거다. 별도 잔액이나 출금 기능이 아니다.
+         * @description recipientRole=INVITER로 내가 친구를 초대해 얻은 보상을 조회한다. 필터는 페이지 구분 전에 적용하며 다음 before에는 마지막 항목 id를 보낸다. 표시 금액은 creditedWon이며 stage와 createdAt으로 문구·날짜를 구성한다. 보류·검토·환불·한도 초과 0원 내역도 포함하므로 status와 reason을 함께 확인한다.
          */
         get: operations["rewards"];
         put?: never;
@@ -1347,8 +1390,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 가입 전 초대 조건 확인
-         * @description 가입 요청에 code와 policyVersion을 전달한다. 정책 변경 시 409로 재확인한다.
+         * 초대 코드와 보상 조건 확인
+         * @description 로그인 후 8자리 코드를 확인하고 온보딩 등록 요청에 code와 policyVersion을 전달한다. 대소문자를 구분하지 않는다. 정책 변경 시 409로 재확인한다.
          */
         get: operations["preview"];
         put?: never;
@@ -1368,7 +1411,7 @@ export interface paths {
         };
         /**
          * 내 레퍼럴 조회
-         * @description 초대 성과와 조건만 반환한다. 통합 적립액과 환급 가능액은 /api/v1/me/rewards에서 조회한다.
+         * @description 초대 인원, 초대인 적립 순액(inviterCreditedWon), 현재 한도와 사용량·잔여량을 반환한다. 한도 사용액은 환불로 줄지 않아 적립 순액과 다를 수 있다. 무제한이면 value/used/remaining은 null이다. 초대인 적립 순액은 검토 중 보존액을 포함하며 별도 지갑·출금 가능액이 아니다. 통합 적립액과 환급 가능액은 /api/v1/me/rewards에서 조회한다.
          */
         get: operations["me"];
         put?: never;
@@ -1388,7 +1431,7 @@ export interface paths {
         };
         /**
          * 현재 노출 팝업 조회
-         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
+         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
          */
         get: operations["getActive"];
         put?: never;
@@ -1488,7 +1531,7 @@ export interface paths {
         };
         /**
          * 통합 적립과 환급 현황
-         * @description 100일 챌린지 현황과 만료 이후 출금 가능한 금액·상태, 재구매 가능 여부를 반환한다. 결제 확인 시 구매일 KST 00시부터 완료한 학습도 적립한다. 오늘의 시나리오 완료는 하루 한 번 구매 시 확정한 상품 정가의 100분의 1을 적립하며 표현·스몰톡은 적립하지 않는다. 미완료일에도 누적액을 보존하며 만료 자정부터 출금 가능한 금액을 제공한다. 실제 지급 완료가 아니다. balanceWon은 학습과 레퍼럴의 통합 적립액이다. 레퍼럴은 구매 전에도 보존하고 본인의 최초 적격 100일 회차 만기 후 함께 환급한다. current.balanceWon과 pendingRefundWon, withdrawableWon에도 합산한다. 학습 상한 maximumWon은 그대로이며 학습 50000원과 레퍼럴 3000원은 총 53000원이다. 무료 사용자의 preview는 과거 오늘의 시나리오 완료까지 포함하여 하루 500원을 기한 없이 누적한 표시용 금액이다. 챌린지 구매 후에는 preview=null이며 만료 후에도 숨긴다. 출금·환급액과 이력에 합산하지 않는다.
+         * @description 100일 챌린지 현황과 만료 이후 출금 가능한 금액·상태, 재구매 가능 여부를 반환한다. 결제 확인 시 구매일 KST 00시부터 완료한 학습도 적립한다. 오늘의 시나리오 완료는 하루 한 번 구매 시 확정한 상품 정가의 100분의 1을 적립하며 표현·스몰톡은 적립하지 않는다. 미완료일에도 누적액을 보존하며 만료 자정부터 출금 가능한 금액을 제공한다. 실제 지급 완료가 아니다. balanceWon은 학습과 레퍼럴의 통합 적립액이다. 레퍼럴은 구매 전에도 보존하고 본인의 최초 적격 100일 회차 만기 후 함께 환급한다. current.balanceWon과 pendingRefundWon, withdrawableWon에도 합산한다. develop 프로필에서만 샌드박스 회차에도 레퍼럴을 연결해 표시하며, 샌드박스는 출금 가능액에서 제외한다. 학습 상한 maximumWon은 그대로이며 학습 50000원과 레퍼럴 3000원은 총 53000원이다. 무료 사용자의 preview는 과거 오늘의 시나리오 완료까지 포함하여 하루 500원을 기한 없이 누적한 표시용 금액이다. 챌린지 구매 후에는 preview=null이며 만료 후에도 숨긴다. 출금·환급액과 이력에 합산하지 않는다.
          */
         get: operations["summary"];
         put?: never;
@@ -2428,12 +2471,20 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        /** @description 가입·결제의 초대인 보상에 합산 적용하는 평생 한도 */
+        ReferralInviterLimit: {
+            /** @enum {string} */
+            type: "UNLIMITED" | "INVITE_COUNT" | "TOTAL_AMOUNT";
+            /** Format: int64 */
+            value?: number;
+        };
         ReferralPolicy: {
             /** Format: int64 */
             version?: number;
             signup?: components["schemas"]["ReferralStage"];
             purchase?: components["schemas"]["ReferralStage"];
             products?: components["schemas"]["ReferralProduct"][];
+            inviterLimit?: components["schemas"]["ReferralInviterLimit"];
             /** Format: int64 */
             createdBy?: number;
             /** Format: date-time */
@@ -2468,6 +2519,7 @@ export interface components {
             signup: components["schemas"]["ReferralStage"];
             purchase: components["schemas"]["ReferralStage"];
             products: components["schemas"]["ReferralProduct"][];
+            inviterLimit?: components["schemas"]["ReferralInviterLimit"];
             reason: string;
         };
         TrialReminderSettings: {
@@ -2635,6 +2687,21 @@ export interface components {
             inputType?: "VOICE" | "TEXT" | "GENERATED";
             /** @description 재전송 시 유지할 클라이언트 메시지 UUID. 구버전 요청은 생략 가능 */
             clientMessageId?: string;
+            /** @description 첫 시나리오의 해당 답변 작성·녹음 전/중 가이드 열람 여부. 재전송 시 유지 */
+            guideViewed?: boolean;
+        };
+        /** @description 첫 시나리오의 답변 가이드 */
+        AnswerGuide: {
+            /**
+             * @description 그대로 따라 말할 수 있는 영어 답변
+             * @example I want to go to Gyeongju. I like history.
+             */
+            content?: string;
+            /**
+             * @description 반말로 제공하는 한국어 뜻
+             * @example 경주에 가고 싶어. 역사를 좋아해.
+             */
+            translatedContent?: string;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseSessionMessageSubmitResponse: {
@@ -2677,6 +2744,8 @@ export interface components {
             fixedQuestionText?: string | null;
             /** @description 이어서 재생할 고정 질문 음원 URL */
             questionAudioUrl?: string;
+            /** @description 다음 질문의 답변 가이드. 종료 메시지와 미설정 질문은 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
         };
         RewardActivity: {
             activityType?: string;
@@ -2704,7 +2773,10 @@ export interface components {
             /** Format: int64 */
             cycleId?: number;
             activityType?: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description 학습 인정 날짜. 새 정책 세션은 시작일, 기존 세션은 완료일
+             */
             learningDate?: string;
             /**
              * @description 미확정 PENDING은 금액 null, 확정 0원은 NO_ADDITIONAL_REWARD
@@ -2725,13 +2797,13 @@ export interface components {
             balanceWon?: number;
             /**
              * Format: int64
-             * @description 완료 날짜의 전체 적립액
+             * @description 학습 인정 날짜의 전체 적립액
              * @example 300
              */
             todayEarnedWon?: number;
             /**
              * Format: int64
-             * @description 완료 날짜의 실제 한도
+             * @description 학습 인정 날짜의 실제 한도
              * @example 300
              */
             todayMaximumWon?: number;
@@ -2913,17 +2985,21 @@ export interface components {
             vocabulary?: components["schemas"]["DomainScore"];
             discourse?: components["schemas"]["DomainScore"];
             interactionPragmatics?: components["schemas"]["DomainScore"];
-            /** @description 종합 점수. scoreMax로 척도를 구분하며 미평가 시 null */
+            /** @description 관찰된 영역의 가중치를 재정규화한 종합 점수. scoreMax로 척도를 구분하며 미평가 시 null */
             assessedScore?: number;
             /**
              * Format: int32
-             * @description 종합 점수에 대응하는 학습 레벨
+             * @description 학습 레벨. 정상 모델 평가에서 전부 가이드 의존이면 시작 수준 2, 영어 미관찰이면 1
              */
             assessedLevel?: number;
+            /** @description 기존 FE 호환용 결과 표시 가능 여부. 계산된 레벨 또는 영어 미관찰의 시작 레벨이 있으면 true. 전부 가이드 의존인 시작 수준 2도 표시하며 실제 근거 충족 여부와는 다름 */
             sufficientEvidence?: boolean;
             /** @enum {string} */
             source?: "MODEL" | "FALLBACK";
-            /** @enum {string} */
+            /**
+             * @description 평가에 따른 수준 변경. 가이드 의존·영어 미관찰의 시작 수준 배정은 NOT_APPLIED
+             * @enum {string}
+             */
             changeType?: "INITIALIZED" | "PROMOTED" | "DEMOTED" | "UNCHANGED" | "NOT_APPLIED";
             /** Format: int32 */
             previousLevel?: number;
@@ -2999,6 +3075,8 @@ export interface components {
             innerThought?: string;
             /** @description 속마음 유형 */
             innerThoughtType?: string;
+            /** @description 현재 질문의 답변 가이드. 없으면 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
         };
         /** @description 시나리오 세션 시작 응답 */
         SessionStartResponse: {
@@ -3171,6 +3249,11 @@ export interface components {
         ReviewAnswerResponse: {
             correct?: boolean;
             review?: components["schemas"]["ReviewResponse"];
+        };
+        ReferralRegistrationRequest: {
+            code: string;
+            /** Format: int64 */
+            policyVersion: number;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseString: {
@@ -3589,9 +3672,6 @@ export interface components {
             idToken: string;
             nonce?: string;
             nickname?: string;
-            referralCode?: string;
-            /** Format: int64 */
-            referralPolicyVersion?: number;
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAuthTokenResponse: {
@@ -3769,6 +3849,8 @@ export interface components {
             endsAt: string;
             /** Format: int32 */
             priority: number;
+            /** @description 숨길 활성 사용자 ID, 최대 1000명. 생략하면 숨김 없음 */
+            excludedUserIds?: number[];
         };
         AdminPopupResponse: {
             /** Format: int64 */
@@ -3785,6 +3867,7 @@ export interface components {
             priority: number;
             /** Format: date-time */
             updatedAt: string;
+            excludedUserIds: number[];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminPopupResponse: {
@@ -4132,6 +4215,8 @@ export interface components {
             endsAt?: string;
             /** Format: int32 */
             priority?: number;
+            /** @description 숨길 사용자 ID, 최대 1000명. 생략하면 유지, 빈 배열이면 전체 해제 */
+            excludedUserIds?: number[];
             /** @description 생략하면 유지, null이면 링크 제거 */
             linkUrl?: string | null;
         };
@@ -4285,6 +4370,8 @@ export interface components {
             aiOpeningMessage?: string;
             /** @description 첫 AI 메시지 번역 */
             aiOpeningMessageTranslation?: string;
+            /** @description 첫 질문의 답변 가이드. 없으면 null */
+            answerGuide?: components["schemas"]["AnswerGuide"];
             /** @description USER first 시 사용자 시작 안내 */
             userOpeningInstruction?: string;
             /** @description 첫 화면에 보여줄 상대 역할의 속마음 */
@@ -4545,15 +4632,29 @@ export interface components {
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
         };
+        ReferralInviterLimitProgress: {
+            /** @enum {string} */
+            type?: "UNLIMITED" | "INVITE_COUNT" | "TOTAL_AMOUNT";
+            /** Format: int64 */
+            value?: number;
+            /** Format: int64 */
+            used?: number;
+            /** Format: int64 */
+            remaining?: number;
+        };
         ReferralSummary: {
             code?: string;
-            shareUrl?: string;
             currentOffer?: components["schemas"]["ReferralPreview"];
             enrolledOffer?: components["schemas"]["ReferralPreview"];
             /** Format: int64 */
             invitedCount?: number;
             /** Format: int64 */
             convertedCount?: number;
+            /** @enum {string} */
+            registrationStatus?: "PENDING" | "REGISTERED" | "SKIPPED" | "UNAVAILABLE";
+            /** Format: int64 */
+            inviterCreditedWon?: number;
+            inviterLimit?: components["schemas"]["ReferralInviterLimitProgress"];
         };
         /** @description 현재 표시할 팝업. 대상이 없으면 data는 null이다. */
         ActivePopupResponse: {
@@ -5016,7 +5117,10 @@ export interface components {
             id?: string;
             type?: string;
             activityType?: string;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description 시나리오 학습 인정 날짜. 실제 완료 시각의 날짜와 다를 수 있음
+             */
             date?: string;
             /** Format: date-time */
             occurredAt?: string;
@@ -7220,6 +7324,50 @@ export interface operations {
             };
         };
     };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReferralRegistrationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    skip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
     issue: {
         parameters: {
             query?: never;
@@ -9230,6 +9378,7 @@ export interface operations {
             query?: {
                 before?: number;
                 size?: number;
+                recipientRole?: string;
             };
             header?: never;
             path?: never;
