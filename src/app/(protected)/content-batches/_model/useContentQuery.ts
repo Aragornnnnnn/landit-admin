@@ -30,9 +30,10 @@ export function useContentDraftQuery(
   batchId: number | undefined,
   draftId: number | undefined,
   active = false,
+  expectedStatus?: string,
 ) {
   return useQuery({
-    queryKey: ['content', 'draft', batchId, draftId],
+    queryKey: ['content', 'draft', batchId, draftId, expectedStatus],
     enabled: batchId !== undefined && draftId !== undefined,
     queryFn: () =>
       api.get<Schema<'AdminContentDraftDetail'>>(
