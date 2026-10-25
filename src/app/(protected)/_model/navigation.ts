@@ -91,6 +91,11 @@ export const NAV_GROUPS: NavGroup[] = [
         label: '발음 에셋',
         icon: PronunciationAssetsIcon,
       },
+      {
+        href: '/content-batches',
+        label: '콘텐츠 제작·검수',
+        icon: ScenarioTestIcon,
+      },
       { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
       {
         href: '/scenario-test',
