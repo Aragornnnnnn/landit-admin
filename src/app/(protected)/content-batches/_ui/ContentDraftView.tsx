@@ -181,6 +181,10 @@ export function ContentDraftView({
               checks.map((check, i) => (
                 <p className="text-xs leading-6" key={i}>
                   {readText(check.ruleId)} · {readText(check.level)}
+                  <br />
+                  {readText(check.path)}
+                  <br />
+                  {readText(check.message)}
                 </p>
               ))
             ) : (
@@ -200,6 +204,10 @@ export function ContentDraftView({
             </p>
             {review.items.map((row, i) => (
               <p className="mt-2 text-xs leading-6" key={i}>
+                {readText(row.path)}
+                <br />
+                {readText(row.excerpt)}
+                <br />
                 {readText(row.comment) ||
                   readText(row.reason) ||
                   readText(row.message)}
@@ -211,6 +219,10 @@ export function ContentDraftView({
             {draft.comments.length ? (
               draft.comments.map((comment) => (
                 <p key={comment.commentId} className="text-xs leading-6">
+                  {comment.verdict} · {comment.resolvedAt ? '해결됨' : '기록'}
+                  <br />
+                  {comment.targetPath}
+                  <br />
                   {comment.comment}
                 </p>
               ))
@@ -220,6 +232,22 @@ export function ContentDraftView({
               </p>
             )}
           </div>
+          <details className="text-xs">
+            <summary className="cursor-pointer font-bold">
+              전체 초안·연습 예문 확인
+            </summary>
+            <pre className="mt-3 max-h-96 overflow-auto break-all whitespace-pre-wrap">
+              {JSON.stringify(
+                {
+                  scenario: draft.scenarioPayload,
+                  expressions: content.expressions,
+                  stars: content.stars,
+                },
+                null,
+                2,
+              )}
+            </pre>
+          </details>
         </aside>
       </div>
     </section>
