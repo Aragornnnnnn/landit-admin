@@ -12,7 +12,10 @@ import {
   useContentBatchQuery,
   useContentDraftQuery,
 } from '../_model/useContentQuery';
+import { BatchActions } from './BatchActions';
 import { ContentDraftView } from './ContentDraftView';
+import { CreateContentBatch } from './CreateContentBatch';
+import { DraftActions } from './DraftActions';
 
 function positive(value: string | null): number | undefined {
   const number = Number(value);
@@ -44,6 +47,7 @@ export function ContentBatchesPage() {
   const failure = list.error ?? batch.error ?? draft.error;
   return (
     <div className="space-y-5 pb-10">
+      <CreateContentBatch onCreated={(id) => select({ page: 0, batch: id })} />
       <p className="text-sm text-body">
         제작 배치의 진행 상태와 Day별 질문·표현을 확인하세요.
       </p>
@@ -192,12 +196,22 @@ export function ContentBatchesPage() {
           )}
         </>
       )}
+      {batch.data && (
+        <BatchActions key={batch.data.batch.batchId} data={batch.data} />
+      )}
       {draft.data && (
         <>
           <p role="status" className="text-sm text-subtle">
             {STATUS_LABELS[draft.data.status]}
             {draft.data.errorMessage ? ` · ${draft.data.errorMessage}` : ''}
           </p>
+          {batch.data && (
+            <DraftActions
+              key={`${draft.data.batchId}:${draft.data.draftId}`}
+              batchStatus={batch.data.batch.status}
+              draft={draft.data}
+            />
+          )}
           <ContentDraftView
             key={draft.data.draftId}
             draft={draft.data}
