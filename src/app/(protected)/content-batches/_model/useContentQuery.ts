@@ -55,6 +55,7 @@ export function useNextContentDayQuery() {
 export function useContentCommandMutation() {
   const client = useQueryClient();
   return useMutation({
+    mutationKey: ['content'],
     mutationFn: runContentCommand,
     onSuccess: () => toast.success('요청을 처리했어요.'),
     onSettled: () => client.invalidateQueries({ queryKey: ['content'] }),
