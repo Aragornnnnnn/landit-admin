@@ -33,6 +33,7 @@ export function ContentBatchesPage() {
     batchId,
     selected?.draftId,
     shouldPoll(batch.data),
+    selected?.status,
   );
   function select(values: { page?: number; batch?: number; draft?: number }) {
     const next = new URLSearchParams();
