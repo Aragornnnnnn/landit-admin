@@ -93,6 +93,12 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
       {
+        href: '/scenarios',
+        label: '시나리오 목록',
+        icon: ScenarioTestIcon,
+        developOnly: true,
+      },
+      {
         href: '/scenario-test',
         label: '시나리오 테스트',
         icon: ScenarioTestIcon,
