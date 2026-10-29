@@ -23,9 +23,7 @@ import {
   canPublishDraft,
   EMPTY_LETTER_DRAFT,
   isSameDraft,
-  otherLocale,
   toLetterDraft,
-  withLanguageMode,
   type LetterDraft,
 } from '../_model/letter-draft';
 import {
@@ -39,10 +37,7 @@ import { statusAfter } from '../../_model/letter-actions';
 import { useLetterActions } from '../../_model/useLetterActions';
 import { LetterActionDialog } from '../../_ui/LetterActionDialog';
 import { LetterAudienceFields } from './LetterAudienceFields';
-import { LetterBasicFields } from './LetterBasicFields';
-import { LetterBodyCard } from './LetterBodyCard';
-import { LetterPreview } from './LetterPreview';
-import { LetterTemplateRow } from './LetterTemplateRow';
+import { LetterContentEditor } from './LetterContentEditor';
 
 /** 편집이면 편지 번호, 새 편지면 없음 */
 export function LetterEditor({ letterId }: { letterId?: number }) {
@@ -80,7 +75,6 @@ function Editor({
   const [draft, setDraft] = useState<LetterDraft>(initial);
   const [saved, setSaved] = useState<LetterDraft>(initial);
   const [savedAt, setSavedAt] = useState<string>();
-  const [previewTranslation, setPreviewTranslation] = useState(false);
   const [leaving, setLeaving] = useState(false);
   // 새 편지는 첫 저장으로 번호를 받는다 — 그 뒤 저장은 PATCH다
   const [id, setId] = useState(letterId);
@@ -166,125 +160,12 @@ function Editor({
         </span>
       </div>
 
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-        <div className="flex flex-1 flex-col gap-4">
-          <section
-            className="flex flex-col gap-3 rounded-[20px] bg-card p-6"
-            aria-label="공지 언어"
-          >
-            <span className="text-[13px] text-subtle">작성할 언어</span>
-            <div className="flex flex-wrap gap-2">
-              {(['ko', 'ja', 'both'] as const).map((mode) => (
-                <Button
-                  key={mode}
-                  variant={
-                    (
-                      draft.includeTranslation
-                        ? mode === 'both'
-                        : mode === draft.locale
-                    )
-                      ? 'default'
-                      : 'secondary'
-                  }
-                  aria-pressed={
-                    draft.includeTranslation
-                      ? mode === 'both'
-                      : mode === draft.locale
-                  }
-                  onClick={() => {
-                    setDraft(withLanguageMode(draft, mode));
-                    setPreviewTranslation(false);
-                  }}
-                >
-                  {mode === 'both'
-                    ? '한국어 · 일본어'
-                    : LETTER_LOCALE_LABEL[mode]}
-                </Button>
-              ))}
-            </div>
-            <p className="text-sm text-subtle">
-              선택한 언어를 사용하는 사용자에게만 보여요. 두 언어를 작성하면
-              함께 발행돼요.
-            </p>
-          </section>
-          {draft.locale === 'ko' && (
-            <LetterTemplateRow draft={draft} onChange={setDraft} />
-          )}
-          <LetterBasicFields
-            draft={draft}
-            onChange={setDraft}
-            languageLabel={LETTER_LOCALE_LABEL[draft.locale]}
-          />
-          <LetterAudienceFields draft={draft} onChange={setDraft} />
-          <LetterBodyCard
-            label={`${LETTER_LOCALE_LABEL[draft.locale]} 본문`}
-            body={draft.body}
-            onChange={(body) => setDraft({ ...draft, body })}
-          />
-          {draft.includeTranslation && (
-            <section
-              className="flex flex-col gap-4"
-              aria-label={`${LETTER_LOCALE_LABEL[otherLocale(draft.locale)]} 번역`}
-            >
-              <LetterBasicFields
-                contentOnly
-                languageLabel={LETTER_LOCALE_LABEL[otherLocale(draft.locale)]}
-                draft={{ ...draft, ...draft.translation }}
-                onChange={(value) =>
-                  setDraft({
-                    ...draft,
-                    translation: {
-                      title: value.title,
-                      preview: value.preview,
-                      body: value.body,
-                    },
-                  })
-                }
-              />
-              <LetterBodyCard
-                label={`${LETTER_LOCALE_LABEL[otherLocale(draft.locale)]} 본문`}
-                body={draft.translation.body}
-                onChange={(body) =>
-                  setDraft({
-                    ...draft,
-                    translation: { ...draft.translation, body },
-                  })
-                }
-              />
-            </section>
-          )}
-        </div>
-        <div className="flex flex-col items-center gap-3 xl:sticky xl:top-4">
-          {draft.includeTranslation && (
-            <div className="flex gap-2" aria-label="미리보기 언어">
-              {[false, true].map((translated) => (
-                <Button
-                  key={String(translated)}
-                  variant={
-                    previewTranslation === translated ? 'default' : 'secondary'
-                  }
-                  onClick={() => setPreviewTranslation(translated)}
-                >
-                  {
-                    LETTER_LOCALE_LABEL[
-                      translated ? otherLocale(draft.locale) : draft.locale
-                    ]
-                  }{' '}
-                  미리보기
-                </Button>
-              ))}
-            </div>
-          )}
-          <LetterPreview
-            draft={
-              draft.includeTranslation && previewTranslation
-                ? { ...draft, ...draft.translation }
-                : draft
-            }
-            date={todayLabel()}
-          />
-        </div>
-      </div>
+      <LetterAudienceFields draft={draft} onChange={setDraft} />
+      <LetterContentEditor
+        draft={draft}
+        onChange={setDraft}
+        date={todayLabel()}
+      />
 
       <LetterActionDialog
         action={actions.asked}
