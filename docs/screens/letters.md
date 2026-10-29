@@ -4,7 +4,24 @@ Figma — 화면: https://www.figma.com/design/3LwSPCntVV55PU1CIcXbVN/?node-id=1
 라우트: /letters · /letters/new · /letters/[id]
 API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mailbox/letters/{id} · POST admin/content-images/presigned-url
 
-> 운영이 모두에게 보내는 편지(공지·업데이트)를 쓰고 발행한다. 답장(REPLY)은 피드백 화면에서 만들어지고 여기선 조회만.
+> 운영이 사용자 언어에 맞춰 보내는 편지(공지·업데이트)를 쓰고 발행한다. 답장(REPLY)은 피드백 화면에서 만들어지고 여기선 조회만.
+
+## 언어별 공지 (LAN-798 · 2026-10-29 사용자 요청)
+
+- 작성 언어를 한국어, 일본어, 한국어·일본어 중에서 선택한다. 기존 공지는 한국어다.
+- 두 언어를 선택하면 언어마다 제목·미리보기·본문을 작성하고 한 번 저장·발행한다. 게시 상태·고정·숨길 대상은 공유한다.
+- 두 언어 내용이 모두 유효해야 저장·발행할 수 있다. 작성 중 언어를 바꾸거나 단일 언어로 전환해도 입력한 번역은 편집 중 보존한다.
+- 미리보기는 언어를 바꿔 확인할 수 있고 목록에는 작성된 언어를 표시한다. 발행 확인창에도 대상 언어를 표시한다.
+- 서버에는 기본 `locale`(ko/ja), 기본 제목·미리보기·본문, 다른 언어의 `translations` 배열을 보낸다. 추가 언어를 끄면 빈 배열로 번역을 제거한다.
+- 각 사용자는 저장된 앱 언어의 공지만 받는다. 해당 언어 콘텐츠가 없으면 보이지 않는다.
+- 기존 프레임에 언어 선택 UI는 없다. 이번 사용자 요청을 반영해 기존 필드·버튼 스타일로 확장하며 Figma 갱신이 필요하다.
+- 타입 재생성: `API_DOCS_URL=<OpenAPI URL 또는 file URL> node scripts/generate-mailbox-api-types.mjs`. 관련 스키마만 `mailbox-schema.d.ts`로 생성한다.
+- 백엔드 LAN-798 배포 뒤 관리자 버전을 배포한다. 구버전 백엔드는 언어 필드를 처리하지 않는다.
+
+검증 결과: 테스트 631개, 타입·ESLint·프로덕션 빌드 통과. Playwright의 로컬 API 응답으로 두 언어 저장·발행, 단일 언어 전환, 1440px·390px 화면을 확인했다. 실제 운영 공지를 게시하지 않았다.
+
+- [구현 화면](../images/screens/lan798-letters-editor.png), [기존 Figma 프레임](../images/screens/lan798-letters-editor.figma.png), [모바일 구현](../images/screens/lan798-letters-editor.mobile.png).
+- 기존 Figma 프레임에는 언어 선택·번역 입력이 없으므로 사용자 요청과 이 문서의 언어 규칙을 기준으로 확장했다.
 
 ## 화면 변형
 

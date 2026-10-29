@@ -17,12 +17,14 @@ interface LetterActionDialogProps {
   /** 물어볼 행동. 없으면 닫힌 상태 */
   action: LetterAction | null;
   pending: boolean;
+  languageLabel?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export function LetterActionDialog({
   action,
+  languageLabel,
   pending,
   onCancel,
   onConfirm,
@@ -40,6 +42,9 @@ export function LetterActionDialog({
         </AlertDialogTitle>
         <AlertDialogDescription className="text-[14px] text-muted-foreground">
           {copy?.description}
+          {languageLabel && (
+            <span className="mt-2 block">공지 언어: {languageLabel}</span>
+          )}
         </AlertDialogDescription>
         {/* 프레임은 오른쪽 정렬 + 폭 자동 — 답장 확인 창(반반)과 다르다 */}
         <AlertDialogFooter className="mx-0 mb-0 flex-row justify-end gap-2 border-0 bg-transparent p-0 pt-1">
