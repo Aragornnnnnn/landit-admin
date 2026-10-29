@@ -6,8 +6,10 @@ import { MarkdownEditor } from '@/features/markdown-editor/ui/MarkdownEditor';
 export function LetterBodyCard({
   body,
   onChange,
+  label = '편지 본문',
 }: {
   body: string;
+  label?: string;
   onChange: (body: string) => void;
 }) {
   return (
@@ -17,7 +19,7 @@ export function LetterBodyCard({
         value={body}
         onChange={onChange}
         background="card"
-        label="편지 본문"
+        label={label}
         placeholder="본문 — 이미지는 붙여넣거나 끌어다 놓으세요"
       />
     </section>

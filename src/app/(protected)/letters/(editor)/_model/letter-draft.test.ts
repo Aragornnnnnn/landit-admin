@@ -6,7 +6,9 @@ import {
   EMPTY_LETTER_DRAFT,
   isSameDraft,
   readBlocks,
+  toLetterDraft,
   toLetterRequest,
+  withLanguageMode,
   withType,
   type LetterDraft,
 } from './letter-draft';
@@ -43,7 +45,9 @@ describe('canPublishDraft', () => {
     expect(canPublishDraft(EMPTY_LETTER_DRAFT)).toBe(false);
     expect(canPublishDraft(draft({ title: '점검 안내' }))).toBe(false);
     expect(
-      canPublishDraft(draft({ title: '점검 안내', body: '오늘 새벽에' })),
+      canPublishDraft(
+        draft({ title: '점검 안내', body: '오늘 새벽에', preview: '점검' }),
+      ),
     ).toBe(true);
   });
 
@@ -108,4 +112,90 @@ describe('isSameDraft', () => {
     expect(isSameDraft(EMPTY_LETTER_DRAFT, draft({ title: 'ㄱ' }))).toBe(false);
     expect(isSameDraft(EMPTY_LETTER_DRAFT, draft())).toBe(true);
   });
+});
+
+describe('공지 언어', () => {
+  const bilingual = () =>
+    draft({
+      title: '한국어',
+      preview: '요약',
+      body: '본문',
+      locale: 'ko',
+      includeTranslation: true,
+      translation: { title: '日本語', preview: '概要', body: '本文' },
+    });
+
+  it('두 언어를 작성하면 한 요청에 각 언어의 콘텐츠를 넣는다', () => {
+    const body = toLetterRequest(bilingual());
+
+    expect(body.locale).toBe('ko');
+    expect(body.translations).toEqual([
+      {
+        locale: 'ja',
+        title: '日本語',
+        preview: '概要',
+        contentBlocks: [{ type: 'PARAGRAPH', text: '本文' }],
+      },
+    ]);
+  });
+
+  it('일본어만 선택하면 일본어 내용을 기본으로 옮기고 번역을 제거한다', () => {
+    const changed = withLanguageMode(bilingual(), 'ja');
+
+    expect(toLetterRequest(changed)).toMatchObject({
+      locale: 'ja',
+      title: '日本語',
+      translations: [],
+    });
+    expect(changed.translation.title).toBe('한국어');
+  });
+
+  it('두 언어로 다시 전환하면 편집 중 보관한 내용을 복원한다', () => {
+    const changed = withLanguageMode(
+      withLanguageMode(bilingual(), 'ja'),
+      'both',
+    );
+
+    expect(toLetterRequest(changed).translations[0]).toMatchObject({
+      locale: 'ko',
+      title: '한국어',
+    });
+  });
+
+  it('추가 언어 본문이 비어 있으면 발행하지 않는다', () => {
+    const value = bilingual();
+    value.translation.body = '  ';
+
+    expect(canPublishDraft(value)).toBe(false);
+  });
+
+  it('서버의 일본어 기본 공지와 한국어 번역을 편집 폼으로 복원한다', () => {
+    const value = toLetterDraft({
+      locale: 'ja',
+      title: '日本語',
+      contentBlocks: [{ type: 'PARAGRAPH', text: '本文' }],
+      translations: [
+        {
+          locale: 'ko',
+          title: '한국어',
+          preview: '요약',
+          contentBlocks: [{ type: 'PARAGRAPH', text: '본문' }],
+        },
+      ],
+    });
+
+    expect(value).toMatchObject({
+      locale: 'ja',
+      includeTranslation: true,
+      body: '本文',
+      translation: { title: '한국어', body: '본문' },
+    });
+  });
+});
+
+it('언어가 없는 기존 공지를 열면 한국어 단일 공지로 복원한다', () => {
+  const value = toLetterDraft({ title: '기존 공지' });
+
+  expect(value).toMatchObject({ locale: 'ko', includeTranslation: false });
+  expect(toLetterRequest(value).translations).toEqual([]);
 });
