@@ -84,6 +84,28 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: '시나리오',
+    items: [
+      {
+        href: '/content-batches',
+        label: '콘텐츠 제작·검수',
+        icon: ScenarioTestIcon,
+      },
+      {
+        href: '/scenarios',
+        label: '시나리오 목록',
+        icon: ScenarioTestIcon,
+        developOnly: true,
+      },
+      {
+        href: '/scenario-test',
+        label: '시나리오 테스트',
+        icon: ScenarioTestIcon,
+        developOnly: true,
+      },
+    ],
+  },
+  {
     label: '설정',
     items: [
       {
@@ -92,12 +114,6 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: PronunciationAssetsIcon,
       },
       { href: '/app-versions', label: '앱 버전', icon: AppVersionsIcon },
-      {
-        href: '/scenario-test',
-        label: '시나리오 테스트',
-        icon: ScenarioTestIcon,
-        developOnly: true,
-      },
     ],
   },
 ];

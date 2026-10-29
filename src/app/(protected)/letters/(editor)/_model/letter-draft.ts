@@ -1,6 +1,10 @@
 // 편지 초안의 규칙 — 무엇을 담고, 무엇이 있어야 발행할 수 있고, 서버 블록과 마크다운 본문을 어떻게 오가는지.
 // 화면은 이 함수들을 부르기만 한다 (docs/screens/letters.md "새 편지 / 편집")
-import type { LetterItem, LetterType } from '@/features/letter/api/letter-list';
+import type {
+  LetterItem,
+  LetterLocale,
+  LetterType,
+} from '@/features/letter/api/letter-list';
 import { imageMarkdown } from '@/features/markdown-editor/model/markdown-image-paste';
 
 /**
@@ -12,8 +16,17 @@ export type LetterBlock =
   | { type: 'IMAGE'; url: string; caption?: string }
   | { type: 'ORDERED_LIST'; items: string[] };
 
+export interface LetterContentDraft {
+  title: string;
+  preview: string;
+  body: string;
+}
+
 export interface LetterDraft {
   type: LetterType;
+  locale: LetterLocale;
+  includeTranslation: boolean;
+  translation: LetterContentDraft;
   title: string;
   preview: string;
   pinned: boolean;
@@ -28,6 +41,9 @@ export const PREVIEW_MAX = 60;
 
 export const EMPTY_LETTER_DRAFT: LetterDraft = {
   type: 'NOTICE',
+  locale: 'ko',
+  includeTranslation: false,
+  translation: { title: '', preview: '', body: '' },
   title: '',
   preview: '',
   pinned: false,
@@ -38,7 +54,18 @@ export const EMPTY_LETTER_DRAFT: LetterDraft = {
 
 /** 서버가 준 편지를 초안으로 — 아는 블록만 남기고 마크다운 한 덩어리로 편다 */
 export function toLetterDraft(item: LetterItem): LetterDraft {
+  const locale = item.locale ?? 'ko';
+  const translated = item.translations?.find(
+    (content) => content.locale !== locale,
+  );
   return {
+    locale,
+    includeTranslation: Boolean(translated),
+    translation: {
+      title: translated?.title ?? '',
+      preview: translated?.preview ?? '',
+      body: blocksToMarkdown(readBlocks(translated?.contentBlocks)),
+    },
     type: item.type === 'UPDATE' ? 'UPDATE' : 'NOTICE',
     title: item.title ?? '',
     preview: item.preview ?? '',
@@ -101,7 +128,17 @@ export function blocksToMarkdown(blocks: LetterBlock[]): string {
 
 /** 발행하려면 제목과 내용이 있어야 한다 — 빈 편지가 사용자 편지함에 뜨면 되돌릴 수 없다 */
 export function canPublishDraft(draft: LetterDraft): boolean {
-  return draft.title.trim().length > 0 && draft.body.trim().length > 0;
+  const contents = draft.includeTranslation
+    ? [draft, draft.translation]
+    : [draft];
+  return contents.every(
+    (content) =>
+      content.title.trim().length > 0 &&
+      content.title.length <= 200 &&
+      content.body.trim().length > 0 &&
+      content.preview.trim().length > 0 &&
+      !isPreviewTooLong(content.preview),
+  );
 }
 
 /** 고정은 공지만 — 업데이트로 바꾸면 고정도 함께 풀린다 */
@@ -124,6 +161,22 @@ export function toLetterRequest(draft: LetterDraft) {
   const body = draft.body.trim();
   return {
     type: draft.type,
+    locale: draft.locale,
+    translations: draft.includeTranslation
+      ? [
+          {
+            locale: otherLocale(draft.locale),
+            title: draft.translation.title.trim(),
+            preview: draft.translation.preview.trim(),
+            contentBlocks: [
+              {
+                type: 'PARAGRAPH' as const,
+                text: draft.translation.body.trim(),
+              },
+            ],
+          },
+        ]
+      : [],
     title: draft.title.trim(),
     preview: draft.preview.trim(),
     pinned: draft.pinned,
@@ -132,3 +185,26 @@ export function toLetterRequest(draft: LetterDraft) {
     contentBlocks: body ? [{ type: 'PARAGRAPH' as const, text: body }] : [],
   };
 }
+
+/** 다른 언어의 입력은 보관하고 선택된 언어를 기본 콘텐츠로 옮긴다. */
+export function withLanguageMode(
+  draft: LetterDraft,
+  mode: LetterLocale | 'both',
+): LetterDraft {
+  if (mode === 'both') return { ...draft, includeTranslation: true };
+  if (mode === draft.locale) return { ...draft, includeTranslation: false };
+  return {
+    ...draft,
+    ...draft.translation,
+    locale: mode,
+    includeTranslation: false,
+    translation: {
+      title: draft.title,
+      preview: draft.preview,
+      body: draft.body,
+    },
+  };
+}
+
+export const otherLocale = (locale: LetterLocale): LetterLocale =>
+  locale === 'ko' ? 'ja' : 'ko';

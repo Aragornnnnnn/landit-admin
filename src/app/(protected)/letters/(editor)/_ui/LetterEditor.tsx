@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 import type { LetterItem } from '@/features/letter/api/letter-list';
 import {
+  LETTER_LOCALE_LABEL,
   LETTER_STATUS_DOT,
   LETTER_STATUS_LABEL,
 } from '@/features/letter/model/letter-label';
@@ -36,10 +37,7 @@ import { statusAfter } from '../../_model/letter-actions';
 import { useLetterActions } from '../../_model/useLetterActions';
 import { LetterActionDialog } from '../../_ui/LetterActionDialog';
 import { LetterAudienceFields } from './LetterAudienceFields';
-import { LetterBasicFields } from './LetterBasicFields';
-import { LetterBodyCard } from './LetterBodyCard';
-import { LetterPreview } from './LetterPreview';
-import { LetterTemplateRow } from './LetterTemplateRow';
+import { LetterContentEditor } from './LetterContentEditor';
 
 /** 편집이면 편지 번호, 새 편지면 없음 */
 export function LetterEditor({ letterId }: { letterId?: number }) {
@@ -93,7 +91,11 @@ function Editor({
   const buttons = editorButtons(status);
   const dirty = !isSameDraft(draft, saved);
 
-  const runSave = (onDone?: (letterId: number) => void) =>
+  const runSave = (onDone?: (letterId: number) => void) => {
+    if (!canPublishDraft(draft)) {
+      toast.error('선택한 모든 언어의 제목·미리보기·본문을 확인해 주세요.');
+      return;
+    }
     save.mutate(
       { letterId: id, draft },
       {
@@ -107,6 +109,7 @@ function Editor({
         },
       },
     );
+  };
 
   const leave = () => router.push('/letters');
 
@@ -133,7 +136,7 @@ function Editor({
         <span className="ml-auto flex items-center gap-2">
           <Button
             variant="secondary"
-            disabled={!dirty || save.isPending}
+            disabled={!dirty || !canPublishDraft(draft) || save.isPending}
             onClick={() => runSave()}
             className="h-10 px-4 text-[14px]"
           >
@@ -145,7 +148,7 @@ function Editor({
             disabled={
               !id ||
               dirty ||
-              !canPublishDraft(draft) ||
+              (!buttons.state.destructive && !canPublishDraft(draft)) ||
               save.isPending ||
               actions.pending
             }
@@ -157,23 +160,20 @@ function Editor({
         </span>
       </div>
 
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-        <div className="flex flex-1 flex-col gap-4">
-          <LetterTemplateRow draft={draft} onChange={setDraft} />
-          <LetterBasicFields draft={draft} onChange={setDraft} />
-          <LetterAudienceFields draft={draft} onChange={setDraft} />
-          <LetterBodyCard
-            body={draft.body}
-            onChange={(body) => setDraft({ ...draft, body })}
-          />
-        </div>
-        <div className="hidden xl:block">
-          <LetterPreview draft={draft} date={todayLabel()} />
-        </div>
-      </div>
+      <LetterAudienceFields draft={draft} onChange={setDraft} />
+      <LetterContentEditor
+        draft={draft}
+        onChange={setDraft}
+        date={todayLabel()}
+      />
 
       <LetterActionDialog
         action={actions.asked}
+        languageLabel={
+          draft.includeTranslation
+            ? '한국어 · 일본어'
+            : LETTER_LOCALE_LABEL[draft.locale]
+        }
         pending={actions.pending}
         onCancel={actions.cancel}
         onConfirm={actions.confirm}
@@ -186,6 +186,12 @@ function Editor({
         onSave={() => runSave(() => leave())}
       />
 
+      {!canPublishDraft(draft) && (
+        <p className="text-sm text-subtle">
+          선택한 언어마다 제목·미리보기·본문을 작성해 주세요. 제목은 200자,
+          미리보기는 60자까지 입력할 수 있어요.
+        </p>
+      )}
       {id && dirty && (
         <p className="text-sm text-subtle">
           변경한 내용과 숨길 대상을 저장한 뒤 발행 상태를 바꿀 수 있어요.
