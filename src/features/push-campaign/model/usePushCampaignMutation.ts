@@ -5,7 +5,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { ApiError } from '@/shared/api/api-error';
+import { failureMessage } from '@/shared/api/api-error';
 import { reportError } from '@/shared/monitoring/report';
 
 import {
@@ -18,11 +18,6 @@ import {
   type PushCampaignRequest,
 } from '../api/push-campaign';
 import { PUSH_CAMPAIGNS_KEY } from './usePushCampaignQuery';
-
-/** BE가 준 메시지까지만 보여 준다 — 스택·내부 URL은 UI에 내지 않는다 (docs/security.md) */
-function failureMessage(error: unknown, fallback: string): string {
-  return error instanceof ApiError && error.message ? error.message : fallback;
-}
 
 export function useCreatePushCampaignMutation() {
   const queryClient = useQueryClient();

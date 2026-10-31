@@ -2,10 +2,15 @@
 
 // 콘텐츠 제작 변경 훅 — 배치(접수·라인업·진행·재시작·승인) · Day(검수·재생성) · 규칙(등록·은퇴).
 // 성공 토스트 문구는 docs/screens/content-batches.md "정확한 카피", 실패는 BE 메시지까지만 (409 상태 가드가 그대로 보인다)
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  type QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { failureMessage } from '@/shared/api/api-error';
+import { ApiError, failureMessage } from '@/shared/api/api-error';
 import { reportError } from '@/shared/monitoring/report';
 
 import {
@@ -34,6 +39,18 @@ import { CONTENT_KEY } from './useContentQuery';
 import { CONTENT_RULES_KEY } from './useContentRuleQuery';
 
 const FAILED_FALLBACK = '처리하지 못했어요. 다시 시도해 주세요';
+
+/** 실패는 BE 메시지까지만 토스트. 409(상태 가드)는 화면이 낡았다는 뜻이라 현재 상태를 다시 읽는다 (스펙 "오류") */
+function reportFailure(
+  queryClient: QueryClient,
+  queryKey: QueryKey,
+  error: unknown,
+) {
+  reportError(error);
+  toast.error(failureMessage(error, FAILED_FALLBACK));
+  if (error instanceof ApiError && error.status === 409)
+    queryClient.invalidateQueries({ queryKey });
+}
 
 export type ContentBatchAction =
   | { type: 'create'; body: ContentBatchRequest }
@@ -86,10 +103,7 @@ export function useContentBatchMutation() {
       toast.success(batchActionDone(action, detail.batch.batchId));
       queryClient.invalidateQueries({ queryKey: CONTENT_KEY });
     },
-    onError: (error) => {
-      reportError(error);
-      toast.error(failureMessage(error, FAILED_FALLBACK));
-    },
+    onError: (error) => reportFailure(queryClient, CONTENT_KEY, error),
   });
 }
 
@@ -116,10 +130,7 @@ export function useContentDraftMutation(batchId: number, draftId: number) {
       }
       queryClient.invalidateQueries({ queryKey: CONTENT_KEY });
     },
-    onError: (error) => {
-      reportError(error);
-      toast.error(failureMessage(error, FAILED_FALLBACK));
-    },
+    onError: (error) => reportFailure(queryClient, CONTENT_KEY, error),
   });
 }
 
@@ -142,9 +153,6 @@ export function useContentRuleMutation() {
       );
       queryClient.invalidateQueries({ queryKey: CONTENT_RULES_KEY });
     },
-    onError: (error) => {
-      reportError(error);
-      toast.error(failureMessage(error, FAILED_FALLBACK));
-    },
+    onError: (error) => reportFailure(queryClient, CONTENT_RULES_KEY, error),
   });
 }
