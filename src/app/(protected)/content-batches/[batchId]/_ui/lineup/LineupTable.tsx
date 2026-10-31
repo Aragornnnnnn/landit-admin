@@ -1,6 +1,7 @@
 'use client';
 
-// 라인업 표 — 행을 누르면 그 행이 인라인 편집 폼으로 바뀐다. 다른 행을 누르면 닫히고 값은 유지 (Figma 4129:939)
+// 라인업 표 — 행을 누르면 그 행이 인라인 편집 폼으로 바뀐다. 다른 행을 누르면 닫히고 값은 유지 (Figma 4129:939).
+// 행은 div + 제목 버튼이다 — 겹침 경고의 링크를 버튼 안에 둘 수 없어서(인터랙티브 중첩). 마우스는 행 어디를 눌러도, 키보드는 제목 버튼으로 연다
 import Link from 'next/link';
 
 import { CONTENT_CHARACTERS } from '@/features/content/api/content-batch';
@@ -75,13 +76,11 @@ export function LineupTable({
                 onClose={() => onToggleEdit(row.day)}
               />
             ) : (
-              <button
+              <div
                 key={row.day}
-                type="button"
-                aria-label={`Day ${row.day} 수정`}
                 onClick={() => onToggleEdit(row.day)}
                 className={cn(
-                  'flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left transition-colors hover:bg-hairline',
+                  'flex w-full cursor-pointer items-center gap-4 rounded-lg px-5 py-3 text-left transition-colors hover:bg-hairline',
                   errors[row.day] && 'ring-1 ring-destructive ring-inset',
                 )}
               >
@@ -93,11 +92,17 @@ export function LineupTable({
                 >
                   {row.day}
                 </span>
-                <span
-                  className={cn(CELL.title, 'truncate text-[14px] text-strong')}
+                {/* 클릭은 행(div)으로 올라가 한 번만 처리된다 — 버튼엔 따로 핸들러를 두지 않는다 */}
+                <button
+                  type="button"
+                  className={cn(
+                    CELL.title,
+                    'truncate text-left text-[14px] text-strong',
+                  )}
                 >
+                  <span className="sr-only">Day {row.day} 수정 — </span>
                   {row.title}
-                </span>
+                </button>
                 <span
                   className={cn(
                     CELL.category,
@@ -131,7 +136,7 @@ export function LineupTable({
                 >
                   <OverlapWarnings row={row} develop={develop} />
                 </span>
-              </button>
+              </div>
             ),
           )}
         </div>
@@ -156,8 +161,9 @@ function OverlapWarnings({
           {develop ? (
             // 기존 Day를 새 탭으로 — 시나리오 목록은 develop 전용이라 운영에선 글자만
             <Link
-              href={`/scenarios?q=${warning.day}`}
+              href={`/scenarios?q=${encodeURIComponent(`Day ${warning.day}`)}`}
               target="_blank"
+              rel="noopener noreferrer"
               onClick={(event) => event.stopPropagation()}
               className="underline-offset-2 hover:underline"
             >
@@ -224,11 +230,14 @@ function RowEditor({
           <select
             value={row.categoryDisplayOrder ?? ''}
             onChange={(event) =>
-              event.target.value &&
               onChange(
-                setCategory(row, {
-                  categoryDisplayOrder: Number(event.target.value),
-                }),
+                setCategory(
+                  row,
+                  // 빈 값("새 이름 사용")을 고르면 새 이름 모드로 — 번호를 비우고 이름 입력이 살아난다
+                  event.target.value
+                    ? { categoryDisplayOrder: Number(event.target.value) }
+                    : { proposedCategory: row.proposedCategory ?? '' },
+                ),
               )
             }
             className={SELECT}

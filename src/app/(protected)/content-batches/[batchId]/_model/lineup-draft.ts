@@ -38,7 +38,7 @@ export function lineupRowsOf(days: ContentDaySummary[]): LineupDraftRow[] {
 export interface LineupValidation {
   /** day → 그 행의 오류 문구들 */
   rows: Record<number, string[]>;
-  /** 표 전체 오류 — 캐릭터 수가 접수 비중과 다를 때 */
+  /** 표 전체 오류 — 편집할 수 없는 Day가 있거나 캐릭터 수가 접수 비중과 다를 때 */
   table: string | null;
 }
 
@@ -46,12 +46,19 @@ export function validateLineupRows(
   rows: LineupDraftRow[],
   // 스웨거는 비율 세 칸을 optional로 찍는다 — 빠진 캐릭터는 0으로 본다
   ratio: Partial<CharacterRatio>,
+  /** 예약 Day 수 — lineupRowsOf가 뺀 Day가 있으면 PUT이 400이라 저장을 막는다 */
+  dayCount: number,
 ): LineupValidation {
   const result: LineupValidation = { rows: {}, table: null };
   rows.forEach((row) => {
     const errors = rowErrors(row);
     if (errors.length) result.rows[row.day] = errors;
   });
+  if (rows.length !== dayCount) {
+    result.table =
+      '라인업이 없거나 읽지 못한 Day가 있어 저장할 수 없어요 — 코멘트로 라인업을 다시 만들어 주세요';
+    return result;
+  }
   const counted = countCharacters(rows);
   if (CONTENT_CHARACTERS.some((name) => counted[name] !== (ratio[name] ?? 0))) {
     result.table = `캐릭터 수가 접수 비중(${formatCharacterRatio(ratio)})과 달라요 — 지금 ${formatCharacterRatio(counted)}`;

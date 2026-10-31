@@ -2,7 +2,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 import type { ContentBatchDetail } from '@/features/content/api/content-batch';
 
@@ -18,6 +18,9 @@ beforeEach(() => {
     },
   );
 });
+
+// fetch 대체가 다음 테스트로 새지 않게
+afterEach(() => vi.unstubAllGlobals());
 
 const detail: ContentBatchDetail = {
   batch: {
@@ -62,7 +65,7 @@ function renderStage() {
   );
 }
 
-it('행을 고치면 저장 전까지 진행·재생성이 잠기고, 저장은 모든 행을 PUT으로 보낸다', async () => {
+it('행을 고치면 저장 전까지 진행·재생성이 잠기고, 저장은 모든 행을 PUT으로 보내며, 저장되면 다시 풀린다', async () => {
   const user = userEvent.setup();
   const requests: { method: string; url: string; body: unknown }[] = [];
   vi.stubGlobal(
@@ -73,7 +76,24 @@ it('행을 고치면 저장 전까지 진행·재생성이 잠기고, 저장은 
         url,
         body: JSON.parse(String(init?.body)),
       });
-      return Response.json({ success: true, data: detail });
+      // 저장은 배치를 건드리지 않는다 — updatedAt이 그대로인 응답(BE updateLineup과 같다)
+      return Response.json({
+        success: true,
+        data: {
+          ...detail,
+          days: detail.days.map((day) =>
+            day.plannedDay === 321
+              ? {
+                  ...day,
+                  lineupRow: {
+                    ...(day.lineupRow as object),
+                    title: '새 임원과 점심',
+                  },
+                }
+              : day,
+          ),
+        },
+      });
     }),
   );
   renderStage();
@@ -82,7 +102,7 @@ it('행을 고치면 저장 전까지 진행·재생성이 잠기고, 저장은 
     screen.getByRole('button', { name: '진행 — Day 생성 시작' }),
   ).toBeEnabled();
 
-  await user.click(screen.getByRole('button', { name: 'Day 321 수정' }));
+  await user.click(screen.getByRole('button', { name: /Day 321 수정/ }));
   const editor = within(screen.getByRole('group', { name: 'Day 321 편집' }));
   await user.clear(editor.getByLabelText('제목'));
   await user.type(editor.getByLabelText('제목'), '새 임원과 점심');
@@ -105,13 +125,19 @@ it('행을 고치면 저장 전까지 진행·재생성이 잠기고, 저장은 
     [321, '새 임원과 점심'],
     [322, '제목 322'],
   ]);
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: '진행 — Day 생성 시작' }),
+    ).toBeEnabled(),
+  );
+  expect(screen.getByText('바뀐 행이 없어요')).toBeInTheDocument();
 });
 
 it('캐릭터를 바꿔 접수 비중과 어긋나면 표 오류를 보여 주고 저장을 막는다', async () => {
   const user = userEvent.setup();
   renderStage();
 
-  await user.click(screen.getByRole('button', { name: 'Day 322 수정' }));
+  await user.click(screen.getByRole('button', { name: /Day 322 수정/ }));
   const editor = within(screen.getByRole('group', { name: 'Day 322 편집' }));
   await user.selectOptions(editor.getByLabelText('캐릭터'), 'chloe');
 
