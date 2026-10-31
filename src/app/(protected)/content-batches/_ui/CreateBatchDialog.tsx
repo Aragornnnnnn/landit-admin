@@ -110,9 +110,9 @@ function CreateBatchForm({
           새 배치 접수
         </DialogTitle>
         <DialogDescription className="text-[13px] leading-[1.5] text-body">
-          {nextDay ? `다음 Day ${nextDay.nextDay}부터 ` : ''}연속으로 예약한다.
+          {nextDay ? `다음 Day ${nextDay.nextDay}부터 ` : ''}연속으로 예약해요.
           접수하면 바로 라인업 생성을 시작하고, 라인업을 확인한 뒤 Day 생성을
-          진행한다.
+          진행해요.
         </DialogDescription>
       </div>
 
@@ -124,26 +124,32 @@ function CreateBatchForm({
         }}
       >
         <fieldset disabled={mutation.isPending} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-medium text-strong">
+          {/* 도움말은 label 밖에 — label 안에 두면 입력의 접근성 이름에 "Day 301 ~ 310 예약"까지 섞인다 */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="batch-day-count"
+              className="text-[13px] font-medium text-strong"
+            >
               Day 수 ({DAY_COUNT_MIN}~{DAY_COUNT_MAX})
-            </span>
+            </label>
             <Input
+              id="batch-day-count"
               type="number"
               min={DAY_COUNT_MIN}
               max={DAY_COUNT_MAX}
+              aria-describedby="batch-day-range"
               value={Number.isNaN(dayCount) ? '' : dayCount}
               onChange={(event) => changeDayCount(event.target.valueAsNumber)}
               className={cn(FIELD, 'w-[120px]')}
             />
-            <span className="text-[12px] text-subtle">
+            <span id="batch-day-range" className="text-[12px] text-subtle">
               {reservedDayRange(nextDay?.nextDay, dayCount)}
             </span>
-          </label>
+          </div>
 
           <div className="flex flex-col gap-1.5">
             <span className="text-[13px] font-medium text-strong">
-              캐릭터별 Day 수 — 합이 Day 수와 같아야 한다
+              캐릭터별 Day 수 — 합이 Day 수와 같아야 해요
             </span>
             <div className="grid grid-cols-4 gap-3">
               {CONTENT_CHARACTERS.map((name) => (
@@ -181,22 +187,30 @@ function CreateBatchForm({
             </span>
           </div>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-medium text-strong">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="batch-note"
+              className="text-[13px] font-medium text-strong"
+            >
               메모 (선택, {NOTE_MAX.toLocaleString()}자) — 프롬프트에 그대로
-              들어간다
-            </span>
+              들어가요
+            </label>
             <Textarea
+              id="batch-note"
               value={note}
               maxLength={NOTE_MAX}
               rows={3}
+              aria-describedby="batch-note-count"
               onChange={(event) => setNote(event.target.value)}
               className="min-h-0 rounded-xl border-transparent bg-muted px-4 py-3 text-[14px] shadow-none"
             />
-            <span className="text-right text-[12px] text-subtle">
+            <span
+              id="batch-note-count"
+              className="text-right text-[12px] text-subtle"
+            >
               {note.length.toLocaleString()} / {NOTE_MAX.toLocaleString()}
             </span>
-          </label>
+          </div>
 
           <label className="flex items-center gap-2.5 text-[14px] text-strong">
             <Checkbox

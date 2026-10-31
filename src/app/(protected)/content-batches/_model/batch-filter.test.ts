@@ -69,7 +69,7 @@ describe('batchEmptyLabel', () => {
   it('원래 없는지, 조건 때문에 없는지 가른다', () => {
     expect(batchEmptyLabel({ page: 0 })).toBe('접수된 배치가 없어요');
     expect(batchEmptyLabel({ status: 'FAILED', page: 0 })).toBe(
-      '조건에 맞는 배치가 없어요',
+      '이 페이지에 조건에 맞는 배치가 없어요',
     );
   });
 });

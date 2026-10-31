@@ -50,7 +50,9 @@ export function filterBatches(
   return status ? items.filter((item) => item.status === status) : items;
 }
 
-/** 빈 상태 문구 — 원래 없는지, 조건 때문에 없는지 가른다 */
+/** 빈 상태 문구 — 원래 없는지, 조건 때문에 없는지 가른다. 조건은 이 페이지 안에서만 거르므로 "이 페이지에" */
 export function batchEmptyLabel(filter: BatchFilter): string {
-  return filter.status ? '조건에 맞는 배치가 없어요' : '접수된 배치가 없어요';
+  return filter.status
+    ? '이 페이지에 조건에 맞는 배치가 없어요'
+    : '접수된 배치가 없어요';
 }
