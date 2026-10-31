@@ -1,63 +1,22 @@
-// 배치·Day 상태가 생성 중일 때만 주기 조회하고 성공한 변경 뒤 모든 관련 자료를 갱신한다.
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// 1차 Day 상세(검수·재생성)가 쓰는 변경 훅 — Day 상세가 Figma 안으로 바뀌는 LAN-813에서 features/content의 훅으로 대체하고 지운다.
+// 조회 훅은 features/content/model/useContentQuery.ts로 옮겨졌다(같은 쿼리 키를 다른 폴링 주기로 두 번 정의하지 않기 위해)
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
+import { markRegenerated } from '@/features/content/model/review-visit';
 
-import { CONTENT_ROOT, runContentCommand } from '../_api/content-api';
-import { shouldPoll } from './content-state';
+import { runContentCommand } from '../_api/content-api';
 
-export function useContentBatchesQuery(page: number) {
-  return useQuery({
-    queryKey: ['content', 'list', page],
-    queryFn: () =>
-      api.get<Schema<'AdminContentBatchPage'>>(
-        `${CONTENT_ROOT}?page=${page}&size=20`,
-      ),
-  });
-}
-export function useContentBatchQuery(id: number | undefined) {
-  return useQuery({
-    queryKey: ['content', 'batch', id],
-    enabled: id !== undefined,
-    queryFn: () =>
-      api.get<Schema<'AdminContentBatchResponse'>>(`${CONTENT_ROOT}/${id}`),
-    refetchInterval: (q) => (shouldPoll(q.state.data) ? 3000 : false),
-  });
-}
-export function useContentDraftQuery(
-  batchId: number | undefined,
-  draftId: number | undefined,
-  active = false,
-  expectedStatus?: string,
-) {
-  return useQuery({
-    queryKey: ['content', 'draft', batchId, draftId, expectedStatus],
-    enabled: batchId !== undefined && draftId !== undefined,
-    queryFn: () =>
-      api.get<Schema<'AdminContentDraftDetail'>>(
-        `${CONTENT_ROOT}/${batchId}/drafts/${draftId}`,
-      ),
-    refetchInterval: (q) =>
-      active || q.state.data?.status === 'GENERATING' ? 3000 : false,
-  });
-}
-export function useNextContentDayQuery() {
-  return useQuery({
-    queryKey: ['content', 'next-day'],
-    queryFn: () =>
-      api.get<Schema<'AdminContentNextDayResponse'>>(
-        `${CONTENT_ROOT}/next-day`,
-      ),
-  });
-}
 export function useContentCommandMutation() {
   const client = useQueryClient();
   return useMutation({
     mutationKey: ['content'],
     mutationFn: runContentCommand,
-    onSuccess: () => toast.success('요청을 처리했어요.'),
+    onSuccess: (_result, command) => {
+      // Day 목록의 "다시 볼 것"은 이 기록으로 센다 — 새 훅으로 바뀌기 전까지 여기서도 남긴다
+      if (command.kind === 'regenerate') markRegenerated(command.draftId);
+      toast.success('요청을 처리했어요.');
+    },
     onSettled: () => client.invalidateQueries({ queryKey: ['content'] }),
   });
 }
