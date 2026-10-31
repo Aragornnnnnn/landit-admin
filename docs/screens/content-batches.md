@@ -75,8 +75,8 @@ BE: landit-be LAN-690·693·694·695·702 · `docs/tasks/LAN-690/design.md` 5절
 - 검수 필터 칩 — `다시 볼 것 {n}` · `전체 {n}` · `미검토 {n}` · `수정 {n}` · `OK {n}` + 보조 `다시 볼 것 = 재생성 뒤 아직 안 본 Day · 행 클릭 → Day 초안 상세`. 기본 선택은 `다시 볼 것`이 1개 이상이면 그것, 아니면 `전체`. 쿼리스트링 `?filter=`
   - 미검토 = REVIEW_READY, 수정 = NEEDS_FIX, OK = OK·APPROVED·PUBLISHED. 생성 중·실패는 `전체`에만
   - 다시 볼 것 = **로컬 기록**. 이 브라우저에서 재생성을 눌렀고, 그 뒤 Day 상태가 GENERATING을 벗어났는데, 그 이후로 상세를 연 적이 없는 Day. 상세를 열면 지워진다(`localStorage`, 키 `content-review:{draftId}`)
-- Day 표 — 열: Day(60) · 제목(flex) · 상태(110, 칩) · 검증기(130, `FAIL {n} · WARN {n}` FAIL>0이면 빨강) · AI 검수(80, `{n}건`) · 코멘트(90, 열린 FIX `FIX {n}` 오렌지 / 전부 해결 `해결 {n}` / 없음 `—`) · 갱신(90)
-  - 검증기·AI 검수·코멘트·갱신 시각은 배치 상세 `days[]`에 없다 → **Day 상세를 병렬로 읽어 채운다**(`useQueries`, Day ≤30). 아직 안 온 칸은 `…`. 배치가 LINEUP 단계면 읽지 않는다. (BE에 요약 필드 요청 — 아래)
+- Day 표 — 열: Day(60) · 제목(flex) · 상태(110, 칩) · 검증기(150, `FAIL {n} · WARN {n}` FAIL>0이면 빨강, UNCHECKED가 있으면 `· 검사 불가 {n}`) · AI 검수(90, `{n}건`) · 코멘트(110, 열린 FIX `FIX {n}` 오렌지 / 전부 해결 `해결 {n}` / 없음 `—`). Figma의 `갱신` 열은 배치 상세에도 초안 상세에도 Day별 시각이 없어 1차는 그리지 않는다(BE 요청)
+  - 검증기·AI 검수·코멘트 수는 배치 상세 `days[]`에 없다 → **Day 상세를 병렬로 읽어 채운다**(`useQueries`, Day ≤30). 아직 안 온 칸은 `…`. 배치가 LINEUP 단계면 읽지 않는다. (BE에 요약 필드 요청 — 아래)
   - 생성 중인 Day는 상태 칩만, 나머지 칸은 `—`. 실패한 Day는 `errorMessage`를 제목 아래 빨강 한 줄
   - 행 클릭 → `/content-batches/{batchId}/drafts/{draftId}`
 - 10초 폴링 — 배치가 GENERATING이거나 GENERATING인 Day가 있을 때
