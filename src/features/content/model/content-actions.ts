@@ -42,9 +42,14 @@ export function shouldPollBatch(detail: ContentBatchDetail | undefined) {
 /** 요청 제한 5분 × 3회 + 60초 — BE ContentGenerationRecoveryService의 heartbeat 기준과 같은 값이어야 한다 */
 export const STALE_GENERATING_MS = 16 * 60_000;
 
-/** 실패했거나, 생성 중인데 heartbeat(updatedAt)가 멈춘 지 오래면 재시작할 수 있다 */
-export function canResume(batch: ContentBatch, now: Date = new Date()) {
-  if (batch.status === 'FAILED') return true;
+/**
+ * 실패했거나, 생성 중인데 heartbeat(updatedAt)가 멈춘 지 오래면 재시작할 수 있다.
+ * 모든 Day가 이미 APPROVED인 FAILED는 에셋 단계 실패라 BE가 409를 낸다 — 버튼도 잠근다.
+ * now는 호출부가 넘긴다(폴링 시각) — 렌더 시각을 쓰면 같은 응답이 올 때 16분이 지나도 안 바뀐다
+ */
+export function canResume({ batch, days }: ContentBatchDetail, now: Date) {
+  if (batch.status === 'FAILED')
+    return !(days.length > 0 && days.every((day) => day.status === 'APPROVED'));
   if (batch.status !== 'GENERATING') return false;
   const updatedAt = new Date(batch.updatedAt).getTime();
   return (
@@ -87,6 +92,7 @@ export function reviewBlockedReason(
   if (draftStatus === 'GENERATING' || isLineupStage(batchStatus))
     return '생성이 끝나면 검수할 수 있어요';
   if (draftStatus === 'FAILED') return '실패한 Day는 다시 만든 뒤 검수해요';
+  if (batchStatus === 'FAILED') return '배치를 재시작한 뒤 검수할 수 있어요';
   return '승인된 배치는 검수를 바꿀 수 없어요';
 }
 
