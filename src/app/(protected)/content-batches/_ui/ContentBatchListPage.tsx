@@ -103,8 +103,10 @@ export function ContentBatchListPage() {
               ))}
             </SelectContent>
           </Select>
+          {/* 기본 비율은 캐릭터 누적으로 정한다 — 다음 Day를 받기 전엔 열지 않는다(실패했으면 누적 없이 연다) */}
           <Button
             className="ml-auto h-10 px-4 text-[14px]"
+            disabled={nextDay.isPending}
             onClick={() => setCreating(true)}
           >
             새 배치 접수
@@ -136,7 +138,8 @@ export function ContentBatchListPage() {
           />
         )}
 
-        {page.data && items.length > 0 && (
+        {/* 상태 필터는 이 페이지 안에서만 거른다 — 이 페이지에 0건이어도 다른 페이지로 갈 수 있어야 한다 */}
+        {page.data && page.data.totalCount > 0 && (
           <Pagination
             page={filter.page}
             size={CONTENT_PAGE_SIZE}
