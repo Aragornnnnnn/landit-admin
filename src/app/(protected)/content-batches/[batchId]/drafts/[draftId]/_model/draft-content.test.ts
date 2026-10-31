@@ -94,7 +94,7 @@ describe('expressionRows', () => {
     expect(rows.map((row) => row.duplicates.map((d) => d.label))).toEqual([
       ['E-DEDUP-KEY · 기존 #1948'],
       ['뜻 중복 #1950'],
-      ["E-DEDUP-KEY · 기존 'hands down'", 'E-DEDUP-KEY · 이 배치 #2'],
+      ["기존 'hands down'", '이 배치 #2'],
     ]);
   });
 });
@@ -153,12 +153,15 @@ describe('draftMeta', () => {
     expect(draftMeta(scenario, null)).toBe(
       'marco · HARD · 카테고리 #6 · USER 선발화',
     );
+  });
+
+  it('카테고리 이름을 알면 번호 대신 이름으로 적는다', () => {
     expect(draftMeta(scenario, null, '여행')).toBe(
       'marco · HARD · 카테고리 여행 · USER 선발화',
     );
   });
 
-  it('둘 다 없으면(생성 전) 빈 문자열', () => {
+  it('둘 다 없으면(생성 전) 빈 문자열이다', () => {
     expect(draftMeta(null, null)).toBe('');
   });
 });
@@ -185,13 +188,18 @@ describe('locateRow', () => {
       'expressions',
       'expressions[LEVEL_2_TO_3][0]',
     ],
-    ['starMessages[4]', 'stars', 'starMessages[4]'],
-  ])('%s → %s 탭의 %s 줄', (path, tab, rowPath) => {
-    expect(locateRow(path, rows)).toEqual({ tab, path: rowPath });
-  });
+    ['starMessages[2.5]', 'stars', 'starMessages[2.5]'],
+  ])(
+    '%s → %s 탭의 %s 줄 (검증기 규칙 — 질문은 displayOrder, 별점은 starRating)',
+    (path, tab, rowPath) => {
+      expect(locateRow(path, rows)).toEqual({ tab, path: rowPath });
+    },
+  );
 
-  it('줄이 없는 경로(시나리오 필드·범위 밖 순번)는 null', () => {
-    expect(locateRow('scenario.aiRole', rows)).toBeNull();
-    expect(locateRow('expressions[7]', rows)).toBeNull();
-  });
+  it.each([['scenario.aiRole'], ['expressions[7]']])(
+    '줄이 없는 경로(%s — 시나리오 필드·범위 밖 순번)는 null',
+    (path) => {
+      expect(locateRow(path, rows)).toBeNull();
+    },
+  );
 });

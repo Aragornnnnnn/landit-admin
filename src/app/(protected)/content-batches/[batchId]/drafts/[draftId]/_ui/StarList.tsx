@@ -1,6 +1,6 @@
 'use client';
 
-// 별점 탭 — `★ {starRating}` · 문구. 참조 [S n], 경로 starMessages[n-1]
+// 별점 탭 — `★ {starRating}` · 문구. 참조 [S {starRating}], 경로 starMessages[{starRating}] (검증기 경로와 같다)
 import type { StarMessage } from '@/features/content/api/draft-payload';
 import {
   referenceOf,
@@ -11,6 +11,7 @@ import { ReferenceRow } from './ReferenceRow';
 
 interface StarListProps {
   stars: StarMessage[];
+  locked: boolean;
   selectedPath: string;
   highlightPath: string | null;
   onToggle: (reference: ReviewReference) => void;
@@ -18,6 +19,7 @@ interface StarListProps {
 
 export function StarList({
   stars,
+  locked,
   selectedPath,
   highlightPath,
   onToggle,
@@ -28,13 +30,17 @@ export function StarList({
         별점 문구 {stars.length}개
       </h3>
       <div className="flex flex-col gap-1">
-        {stars.map((star, index) => {
-          const reference = referenceOf({ kind: 'star', index });
+        {stars.map((star) => {
+          const reference = referenceOf({
+            kind: 'star',
+            rating: star.starRating,
+          });
           return (
             <ReferenceRow
               key={reference.path}
               path={reference.path}
-              label={`S ${index + 1}`}
+              label={`S ${star.starRating}`}
+              disabled={locked}
               selected={selectedPath === reference.path}
               highlighted={highlightPath === reference.path}
               onToggle={() => onToggle(reference)}

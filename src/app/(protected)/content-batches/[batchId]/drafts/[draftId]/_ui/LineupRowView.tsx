@@ -1,13 +1,16 @@
 // 라인업 행 탭 — 읽기 전용(수정은 LINEUP_READY 단계에서만 가능했다)
-import type { LineupRow } from '@/features/content/api/draft-payload';
+import type { LineupRow, Reading } from '@/features/content/api/draft-payload';
 
-export function LineupRowView({ lineup }: { lineup: LineupRow | null }) {
-  if (!lineup)
+export function LineupRowView({ reading }: { reading: Reading<LineupRow> }) {
+  if (reading.state !== 'ok')
     return (
       <section className="rounded-[20px] bg-card px-6 py-10 text-center text-[13px] text-subtle">
-        라인업 행을 읽지 못했어요
+        {reading.state === 'missing'
+          ? '아직 라인업 행이 없어요'
+          : '라인업 행을 읽지 못했어요'}
       </section>
     );
+  const lineup = reading.value;
   const category = lineup.proposedCategory
     ? `새: ${lineup.proposedCategory}`
     : lineup.categoryDisplayOrder !== null

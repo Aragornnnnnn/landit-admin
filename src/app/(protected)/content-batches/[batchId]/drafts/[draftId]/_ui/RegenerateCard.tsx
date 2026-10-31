@@ -77,7 +77,7 @@ export function RegenerateCard({
       </div>
       <ActionConfirmDialog
         open={asking}
-        title={`Day ${plannedDay ?? '?'}의 ${chosen.label}를 다시 만들까요?`}
+        title={`Day ${plannedDay ?? '?'} · ${chosen.label} — 다시 만들까요?`}
         pending={pending}
         onCancel={() => setAsking(false)}
         onConfirm={() => onRegenerate(scope, () => setAsking(false))}

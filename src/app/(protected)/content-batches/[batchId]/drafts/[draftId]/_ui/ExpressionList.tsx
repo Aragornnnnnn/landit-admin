@@ -1,10 +1,11 @@
 'use client';
 
-// 표현 탭 — 12줄, 레벨 · Q · 타입 라벨 · `표현 = 뜻` · 중복 배지. 줄을 누르면 참조가 들어가고 펼쳐진다(usageSummary · 대표 문장 · 연습 예문)
+// 표현 탭 — 12줄, 레벨 · Q · 타입 라벨 · `표현 = 뜻` · 중복 배지. 줄을 누르면 참조, 오른쪽 ▸를 누르면 펼쳐진다(usageSummary · 대표 문장 · 연습 예문).
+// 펼침을 줄 클릭과 떼어 둔다 — 예문만 보려다 코멘트에 참조가 들어가지 않게
 import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import type { ReviewReference } from '@/features/content/model/review-reference';
-import { cn } from '@/shared/lib/cn';
 
 import type { ExpressionRow } from '../_model/draft-content';
 import { ReferenceRow } from './ReferenceRow';
@@ -12,6 +13,7 @@ import { ReferenceRow } from './ReferenceRow';
 interface ExpressionListProps {
   rows: ExpressionRow[];
   duplicates: { surface: number; semantic: number };
+  locked: boolean;
   selectedPath: string;
   highlightPath: string | null;
   onToggle: (reference: ReviewReference) => void;
@@ -20,6 +22,7 @@ interface ExpressionListProps {
 export function ExpressionList({
   rows,
   duplicates,
+  locked,
   selectedPath,
   highlightPath,
   onToggle,
@@ -43,62 +46,71 @@ export function ExpressionList({
           const { expression, reference } = row;
           const open = expanded.includes(reference.path);
           return (
-            <ReferenceRow
-              key={reference.path}
-              path={reference.path}
-              label={`E ${row.ordinal}`}
-              selected={selectedPath === reference.path}
-              highlighted={highlightPath === reference.path}
-              onToggle={() => {
-                onToggle(reference);
-                toggleExpanded(reference.path);
-              }}
-              className="bg-muted/40"
-            >
-              <span className="flex flex-wrap items-center gap-3">
-                <span className="w-[180px] shrink-0 text-[12px] text-subtle">
-                  {row.level} · Q{expression.answerToQuestionDisplayOrder} ·{' '}
-                  {expression.expressionType}
-                </span>
-                <span className="min-w-0 flex-1 text-[14px] font-medium text-strong">
-                  {expression.targetExpressionText} ={' '}
-                  {expression.baseExpressionMeaningText}
-                </span>
-                {row.duplicates.map((badge) => (
-                  <span
-                    key={badge.label}
-                    className={cn(
-                      'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold',
-                      badge.kind === 'surface'
-                        ? 'bg-destructive/10 text-destructive'
-                        : 'bg-primary/10 text-primary',
-                    )}
-                  >
-                    {badge.label}
+            <div key={reference.path} className="rounded-lg bg-muted/40">
+              <div className="flex items-stretch">
+                <ReferenceRow
+                  path={reference.path}
+                  label={`E ${row.ordinal}`}
+                  selected={selectedPath === reference.path}
+                  highlighted={highlightPath === reference.path}
+                  disabled={locked}
+                  onToggle={() => onToggle(reference)}
+                  className="min-w-0 flex-1"
+                >
+                  <span className="flex flex-wrap items-center gap-3">
+                    <span className="w-[180px] shrink-0 text-[12px] text-subtle">
+                      {row.level} · Q{expression.answerToQuestionDisplayOrder} ·{' '}
+                      {expression.expressionType}
+                    </span>
+                    <span className="min-w-0 flex-1 text-[14px] font-medium text-strong">
+                      {expression.targetExpressionText} ={' '}
+                      {expression.baseExpressionMeaningText}
+                    </span>
+                    {row.duplicates.map((badge, index) => (
+                      <span
+                        key={index}
+                        className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-bold text-destructive"
+                      >
+                        {badge.label}
+                      </span>
+                    ))}
                   </span>
-                ))}
-              </span>
+                </ReferenceRow>
+                <button
+                  type="button"
+                  aria-label={`E ${row.ordinal} ${open ? '접기' : '펼치기'}`}
+                  aria-expanded={open}
+                  onClick={() => toggleExpanded(reference.path)}
+                  className="shrink-0 px-2 text-subtle hover:text-strong"
+                >
+                  {open ? (
+                    <ChevronDown className="size-4" aria-hidden />
+                  ) : (
+                    <ChevronRight className="size-4" aria-hidden />
+                  )}
+                </button>
+              </div>
               {open && (
-                <span className="mt-2 block border-t border-field-border pt-2 text-[12px] leading-[1.6] text-body">
-                  <span className="block">{expression.usageSummary}</span>
-                  <span className="mt-1 block font-medium text-strong">
+                <div className="border-t border-field-border px-3 py-2 text-[12px] leading-[1.6] text-body">
+                  <p>{expression.usageSummary}</p>
+                  <p className="mt-1 font-medium text-strong">
                     {expression.representativeSentenceText}
-                  </span>
-                  <span className="block text-subtle">
+                  </p>
+                  <p className="text-subtle">
                     {expression.representativeSentenceTranslation}
-                  </span>
+                  </p>
                   {expression.practiceExamples.map((example, index) => (
-                    <span key={index} className="mt-1 block">
+                    <p key={index} className="mt-1">
                       {example.sentenceText}
                       <span className="text-subtle">
                         {' '}
                         — {example.sentenceTranslation}
                       </span>
-                    </span>
+                    </p>
                   ))}
-                </span>
+                </div>
               )}
-            </ReferenceRow>
+            </div>
           );
         })}
         {rows.length === 0 && (

@@ -16,6 +16,7 @@ import { ReferenceRow } from './ReferenceRow';
 
 interface QuestionColumnsProps {
   questions: DraftQuestion[];
+  locked: boolean;
   selectedPath: string;
   highlightPath: string | null;
   onToggle: (reference: ReviewReference) => void;
@@ -23,6 +24,7 @@ interface QuestionColumnsProps {
 
 export function QuestionColumns({
   questions,
+  locked,
   selectedPath,
   highlightPath,
   onToggle,
@@ -61,6 +63,7 @@ export function QuestionColumns({
                     key={reference.path}
                     path={reference.path}
                     label={`${LEVEL_SHORT[level]} Q${index + 1}`}
+                    disabled={locked}
                     selected={selectedPath === reference.path}
                     highlighted={highlightPath === reference.path}
                     onToggle={() => onToggle(reference)}

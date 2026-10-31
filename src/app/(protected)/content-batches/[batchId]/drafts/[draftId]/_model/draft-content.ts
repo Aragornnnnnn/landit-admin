@@ -16,7 +16,7 @@ import {
 
 export interface DuplicateBadge {
   kind: 'surface' | 'semantic';
-  /** `E-DEDUP-KEY · 기존 #1948` / `기존 'hands down'` / `뜻 중복 #1950` */
+  /** `E-DEDUP-KEY · 기존 #1948` / `기존 'hands down'` / `이 배치 #3` / `뜻 중복 #1950` (스펙 "표현 탭") */
   label: string;
 }
 
@@ -71,14 +71,14 @@ function duplicateBadges(
         badges.push({
           kind: 'surface',
           label: match.targetExpressionText
-            ? `E-DEDUP-KEY · 기존 '${match.targetExpressionText}'`
+            ? `기존 '${match.targetExpressionText}'`
             : `E-DEDUP-KEY · 기존 #${match.id}`,
         }),
       );
       if (item.batchMatchIndexes.length > 0)
         badges.push({
           kind: 'surface',
-          label: `E-DEDUP-KEY · 이 배치 #${item.batchMatchIndexes.map((i) => i + 1).join(', #')}`,
+          label: `이 배치 #${item.batchMatchIndexes.map((i) => i + 1).join(', #')}`,
         });
     });
   report.semanticDuplicates
@@ -157,6 +157,7 @@ export function locateRow(
     return { tab: 'stars', path: referenceOf(target).path };
   if ('level' in target)
     return { tab: 'expressions', path: referenceOf(target).path };
+  // 검증기가 전체 순번으로 적은 표현 — 줄 목록에서 레벨 경로로
   const row = rows.find((candidate) => candidate.ordinal === target.ordinal);
   return row ? { tab: 'expressions', path: row.reference.path } : null;
 }

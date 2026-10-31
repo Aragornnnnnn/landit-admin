@@ -20,11 +20,18 @@ interface PromoteRuleDialogProps {
 export function PromoteRuleDialog({ target, onClose }: PromoteRuleDialogProps) {
   const mutation = useContentRuleMutation();
   return (
-    <Dialog open={target !== null} onOpenChange={(next) => !next && onClose()}>
+    <Dialog
+      open={target !== null}
+      // 요청 중엔 닫지 않는다 — 닫힌 뒤 도착한 성공 콜백이 그사이 새로 연 Dialog를 닫을 수 있다
+      onOpenChange={(next) => !next && !mutation.isPending && onClose()}
+    >
       <DialogContent
         className="w-[calc(100%-4rem)] gap-5 rounded-2xl p-6 sm:max-w-[560px]"
         showCloseButton={false}
         onInteractOutside={(event) =>
+          mutation.isPending && event.preventDefault()
+        }
+        onEscapeKeyDown={(event) =>
           mutation.isPending && event.preventDefault()
         }
       >

@@ -15,6 +15,7 @@ import { Textarea } from '@/shared/ui/shadcn/textarea';
 import {
   canSaveReview,
   COMMENT_MAX,
+  TARGET_PATH_MAX,
   type CommentDraft,
 } from '../_model/comment-draft';
 import { Card } from './ValidationCard';
@@ -49,6 +50,7 @@ export function ReviewerCard({
         aria-label="대상 경로 (선택)"
         placeholder="대상 경로 (선택) · 줄을 클릭하면 채워져요"
         value={draft.targetPath}
+        maxLength={TARGET_PATH_MAX}
         disabled={locked}
         onChange={(event) =>
           onChange({ ...draft, targetPath: event.target.value })
@@ -78,7 +80,7 @@ export function ReviewerCard({
           FIX 저장
         </Button>
         <Button
-          disabled={locked}
+          disabled={locked || !canSaveReview('OK', draft)}
           onClick={() => onSave('OK')}
           className="h-9 bg-success px-4 text-[13px] text-white hover:bg-success/90"
         >

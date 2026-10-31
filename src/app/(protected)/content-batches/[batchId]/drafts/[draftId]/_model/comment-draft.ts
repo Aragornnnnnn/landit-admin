@@ -8,6 +8,8 @@ import type { CommentDraft } from '@/features/content/model/review-reference';
 export type { CommentDraft };
 
 export const COMMENT_MAX = 2000;
+/** BE AdminContentReviewCommentRequest.targetPath @Size(max=255) */
+export const TARGET_PATH_MAX = 255;
 export const EMPTY_COMMENT: CommentDraft = { text: '', targetPath: '' };
 
 const KEY_PREFIX = 'content-comment:';
@@ -50,11 +52,13 @@ export function writeCommentDraft(
   }
 }
 
-/** FIX는 코멘트 1자 이상 필수(BE 400). OK는 코멘트 없이도 된다 */
+/** FIX는 코멘트 1자 이상 필수(BE 400). OK는 코멘트 없이도 된다. 길이 한도를 넘으면 둘 다 안 된다(참조 삽입은 maxLength를 안 거친다) */
 export function canSaveReview(
   verdict: ReviewVerdict,
   draft: CommentDraft,
 ): boolean {
+  if (draft.text.length > COMMENT_MAX) return false;
+  if (draft.targetPath.trim().length > TARGET_PATH_MAX) return false;
   return verdict === 'OK' || draft.text.trim().length > 0;
 }
 

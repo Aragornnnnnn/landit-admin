@@ -64,27 +64,42 @@ describe('readCommentDraft · writeCommentDraft', () => {
 });
 
 describe('canSaveReview', () => {
-  it('FIX는 코멘트가 있어야 하고 OK는 없어도 된다', () => {
-    const empty = { text: '   ', targetPath: 'questions[LEVEL_1][0]' };
+  const empty = { text: '   ', targetPath: 'questions[LEVEL_1][1]' };
 
+  it('FIX는 코멘트가 있어야 한다', () => {
     expect(canSaveReview('FIX', empty)).toBe(false);
+  });
+
+  it('OK는 코멘트가 없어도 된다', () => {
     expect(canSaveReview('OK', empty)).toBe(true);
+  });
+
+  it.each([
+    ['코멘트가 2,000자를 넘으면', { text: 'a'.repeat(2001), targetPath: '' }],
+    ['경로가 255자를 넘으면', { text: 'a', targetPath: 'q'.repeat(256) }],
+  ])('%s OK도 저장할 수 없다 (BE 400)', (_name, draft) => {
+    expect(canSaveReview('OK', draft)).toBe(false);
   });
 });
 
 describe('reviewCommentsOf', () => {
-  it('본문이 없으면 코멘트를 보내지 않고, 경로는 적었을 때만 싣는다', () => {
-    expect(reviewCommentsOf({ text: ' ', targetPath: 'x' })).toEqual([]);
-    expect(reviewCommentsOf({ text: ' 어색함 ', targetPath: '' })).toEqual([
-      { comment: '어색함' },
-    ]);
-    expect(
-      reviewCommentsOf({
-        text: '[E 1] 겹침',
-        targetPath: 'expressions[LEVEL_1][0]',
-      }),
-    ).toEqual([
-      { targetPath: 'expressions[LEVEL_1][0]', comment: '[E 1] 겹침' },
-    ]);
+  it.each([
+    [
+      '본문이 없으면 코멘트를 보내지 않는다',
+      { text: ' ', targetPath: 'x' },
+      [],
+    ],
+    [
+      '경로가 없으면 본문만 싣는다',
+      { text: ' 어색함 ', targetPath: '' },
+      [{ comment: '어색함' }],
+    ],
+    [
+      '경로를 적었으면 함께 싣는다',
+      { text: '[E 1] 겹침', targetPath: 'expressions[LEVEL_1][0]' },
+      [{ targetPath: 'expressions[LEVEL_1][0]', comment: '[E 1] 겹침' }],
+    ],
+  ])('%s', (_name, draft, expected) => {
+    expect(reviewCommentsOf(draft)).toEqual(expected);
   });
 });
