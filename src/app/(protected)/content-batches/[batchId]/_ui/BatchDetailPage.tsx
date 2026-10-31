@@ -1,6 +1,6 @@
 'use client';
 
-// 배치 상세 조립 — 배치를 읽어 라인업 단계면 라인업 확인(LAN-811), 그 뒤면 Day 목록(LAN-812 전까지 1차 화면)을 고른다
+// 배치 상세 조립 — 배치를 읽어 라인업 단계면 라인업 확인, 그 뒤면 Day 목록을 고른다
 import { useRouter } from 'next/navigation';
 
 import { isLineupStage } from '@/features/content/model/content-actions';
@@ -10,7 +10,7 @@ import { ApiError } from '@/shared/api/api-error';
 import { InlineError } from '@/shared/ui/InlineError';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
 
-import { ContentBatchesPage } from '../../_ui/ContentBatchesPage';
+import { DaysStage } from './days/DaysStage';
 import { LineupStage } from './lineup/LineupStage';
 
 export function BatchDetailPage({ batchId }: { batchId: number }) {
@@ -35,11 +35,13 @@ export function BatchDetailPage({ batchId }: { batchId: number }) {
       />
     );
   }
-  if (!isLineupStage(batch.data.batch.status))
-    return <ContentBatchesPage batchId={batchId} />;
   return (
     <DesktopOnly>
-      <LineupStage key={batch.data.batch.updatedAt} detail={batch.data} />
+      {isLineupStage(batch.data.batch.status) ? (
+        <LineupStage key={batch.data.batch.updatedAt} detail={batch.data} />
+      ) : (
+        <DaysStage detail={batch.data} />
+      )}
     </DesktopOnly>
   );
 }
