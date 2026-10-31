@@ -88,19 +88,20 @@ BE: landit-be LAN-690·693·694·695·702 · `docs/tasks/LAN-690/design.md` 5절
 - 제목 카드 — `{languageVariant.title}` + 상태 칩 · 보조 `{characterId} · {difficulty} · 카테고리 {번호 또는 proposedCategory} · {firstSpeaker} 선발화` · 아래 두 줄 `브리핑`·`대화 목표`(1차에서 살림)
 - 탭 — `질문 9` · `표현 12` · `별점 5` · `라인업 행`. 숫자는 실제 개수(생성 전이면 0)
 - **질문 탭** — 카드 제목 `질문 9개 · 레벨 3열` + 보조 `질문 줄을 클릭하면 코멘트 칸에 [L1 Q2]처럼 참조가 들어간다`. LEVEL_1 / LEVEL_2_TO_3 / LEVEL_4_TO_5 세 열 나란히. 열마다 위에 `속마음({innerThoughtType}): {innerThought}` 회색 타일(Q1에만, 없으면 생략), 질문 줄 = `L1 Q1` 라벨(12px 회색) · 영어(Bold) · 해석 · `requiredResponseElement`(회색 작은 글씨)
-  - 줄 클릭 → 선택 표시(오렌지 테두리) + 오른쪽 담당자 검수의 `대상 경로`에 `questions[LEVEL_1][1]`, 코멘트 끝에 `[L1 Q2] ` 삽입. **같은 줄을 다시 누르면 해제**(경로 비우고 참조 문자열 제거). 다른 줄을 누르면 경로는 바뀌고 참조는 추가된다. 레벨 라벨은 L1 · L2 · L4
+  - 줄 클릭 → 선택 표시(오렌지 테두리) + 오른쪽 담당자 검수의 `대상 경로`에 `questions[LEVEL_1][2]`, 코멘트 끝에 `[L1 Q2] ` 삽입. **같은 줄을 다시 누르면 해제**(경로 비우고 참조 문자열 제거). 다른 줄을 누르면 경로는 바뀌고 참조는 추가된다. 레벨 라벨은 L1 · L2 · L4. 검수가 잠겨 있거나(아래 "OK·FIX" 조건 밖) 저장 중이면 줄 클릭도 막는다
+  - **경로 규칙은 BE 검증기(`ContentDraftValidationService`)와 같다** — 질문은 `questions[{level}][{displayOrder}]`(1부터), 표현은 `expressions[{level}][{레벨 안 0부터}]`(검증기는 전체 순번 `expressions[{0부터}]`로도 적는다), 별점은 `starMessages[{starRating}]`(`1.0`~`3.0`). 코멘트 targetPath도 같은 규칙이라 프롬프트 안에서 검증기 path와 어긋나지 않는다
   - 검증기·AI 검수의 `path` 클릭 → 해당 줄로 스크롤 + 2초 하이라이트
-- **표현 탭** — 카드 제목 `표현 12개 (레벨별 4개) · 표면 중복 {n} · 뜻 중복 {n}`(`validationResult.surfaceDuplicates`에서 겹침이 있는 수 · `semanticDuplicates` 수). 줄 = `{levelGroup} · Q{answerToQuestionDisplayOrder} · {expressionType}` 라벨 · `{targetExpressionText} = {baseExpressionMeaningText}` · 오른쪽 중복 배지(`E-DEDUP-KEY · 기존 #{id}` / `기존 '{text}'` / 뜻 중복 `#{duplicateOfId}`, 빨강 연). 줄 클릭 → 펼쳐서 `usageSummary`·대표 문장·연습 예문 4개. 줄 클릭은 질문과 같은 참조 규칙 — 경로 `expressions[{levelGroup}][{레벨 안 순번 0~3}]`, 참조 `[E {전체 순번 1~12}]`
-- **별점 탭** — `★ {starRating}` · 문구. 참조 `[S {n}]`, 경로 `starMessages[{n-1}]`
+- **표현 탭** — 카드 제목 `표현 12개 (레벨별 4개) · 표면 중복 {n} · 뜻 중복 {n}`(`validationResult.surfaceDuplicates`에서 겹침이 있는 수 · `semanticDuplicates` 수). 줄 = `{levelGroup} · Q{answerToQuestionDisplayOrder} · {expressionType}` 라벨 · `{targetExpressionText} = {baseExpressionMeaningText}` · 오른쪽 중복 배지(`E-DEDUP-KEY · 기존 #{id}` / `기존 '{text}'` / 뜻 중복 `#{duplicateOfId}`, 빨강 연). 줄 오른쪽 `▸`를 누르면 펼쳐서 `usageSummary`·대표 문장·연습 예문(펼침은 줄 클릭과 분리 — 예문만 보려다 참조가 들어가지 않게). 줄 클릭은 질문과 같은 참조 규칙 — 경로 `expressions[{levelGroup}][{레벨 안 순번 0~3}]`, 참조 `[E {전체 순번 1~12}]`. 같은 배치 안에서 겹치면 배지 `이 배치 #{n}`
+- **별점 탭** — `★ {starRating}` · 문구. 참조 `[S {starRating}]`, 경로 `starMessages[{starRating}]`(검증기와 같다 — 순번이 아니라 별점 값)
 - **라인업 행 탭** — 라인업 행 그대로(제목·카테고리·난이도·캐릭터·선발화·beats·겹침 경고). 읽기 전용(수정은 LINEUP_READY에서만 가능했다)
 - 오른쪽 **검증기** 카드 — 제목 `검증기 · FAIL {n} · WARN {n} · 통과 {n}`(UNCHECKED가 있으면 `· 검사 불가 {n}`). FAIL(빨강 칩) → WARN(오렌지) → UNCHECKED(회색) 순으로 `{ruleId} · {path} · {message}`. PASS는 접어 둔다(`통과 {n}개 보기`). 아래 `사람만 볼 수 있는 항목 {n}개: {humanOnlyChecks 나열}`(항상 표시). `validationResult`가 null이면 `아직 검증 전이에요`
 - **AI 검수** 카드 — 제목 `AI 검수 · 결함 {n}건`. 결함 = `{type}` 칩 + `{path}`(회색, 클릭 이동) + `{reason}` + `{ruleCode}`(있으면). 처음 4건만 보이고 `… {n}건 더 보기`. 각 결함 오른쪽 `규칙으로 승격` → 규칙 등록 Dialog(scope 기본값은 path로 추정: `questions`→QUESTION, `expressions`→EXPRESSION, `starMessages`→STAR_MESSAGE, 그 외 COMMON; 규칙 문장은 `reason`으로 미리 채움, `sourceCommentId` 없음 — AI 결함은 코멘트가 아니다). `reviewResult`가 null → `아직 검수 전이에요`, 빈 배열 → `결함 없음`, 깨진 JSON → `검수 결과를 읽지 못했어요`(통과로 보이지 않게)
 - **담당자 검수** 카드 — `대상 경로 (선택)` 입력(줄 클릭으로 채워지고 직접 고칠 수 있다) · 코멘트 여러 줄 입력(≤2,000, 새로고침 대비 `sessionStorage` 임시 저장, 저장 성공 시 비움) · 버튼 `FIX 저장`(outline, 코멘트 있을 때만) · `OK`(초록) · helper `FIX는 코멘트 1개 이상 필수. 질문·표현 줄을 클릭하면 [L1 Q2]·[E 1] 참조가 들어가고 targetPath로 저장된다. OK면 열린 FIX 코멘트를 해결 처리한다.`
   - 아래 **코멘트 목록**(작성 순) — `{verdict}` 칩 · `{targetPath}` · 본문 · `{MM.DD HH:mm}` · 해결이면 `해결됨` 회색. FIX 코멘트 줄의 `규칙으로 승격` → 규칙 등록 Dialog(`sourceCommentId` 채움, 규칙 문장은 코멘트 본문)
-  - OK·FIX는 배치가 `GENERATING`·`REVIEW_READY`이고 Day가 REVIEW_READY·NEEDS_FIX·OK일 때 활성 — 다른 Day를 아직 만드는 중이어도 끝난 Day는 검수할 수 있다(BE `ContentDraftReviewService` 가드와 같다). 그 외엔 비활성 + 이유 helper(`생성이 끝나면 검수할 수 있어요` / `실패한 Day는 다시 만든 뒤 검수해요` / `승인된 배치는 검수를 바꿀 수 없어요`)
+  - OK·FIX는 배치가 `GENERATING`·`REVIEW_READY`이고 Day가 REVIEW_READY·NEEDS_FIX·OK일 때 활성 — 다른 Day를 아직 만드는 중이어도 끝난 Day는 검수할 수 있다(BE `ContentDraftReviewService` 가드와 같다). 그 외엔 비활성 + 이유 helper(`생성이 끝나면 검수할 수 있어요` / `실패한 Day는 다시 만든 뒤 검수해요` / `배치를 재시작한 뒤 검수할 수 있어요`(배치 FAILED) / `승인된 배치는 검수를 바꿀 수 없어요`). 코멘트 2,000자·경로 255자(BE `@Size`)를 넘으면 저장 버튼도 잠근다
   - OK·FIX 저장은 확인창 없이 바로(OK는 다시 FIX로 되돌릴 수 있다). 코멘트가 있는 OK는 코멘트도 함께 보낸다(`verdict: OK` + comments)
-- **재생성** 카드 — Select `범위: {라벨}`(ALL `전체` / `질문+표현 · LEVEL_1` / `질문+표현 · LEVEL_2_TO_3` / `질문+표현 · LEVEL_4_TO_5` / `표현만 · LEVEL_1` / … / `별점`) + helper `범위 밖 payload는 유지되고, 미해결 FIX 코멘트가 프롬프트에 들어가며 다시 만든 범위의 코멘트만 해결된다.` + 보조 `약 2분 · 0.3달러`(ALL은 `약 7분 · 1.1달러`) + 주황 `재생성`. AlertDialog로 확인(범위·비용·"기존 내용이 교체돼요"). 배치 REVIEW_READY이고 Day가 GENERATING이 아닐 때만
-  - 재생성 성공 → Day GENERATING → 10초 폴링, 콘텐츠 영역은 이전 내용을 흐리게 두고 `다시 만들고 있어요 · {범위}` 배너. 끝나면(상태가 바뀌면) 상세를 다시 읽고 로컬 "다시 볼 것" 기록을 남긴다
+- **재생성** 카드 — Select `범위: {라벨}`(ALL `전체` / `질문+표현 · 레벨 1` / `질문+표현 · 레벨 2~3` / `질문+표현 · 레벨 4~5` / `표현만 · 레벨 1` / … / `별점`) + helper `범위 밖 payload는 유지되고, 미해결 FIX 코멘트가 프롬프트에 들어가며 다시 만든 범위의 코멘트만 해결된다.` + 보조 `약 2분 · 0.3달러`(ALL은 `약 7분 · 1.1달러`) + 주황 `재생성`. AlertDialog로 확인(범위·비용·"기존 내용이 교체돼요"). 배치 REVIEW_READY이고 Day가 GENERATING이 아닐 때만
+  - 재생성 성공 → Day GENERATING → 10초 폴링, 콘텐츠 영역은 이전 내용을 흐리게 두고 `다시 만들고 있어요 · {범위}` 배너. 끝나면(상태가 바뀌면) 상세를 다시 읽는다. "다시 볼 것" 기록은 재생성을 누른 시각에 남기고, 상세를 보는 중에 끝나면 그 자리에서 열람으로 처리한다(화면을 떠나 있었을 때만 Day 목록에 "다시 볼 것"이 뜬다)
 - 상세를 열면 로컬 열람 기록(`다시 볼 것` 해제)
 
 ### 제작 규칙 (/content-rules — `4133:855`)
@@ -126,7 +127,7 @@ BE: landit-be LAN-690·693·694·695·702 · `docs/tasks/LAN-690/design.md` 5절
 | 승인 확인창        | Day {dayCount}개를 승인할까요? / 표현 id 12개씩 {dayCount×12}개를 예약하고 에셋 생성 단계로 넘어가요. 되돌릴 수 없어요.                                              |
 | 승인 토스트        | 승인했어요 · 표현 id를 예약했어요 (예약 범위 {min}~{max}는 Day 목록의 승인 배너에 — 승인 응답엔 id가 없다)                                                           |
 | 검수 토스트        | OK로 저장했어요 / FIX로 저장했어요                                                                                                                                   |
-| 재생성 확인창      | Day {n}의 {범위}를 다시 만들까요? / 기존 내용이 교체되고 미해결 FIX 코멘트가 프롬프트에 들어가요. 약 {n}분 · {n}달러.                                                |
+| 재생성 확인창      | Day {n} · {범위} — 다시 만들까요? / 기존 내용이 교체되고 미해결 FIX 코멘트가 프롬프트에 들어가요. 약 {n}분 · {n}달러.                                                |
 | 재생성 토스트      | 다시 만들고 있어요 · {범위}                                                                                                                                          |
 | 규칙 등록 토스트   | {code}로 등록했어요                                                                                                                                                  |
 | 규칙 은퇴 토스트   | {code}를 은퇴했어요                                                                                                                                                  |
@@ -159,7 +160,7 @@ BE 계약은 `landit-be/docs/tasks/LAN-690/design.md` 5절. 모든 요청은 프
 - 배치: REQUESTED → LINEUP_GENERATING → LINEUP_READY(확인 1) → GENERATING → REVIEW_READY(확인 2) → APPROVED → (2차) ASSETS_GENERATING → ASSETS_REVIEW_READY → ASSETS_READY → (3차) PUBLISHED. FAILED는 Day 단계 실패·제출 거부일 때만. **첫 라인업이 끝까지 실패하면 배치와 Day 예약이 삭제돼 목록에서 사라진다**(사유는 서버 로그) — 폴링 중 404가 되면 목록으로 보내고 토스트
 - Day: LINEUP → GENERATING → REVIEW_READY | NEEDS_FIX(검증 FAIL 또는 검수 결함) → OK / NEEDS_FIX(담당자) → APPROVED → PUBLISHED / FAILED. 재생성하면 GENERATING으로 돌아가고 범위 밖 payload는 유지
 - 시각은 전부 LocalDateTime(오프셋 없음) — 다른 화면처럼 `new Date()`로 읽어 `MM.DD HH:mm`
-- payload 세 개(`scenarioPayload`·`expressionPayload`·`starMessagePayload`)와 `validationResult`·`reviewResult`는 스웨거가 `unknown`/`string`으로 찍는다. feature `api/`에서 BE `dto/draft/*.java`·`dto/validation/*.java` 모양대로 좁힌 타입을 두고, 읽을 때 형태를 검사한다(깨진 값은 "읽지 못했어요", 통과로 보이지 않게 — 1차 결정 유지)
+- payload 세 개(`scenarioPayload`·`expressionPayload`·`starMessagePayload`)와 `validationResult`·`reviewResult`는 스웨거가 `unknown`/`string`으로 찍는다. feature `api/`에서 BE `dto/draft/*.java`·`dto/validation/*.java` 모양대로 좁힌 타입을 두고, 읽을 때 형태를 검사한다(깨진 값은 "읽지 못했어요", 통과로 보이지 않게 — 1차 결정 유지). 콘텐츠 탭도 같다 — 깨진 payload는 `{질문|표현|별점 문구} 데이터를 읽지 못했어요`와 탭 숫자 `!`, 없는 payload는 `아직 …이 없어요`
 
 ## 인터랙션 요약
 
@@ -174,7 +175,7 @@ BE 계약은 `landit-be/docs/tasks/LAN-690/design.md` 5절. 모든 요청은 프
 | 재시작            | AlertDialog → POST resume                                                                                         | GENERATING → 폴링                                           |
 | 승인              | AlertDialog → POST approve                                                                                        | APPROVED 배너 + 표현 id 범위                                |
 | 검수 필터 칩      | 서버 status + 로컬 열람 기록                                                                                      | `?filter=`                                                  |
-| 질문·표현·별점 줄 | 클릭 → 참조 삽입 + targetPath. 다시 클릭 → 해제                                                                   | PUT review의 `comments[0].targetPath`                       |
+| 질문·표현·별점 줄 | 클릭 → 참조 삽입 + targetPath(검증기 경로 규칙). 다시 클릭 → 해제. 검수 잠김·저장 중엔 무시                       | PUT review의 `comments[0].targetPath`                       |
 | 검증기·결함 path  | 클릭 → 해당 줄로 스크롤·하이라이트                                                                                | —                                                           |
 | OK / FIX          | PUT review                                                                                                        | Day 상태 갱신 · 코멘트 목록 갱신 · 배치 상세 무효화         |
 | 재생성            | Select → AlertDialog → POST regenerate                                                                            | GENERATING → 폴링 → 끝나면 다시 읽고 "다시 볼 것" 기록      |
