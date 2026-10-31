@@ -1,4 +1,4 @@
-// 이 파일은 `pnpm api:types`가 스웨거(file:///Users/sangmin8817/.codex/worktrees/df3a/landit-be/build/openapi.json)에서 생성한다. 손으로 고치지 말고 재생성한다.
+// 이 파일은 `pnpm api:types`가 스웨거(https://api-develop.landit.im/v3/api-docs)에서 생성한다. 손으로 고치지 말고 재생성한다.
 // 스웨거가 틀린 부분은 ./schema-patch.ts에서 덮어쓴다.
 export interface paths {
     "/api/v1/me/push-devices/{installationId}": {
@@ -34,6 +34,30 @@ export interface paths {
          * @description 마이페이지에서 사용자가 원할 때 자신의 닉네임을 변경합니다. 앞뒤 공백을 제거한 값을 저장하며, 1자 이상 20자 이하의 글자·숫자·단어 사이 공백만 허용합니다. 이모지, 밑줄이나 마침표 같은 기호, 제어 문자, 보이지 않는 문자는 거절합니다. 다른 사용자와 같은 닉네임도 허용하고, 현재와 같은 값을 보내도 200으로 응답합니다. 가입 때 저장된 기본 닉네임에는 이 규칙을 적용하지 않습니다.
          */
         put: operations["updateNickname"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/locale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 사용자 표시 언어 조회
+         * @description 로그인·앱 시작 시 저장된 언어와 selectionRequired를 확인합니다. true이면 locale은 호환용 임시 기본값이므로 첫 언어 선택 화면을 표시합니다. false이면 기기 언어가 바뀌어도 저장된 locale을 유지하며 자동 PUT을 호출하지 않습니다. 기존 사용자는 현재 저장 언어를 유지하고 선택 화면을 다시 표시하지 않습니다.
+         */
+        get: operations["getLocale"];
+        /**
+         * 사용자 표시 언어 선택
+         * @description 최초 언어 선택 화면에서 사용자가 선택한 ko 또는 ja를 저장합니다. 저장 성공 시 selectionRequired=false와 확정한 locale을 반환합니다. 로그인·앱 시작·기기 언어 변경에 따른 자동 동기화에는 사용하지 않습니다. 콘텐츠·AI 응답·발음 코칭은 저장된 적용 언어를 따릅니다. 기존 세션과 이미 준비된 비동기 작업은 당시 저장된 언어를 유지합니다.
+         */
+        put: operations["updateLocale"];
         post?: never;
         delete?: never;
         options?: never;
@@ -232,6 +256,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}/assets/replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Day 이미지 에셋 교체 업로드 (2차)
+         * @description 콘텐츠 이미지 presign API(POST /api/v1/admin/content-images/presign)로 올린 content/inbox/{uuid}.webp를 대상 자리의 최종 키로 복사하고 상태를 REPLACED로 둔다. 이미지 대상(THUMBNAIL·EXPRESSION_IMAGE)만 받으며(400) 배치가 ASSETS_REVIEW_READY가 아니면 409. Day의 담당자 확인은 지워진다.
+         */
+        put: operations["replaceAsset"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}/assets/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Day 에셋 확인 (2차)
+         * @description 모든 에셋이 완성(DONE·REPLACED)된 Day만 확인할 수 있다(아니면 409). 배치의 모든 Day가 확인되면 배치가 ASSETS_READY로 바뀐다. 배치가 ASSETS_REVIEW_READY가 아니면 409.
+         */
+        put: operations["confirmAssets"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sessions/{sessionId}/messages": {
         parameters: {
             query?: never;
@@ -263,7 +327,7 @@ export interface paths {
         put?: never;
         /**
          * 대화 최종 피드백 생성 및 조회
-         * @description 완료된 세션의 요약 피드백과 메시지별 피드백을 생성하거나 조회한다. 유료 도입 후 무료 사용자는 첫 시나리오의 첫 완료 세션만 메시지별 피드백을 받고, 그 외 세션은 messageFeedbacks가 비고 detailFeedbackLocked가 true다. 결제 후 다시 조회하면 전부 내려간다. userLevelAssessment에는 기존 비동기 사용자 수준 평가 상태·결과를 포함한다. growthFeedback은 직전 완료 시나리오와 비교할 근거가 없으면 null이다. expressionReuse.pending은 분석 대기 여부이며, 완료 후 items가 비어 있으면 FE에서 카드를 숨긴다.
+         * @description 완료된 세션의 요약 피드백과 메시지별 피드백을 생성하거나 조회한다. 유료 도입 후 무료 사용자는 첫 시나리오의 첫 완료 세션만 메시지별 피드백을 받고, 그 외 세션은 messageFeedbacks가 비고 detailFeedbackLocked가 true다. 결제 후 다시 조회하면 전부 내려간다. userLevelAssessment에는 기존 비동기 사용자 수준 평가 상태·결과를 포함한다. growthFeedback은 직전 완료 시나리오와 비교할 근거가 없으면 null이다. hasPreviousSameScenarioCompletion은 현재 세션 시작 시각까지 동일 시나리오의 이전 완료 이력이 있는지이며, 비교 결과가 비어 있어도 true일 수 있다. 재조회해도 해당 세션 시작 시각을 기준으로 판단한다. expressionReuse.pending은 분석 대기 여부이며, 완료 후 items가 비어 있으면 FE에서 카드를 숨긴다.
          */
         post: operations["getOrCreateFeedback"];
         delete?: never;
@@ -624,7 +688,7 @@ export interface paths {
         put?: never;
         /**
          * 소셜 로그인
-         * @description OIDC ID Token과 nonce를 검증하고 서비스 토큰을 발급한다. 기존 사용자는 이메일만 최신 값으로 갱신하고, 닉네임은 제공자 이름으로 덮어쓰지 않는다. 닉네임은 가입 때 한 번 저장되며 이후에는 닉네임 변경 API로만 바뀐다.
+         * @description OIDC ID Token과 nonce를 검증하고 서비스 토큰을 발급한다. 기존 사용자는 이메일만 최신 값으로 갱신하고, 닉네임은 제공자 이름으로 덮어쓰지 않는다. 닉네임은 가입 때 한 번 저장되며 이후에는 닉네임 변경 API로만 바뀐다. 신규 사용자는 Accept-Language의 선호 순서에서 ko/ja를 선택한다. 둘 다 없으면 언어 선택이 필요하다. 로그인 후 GET /api/v1/me/locale의 selectionRequired를 확인한다. 기존 사용자의 저장 언어는 유지한다.
          */
         post: operations["socialLogin"];
         delete?: never;
@@ -914,7 +978,10 @@ export interface paths {
         /** 공지·업데이트 목록 */
         get: operations["getLetters"];
         put?: never;
-        /** 공지·업데이트 초안 생성 */
+        /**
+         * 공지·업데이트 초안 생성
+         * @description locale(ko/ja, 생략 시 ko)로 기본 언어를 지정한다. translations에 다른 언어 콘텐츠를 함께 등록하면 하나의 공지로 동시에 게시된다.
+         */
         post: operations["createLetter"];
         delete?: never;
         options?: never;
@@ -1001,7 +1068,7 @@ export interface paths {
         put?: never;
         /**
          * 제작 규칙 등록(코멘트 승격)
-         * @description scope 접두어 + 다음 번호로 코드를 매기고 ACTIVE로 등록한다. 다음 AI 호출부터(진행 중 배치 포함) 들어간다. sourceCommentId가 있으면 그 코멘트에서 승격한 것으로 남긴다(없는 코멘트면 404).
+         * @description scope 접두어 + 다음 번호로 코드를 매기고 ACTIVE로 등록한다. 다음 AI 호출부터(진행 중 배치 포함) 들어간다. sourceCommentId가 있으면 그 코멘트에서 승격한 것으로 남긴다(없는 코멘트면 404). IMAGE는 I 접두어를 쓰며 에셋 기능 비활성 시 409.
          */
         post: operations["create_2"];
         delete?: never;
@@ -1042,6 +1109,26 @@ export interface paths {
          * @description 시작 Day는 서버가 정한다. 캐릭터별 Day 수의 합은 dayCount와 같아야 한다.
          */
         post: operations["create_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 실패·멈춘 배치 Day 생성 재시작
+         * @description FAILED 배치와 heartbeat가 멈춤 기준(요청 제한 × 3 + 60초)을 넘긴 GENERATING 배치만 GENERATING으로 되돌려 Day 생성을 다시 제출한다. 끝난 Day는 그대로 두고 FAILED·GENERATING·LINEUP Day만 빠진 단계부터 만든다. 다른 상태면 409.
+         */
+        post: operations["resume"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1102,6 +1189,46 @@ export interface paths {
          * @description scope가 ALL이면 전부, QUESTIONS_AND_EXPRESSIONS:{level}이면 그 레벨 질문 3개와 표현 4개, EXPRESSIONS:{level}이면 그 레벨 표현 4개, STAR_MESSAGES면 별점 문구만 다시 만든다. 미해결 FIX 코멘트가 프롬프트에 들어간다. 배치가 REVIEW_READY가 아니거나 Day가 생성 중이면 409, scope 표기가 틀리면 400.
          */
         post: operations["regenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/drafts/{draftId}/assets/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Day 에셋 재생성 (2차)
+         * @description target이 가리키는 에셋만 PENDING으로 되돌리고 배치를 ASSETS_GENERATING으로 바꿔 다시 만든다. note는 이미지 프롬프트에만 붙는다. 표기: ALL, THUMBNAIL, QUESTION_AUDIO:{level}:{order}, EXPRESSION_IMAGE:{expressionId}:{REPRESENTATIVE|PRACTICE_3|PRACTICE_4}, PRONUNCIATION:{expressionId}. 배치가 ASSETS_REVIEW_READY가 아니면 409, 표기가 틀리면 400, 이 Day에 없는 대상이면 404. Day의 담당자 확인은 지워진다. 에셋 기능 비활성 시 409.
+         */
+        post: operations["regenerateAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content-batches/{batchId}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 에셋 생성 시작·재시작 (2차)
+         * @description APPROVED 배치의 에셋 생성을 시작해 ASSETS_GENERATING으로 바꾼다. 에셋 단계에서 실패한 FAILED 배치와 heartbeat가 멈춤 기준을 넘긴 ASSETS_GENERATING 배치는 재시작으로 받고 완성된 에셋은 건너뛴다. 그 외 상태면 409. 끝나면 실패 에셋이 있어도 ASSETS_REVIEW_READY가 되고 batch.errorMessage에 요약이 남는다. 에셋 기능 비활성 시 409.
+         */
+        post: operations["startAssets"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1181,7 +1308,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** 공지·업데이트 수정 */
+        /**
+         * 공지·업데이트 수정
+         * @description translations는 생략하면 유지하고, 전달하면 전체 교체한다. 빈 배열은 추가 번역을 제거한다. 게시 상태·고정·숨김 대상·읽음 기록은 언어 간 공유한다.
+         */
         patch: operations["updateLetter"];
         trace?: never;
     };
@@ -1291,7 +1421,7 @@ export interface paths {
         };
         /**
          * 시나리오 전체 완료 회차 히스토리 조회
-         * @description 사용자 ID는 로그인 토큰에서 식별한다. 완료한 모든 회차를 endedAt 내림차순, 동률이면 sessionId 내림차순으로 반환한다. 진행 중·중도 종료 회차는 제외하며, 비활성 콘텐츠의 과거 기록도 조회한다. 각 회차의 messages는 messageSequence 오름차순이다. 기록이 없거나 존재하지 않는 시나리오 ID이면 sessions는 빈 배열이다. 저장된 완료 피드백이 없으면 feedback은 null이며 AI 생성은 실행하지 않는다. 기존 정책으로 잠긴 상세 피드백은 messageFeedbacks가 빈 배열이고 detailFeedbackLocked가 true다. 과거 평가 문맥을 복원할 메시지나 시작 안내가 없으면 evaluationContext는 null이다.
+         * @description 사용자 ID는 로그인 토큰에서 식별한다. 완료한 모든 회차를 endedAt 내림차순, 동률이면 sessionId 내림차순으로 반환한다. 진행 중·중도 종료 회차는 제외하며, 비활성 콘텐츠의 과거 기록도 조회한다. 각 회차의 messages는 messageSequence 오름차순이다. 기록이 없거나 존재하지 않는 시나리오 ID이면 sessions는 빈 배열이다. 저장된 완료 피드백이 없으면 feedback은 null이며 AI 생성은 실행하지 않는다. feedback.hasPreviousSameScenarioCompletion은 각 회차 시작 시각까지 동일 시나리오의 이전 완료 이력이 있는지다. 이후 완료한 기록은 과거 회차의 판단에 포함하지 않는다. 기존 정책으로 잠긴 상세 피드백은 messageFeedbacks가 빈 배열이고 detailFeedbackLocked가 true다. 과거 평가 문맥을 복원할 메시지나 시작 안내가 없으면 evaluationContext는 null이다.
          */
         get: operations["getHistory"];
         put?: never;
@@ -1431,7 +1561,7 @@ export interface paths {
         };
         /**
          * 현재 노출 팝업 조회
-         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 개별 ID 또는 현재 구독 유형에 해당하는 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
+         * @description enabled이며 startsAt <= 현재 시각 < endsAt인 팝업을 조회합니다. 로그인 사용자의 개별 ID 또는 현재 구독 유형에 해당하는 숨김 대상을 제외한 뒤 priority 내림차순, popupId 내림차순으로 하나를 선택합니다. 비인증 요청에는 사용자·구독 유형 숨김 설정이 없는 팝업만 반환합니다. 대상이 없으면 HTTP 200과 data: null을 반환합니다. 인증 없이 호출할 수 있습니다.
          */
         get: operations["getActive"];
         put?: never;
@@ -1711,7 +1841,7 @@ export interface paths {
         };
         /**
          * 받은 편지 목록 조회
-         * @description 공지·업데이트와 본인이 수신한 답장·직접 편지(DIRECT)를 최신순으로 조회한다.
+         * @description 저장된 사용자 언어(ko/ja)의 콘텐츠가 있는 공지·업데이트와 본인이 수신한 답장·직접 편지(DIRECT)를 최신순으로 조회한다.
          */
         get: operations["getReceivedLetters"];
         put?: never;
@@ -1731,7 +1861,7 @@ export interface paths {
         };
         /**
          * 받은 편지 상세 조회
-         * @description 공지·업데이트와 본인이 수신한 답장·직접 편지(DIRECT)를 조회하고 읽음 처리한다. DIRECT는 bodyText로 표시하며 피드백 인용 필드는 null이다.
+         * @description 저장된 사용자 언어의 공지·업데이트와 본인이 수신한 답장·직접 편지(DIRECT)를 조회하고 읽음 처리한다. 해당 언어 콘텐츠가 없으면 404를 반환한다. DIRECT는 bodyText로 표시하며 피드백 인용 필드는 null이다.
          */
         get: operations["getReceivedLetter"];
         put?: never;
@@ -2357,7 +2487,7 @@ export interface components {
              */
             code?: string;
             /**
-             * @description 오류 메시지
+             * @description 사용자 언어별 오류 메시지. 인증 시 저장 언어, 미인증 시 Accept-Language를 따른다. 기본값은 한국어이며 일본어는 코드별 안내를 제공한다.
              * @example 요청한 리소스를 찾을 수 없습니다.
              */
             message?: string;
@@ -2389,6 +2519,27 @@ export interface components {
              * @example 랜딧러버
              */
             nickname?: string;
+        };
+        UserLocalePreference: {
+            /** @enum {string} */
+            locale: "ko" | "ja";
+        };
+        /** @description 공통 API 응답 객체 */
+        ApiResponseUserLocalePreferenceResponse: {
+            /**
+             * @description 요청 처리 성공 여부
+             * @example true
+             */
+            success?: boolean;
+            /** @description 성공 응답 데이터. 실패 시 null입니다. */
+            data?: components["schemas"]["UserLocalePreferenceResponse"];
+            /** @description 실패 오류 정보. 성공 시 null입니다. */
+            error?: components["schemas"]["ErrorResponse"];
+        };
+        UserLocalePreferenceResponse: {
+            /** @enum {string} */
+            locale: "ko" | "ja";
+            selectionRequired: boolean;
         };
         /** @description 사용자 학습 수준 변경 요청 */
         UserLearningLevelUpdateRequest: {
@@ -2557,6 +2708,17 @@ export interface components {
         AdminContentLineupUpdateRequest: {
             rows: components["schemas"]["AdminContentLineupRowRequest"][];
         };
+        AdminContentAssetProgress: {
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            done: number;
+            /** Format: int32 */
+            failed: number;
+            /** Format: int32 */
+            qaFailed: number;
+            confirmed: boolean;
+        };
         AdminContentBatchResponse: {
             batch: components["schemas"]["AdminContentBatchSummary"];
             days: components["schemas"]["AdminContentDraftSummary"][];
@@ -2565,7 +2727,7 @@ export interface components {
             /** Format: int64 */
             batchId: number;
             /** @enum {string} */
-            status: "REQUESTED" | "LINEUP_GENERATING" | "LINEUP_READY" | "GENERATING" | "REVIEW_READY" | "APPROVED" | "ASSETS_READY" | "PUBLISHED" | "FAILED";
+            status: "REQUESTED" | "LINEUP_GENERATING" | "LINEUP_READY" | "GENERATING" | "REVIEW_READY" | "APPROVED" | "ASSETS_GENERATING" | "ASSETS_REVIEW_READY" | "ASSETS_READY" | "PUBLISHED" | "FAILED";
             /** Format: int32 */
             startDay: number;
             /** Format: int32 */
@@ -2594,6 +2756,8 @@ export interface components {
             errorMessage: string | null;
             /** @description 라인업 행 JSON(design.md 5절 모양). 라인업 전이면 null */
             lineupRow?: unknown;
+            /** @description 에셋 진행 수. 에셋 생성 전이면 null */
+            assetProgress?: components["schemas"]["AdminContentAssetProgress"];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminContentBatchResponse: {
@@ -2649,6 +2813,9 @@ export interface components {
             reservedExpressionIds?: number[];
             errorMessage: string | null;
             comments: components["schemas"]["AdminContentReviewCommentResponse"][];
+            /** @description 에셋 payload(썸네일·질문 음성·표현 이미지·발음 자산 URL과 상태). 에셋 생성 전이면 null */
+            assetPayload?: unknown;
+            assetProgress?: components["schemas"]["AdminContentAssetProgress"];
         };
         AdminContentReviewCommentResponse: {
             /** Format: int64 */
@@ -2675,6 +2842,13 @@ export interface components {
             data?: components["schemas"]["AdminContentDraftDetail"];
             /** @description 실패 오류 정보. 성공 시 null입니다. */
             error?: components["schemas"]["ErrorResponse"];
+        };
+        /** @description 에셋 교체 업로드 요청 */
+        AdminContentAssetReplaceRequest: {
+            /** @example THUMBNAIL */
+            target: string;
+            /** @example content/inbox/0c1d2e3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.webp */
+            objectKey: string;
         };
         /** @description 사용자 발화 제출 요청 */
         SessionMessageSubmitRequest: {
@@ -2978,6 +3152,11 @@ export interface components {
             growthFeedback?: components["schemas"]["ScenarioGrowthCard"];
             /** @description pending이면 분석 중, 완료 후 items가 비어 있으면 FE에서 카드를 숨긴다 */
             expressionReuse?: components["schemas"]["ScenarioExpressionReuseSummary"];
+            /**
+             * @description 현재 세션 시작 시각까지 같은 사용자가 동일 scenarioId를 완료한 이력이 있으면 true다. 현재 세션과 진행 중·중도 종료 세션은 제외한다. 언어·질문 레벨이 달라도 동일 시나리오이면 포함한다. 과거 총평도 해당 세션 시작 시각을 기준으로 판단하며, 성장 비교나 표현 재사용 결과의 존재 여부와는 독립적이다.
+             * @example false
+             */
+            hasPreviousSameScenarioCompletion?: boolean;
         };
         SessionLevelAssessment: {
             situationPerformance?: components["schemas"]["DomainScore"];
@@ -3007,14 +3186,14 @@ export interface components {
             currentLevel?: number;
             details?: components["schemas"]["Details"];
             assessmentVersion?: string;
+            /** Format: int32 */
+            displayLevel?: number;
             /**
              * Format: int32
              * @description 영역별 점수와 종합 점수의 상한. 과거 평가는 5, 신규 평가는 100
              * @enum {integer}
              */
             scoreMax?: "5" | "100";
-            /** Format: int32 */
-            displayLevel?: number;
         };
         /** @description 수준 평가 상태와 결과. 비활성 또는 도입 전 완료 세션이면 data 자체가 null */
         SessionLevelAssessmentResponse: {
@@ -3157,14 +3336,14 @@ export interface components {
             currentQuestionId?: string;
             questions?: components["schemas"]["ReviewQuestion"][];
         };
-        /** @description 작문 연습 문제. 추가 예문 4건 중 2건이 작문 문제로 선택되며 영어와 한국어가 한 건씩이다 */
+        /** @description 작문 연습 문제. 추가 예문 4건 중 2건이 작문 문제로 선택되며 한국어 콘텐츠는 영어·한국어 한 건씩, 일본어 콘텐츠는 영어 두 건이다 */
         WritingSentenceResponse: {
             /**
              * @description 작문 문제의 출제 언어. EN이면 영어 문장을, KR이면 한국어 해석을 조립한다
              * @example EN
              * @enum {string}
              */
-            quizLanguage?: "EN" | "KR";
+            quizLanguage?: "EN" | "KR" | "JA";
             /**
              * @description 작문 문제의 영어 예문
              * @example The special effects blew my mind.
@@ -3956,6 +4135,26 @@ export interface components {
             excludedUserIds?: number[];
             /** @description 숨길 구독 유형. 빈 배열은 숨김 해제 */
             excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+            /**
+             * @description 기본 콘텐츠 언어. 생성 시 기본값 ko, 수정 시 생략하면 유지
+             * @example ko
+             * @enum {string}
+             */
+            locale?: "ko" | "ja";
+            /** @description 기본 언어 외 추가 콘텐츠. 생략하면 유지, 빈 배열은 제거. 기본 언어와 중복 불가 */
+            translations?: components["schemas"]["AdminMailboxLetterTranslation"][];
+        };
+        /** @description 기본 언어와 함께 게시할 추가 언어 콘텐츠 */
+        AdminMailboxLetterTranslation: {
+            /**
+             * @description 추가 언어
+             * @example ja
+             * @enum {string}
+             */
+            locale: "ko" | "ja";
+            title: string;
+            contentBlocks: unknown[];
+            preview: string;
         };
         /** @description 편지함 어드민 공지·업데이트 응답 */
         AdminMailboxLetterResponse: {
@@ -3978,6 +4177,9 @@ export interface components {
             updatedAt?: string;
             excludedUserIds?: number[];
             excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+            /** @enum {string} */
+            locale?: "ko" | "ja";
+            translations?: components["schemas"]["AdminMailboxLetterTranslation"][];
         };
         /** @description 공통 API 응답 객체 */
         ApiResponseAdminMailboxLetterResponse: {
@@ -4082,7 +4284,7 @@ export interface components {
         /** @description 제작 규칙 등록 요청 */
         AdminContentRuleCreateRequest: {
             /** @enum {string} */
-            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW" | "IMAGE";
             /** @example 질문에 이미 나온 말을 표현으로 뽑지 않는다. */
             ruleText: string;
             /**
@@ -4096,7 +4298,7 @@ export interface components {
             ruleId: number;
             ruleCode: string;
             /** @enum {string} */
-            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+            scope: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW" | "IMAGE";
             ruleText: string;
             /** Format: int64 */
             sourceCommentId: number | null;
@@ -4208,6 +4410,13 @@ export interface components {
             /** @example EXPRESSIONS:LEVEL_2_TO_3 */
             scope: string;
         };
+        /** @description 에셋 재생성 요청 */
+        AdminContentAssetRegenerateRequest: {
+            /** @example EXPRESSION_IMAGE:8761:REPRESENTATIVE */
+            target: string;
+            /** @example 배경을 사무실로 */
+            note?: string;
+        };
         AdminPopupPatchRequest: {
             title?: string;
             imageUrl?: string;
@@ -4249,6 +4458,14 @@ export interface components {
             excludedUserIds?: number[];
             /** @description 숨길 구독 유형. 빈 배열은 숨김 해제 */
             excludedAudiences?: ("MONTHLY" | "YEARLY" | "PASS_100_DAYS" | "TRIAL" | "NONE" | "ADMIN_GRANTED" | "OTHER")[];
+            /**
+             * @description 기본 콘텐츠 언어. 생성 시 기본값 ko, 수정 시 생략하면 유지
+             * @example ko
+             * @enum {string}
+             */
+            locale?: "ko" | "ja";
+            /** @description 기본 언어 외 추가 콘텐츠. 생략하면 유지, 빈 배열은 제거. 기본 언어와 중복 불가 */
+            translations?: components["schemas"]["AdminMailboxLetterTranslation"][];
         };
         /** @description 제작 규칙 상태 변경 요청 */
         AdminContentRuleStatusRequest: {
@@ -4552,7 +4769,7 @@ export interface components {
              */
             date?: string;
             /**
-             * @description 화면 헤더 문구
+             * @description 저장 언어별 헤더. 일본어 WEEK은 2026年7月 第5週, MONTH은 2026年7月
              * @example 26년 7월 5주차
              */
             label?: string;
@@ -5716,7 +5933,7 @@ export interface components {
             usageDescription?: string;
             /** @description 문제 안 풀고, 눈으로 익히는 추가 예문 2건 */
             practiceSentence?: components["schemas"]["PracticeSentenceResponse"][];
-            /** @description 직접 푸는 작문 문제 2건. 영어 문제와 한국어 문제가 한 건씩이다 */
+            /** @description 직접 푸는 작문 문제 2건. 한국어 콘텐츠는 영어·한국어 한 건씩, 일본어 콘텐츠는 영어 두 건이다 */
             writingSentence?: components["schemas"]["WritingSentenceResponse"][];
         };
         /** @description 추가 예문 항목 */
@@ -5933,9 +6150,9 @@ export interface components {
             /** @enum {string} */
             status: "ACTIVE" | "WITHDRAWN" | "BANNED";
             /** @enum {string} */
-            targetLocale: "EN" | "KR";
+            targetLocale: "EN" | "KR" | "JA";
             /** @enum {string} */
-            baseLocale: "EN" | "KR";
+            baseLocale: "EN" | "KR" | "JA";
             /** Format: int32 */
             learningLevel: number | null;
             /** Format: int32 */
@@ -6519,7 +6736,10 @@ export interface operations {
     update: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 installationId: string;
             };
@@ -6545,7 +6765,10 @@ export interface operations {
     updateNickname: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6584,10 +6807,63 @@ export interface operations {
             };
         };
     };
+    getLocale: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseUserLocalePreferenceResponse"];
+                };
+            };
+        };
+    };
+    updateLocale: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserLocalePreference"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseUserLocalePreferenceResponse"];
+                };
+            };
+        };
+    };
     getLearningLevel: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6616,7 +6892,10 @@ export interface operations {
     updateLearningLevel: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6658,7 +6937,10 @@ export interface operations {
     update_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6700,7 +6982,10 @@ export interface operations {
     getAlarm: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6729,7 +7014,10 @@ export interface operations {
     updateAlarm: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6771,7 +7059,10 @@ export interface operations {
     getAccentLocale: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6800,7 +7091,10 @@ export interface operations {
     updateAccentLocale: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6842,7 +7136,10 @@ export interface operations {
     processing: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6866,7 +7163,10 @@ export interface operations {
     current: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6886,7 +7186,10 @@ export interface operations {
     update_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6910,7 +7213,10 @@ export interface operations {
     settings: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6930,7 +7236,10 @@ export interface operations {
     update_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6954,7 +7263,10 @@ export interface operations {
     updateLineup: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
             };
@@ -6980,7 +7292,10 @@ export interface operations {
     review: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
                 draftId: number;
@@ -7004,10 +7319,69 @@ export interface operations {
             };
         };
     };
+    replaceAsset: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentAssetReplaceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
+                };
+            };
+        };
+    };
+    confirmAssets: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
+                };
+            };
+        };
+    };
     submitMessage: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7087,7 +7461,10 @@ export interface operations {
     getOrCreateFeedback: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7163,7 +7540,10 @@ export interface operations {
     startScenarioSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 scenarioId: number;
             };
@@ -7212,7 +7592,10 @@ export interface operations {
     start: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 reviewId: string;
             };
@@ -7261,7 +7644,10 @@ export interface operations {
     answer: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 reviewId: string;
             };
@@ -7332,7 +7718,10 @@ export interface operations {
     register: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7356,7 +7745,10 @@ export interface operations {
     skip: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7376,7 +7768,10 @@ export interface operations {
     issue: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7396,7 +7791,10 @@ export interface operations {
     submit: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7438,7 +7836,10 @@ export interface operations {
     dismissPaywall: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7467,7 +7868,10 @@ export interface operations {
     submitFeedbackWithImages: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7524,7 +7928,10 @@ export interface operations {
                  */
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7562,7 +7969,10 @@ export interface operations {
     startSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7658,7 +8068,10 @@ export interface operations {
     submitMessage_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7738,7 +8151,10 @@ export interface operations {
     retryExpressions: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7805,7 +8221,10 @@ export interface operations {
     decideExit: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7885,7 +8304,10 @@ export interface operations {
     completeSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -7943,7 +8365,10 @@ export interface operations {
     analyzeSentence: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 /**
                  * @description Writing 표현 ID
@@ -7999,6 +8424,8 @@ export interface operations {
             query?: never;
             header?: {
                 "X-Learning-Attempt-Id"?: string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path: {
                 expressionId: number;
@@ -8043,7 +8470,10 @@ export interface operations {
     refresh: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8076,7 +8506,10 @@ export interface operations {
     socialLogin: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8109,7 +8542,10 @@ export interface operations {
     logout: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8133,7 +8569,10 @@ export interface operations {
     history: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 userProfileId: number;
             };
@@ -8155,7 +8594,10 @@ export interface operations {
     grant: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 userProfileId: number;
             };
@@ -8181,7 +8623,10 @@ export interface operations {
     start_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 scenarioId: number;
             };
@@ -8230,7 +8675,10 @@ export interface operations {
     retryReward: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 id: number;
             };
@@ -8256,7 +8704,10 @@ export interface operations {
     retryEvent: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 id: number;
             };
@@ -8288,7 +8739,10 @@ export interface operations {
                 page?: number;
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8311,6 +8765,8 @@ export interface operations {
             header: {
                 /** @description 1~128자 ASCII 영숫자, 대시, 밑줄 */
                 "Idempotency-Key": string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path?: never;
             cookie?: never;
@@ -8337,6 +8793,8 @@ export interface operations {
             query?: never;
             header: {
                 "Idempotency-Key": string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path: {
                 campaignId: string;
@@ -8361,6 +8819,8 @@ export interface operations {
             query?: never;
             header: {
                 "Idempotency-Key": string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path: {
                 campaignId: string;
@@ -8385,6 +8845,8 @@ export interface operations {
             query?: never;
             header: {
                 "Idempotency-Key": string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path: {
                 campaignId: string;
@@ -8411,7 +8873,10 @@ export interface operations {
     cancelSchedule: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 campaignId: string;
             };
@@ -8433,7 +8898,10 @@ export interface operations {
     queryAudience: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8457,7 +8925,10 @@ export interface operations {
     list_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8477,7 +8948,10 @@ export interface operations {
     create_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8503,6 +8977,8 @@ export interface operations {
             query?: never;
             header: {
                 "Idempotency-Key": string;
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
             };
             path?: never;
             cookie?: never;
@@ -8527,7 +9003,10 @@ export interface operations {
     sendReplies: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8557,7 +9036,10 @@ export interface operations {
                 publicationStatus?: "DRAFT" | "PUBLISHED" | "UNPUBLISHED";
                 pinned?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8577,7 +9059,10 @@ export interface operations {
     createLetter: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8606,7 +9091,10 @@ export interface operations {
                 /** @description 페이지 크기 */
                 size?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8626,7 +9114,10 @@ export interface operations {
     sendDirectLetter: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8656,7 +9147,10 @@ export interface operations {
                  */
                 manifestKey: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8682,7 +9176,10 @@ export interface operations {
                  */
                 manifestKey: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8702,10 +9199,13 @@ export interface operations {
     list_2: {
         parameters: {
             query?: {
-                scope?: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW";
+                scope?: "COMMON" | "LINEUP" | "QUESTION" | "EXPRESSION" | "STAR_MESSAGE" | "REVIEW" | "IMAGE";
                 status?: "ACTIVE" | "RETIRED";
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8725,7 +9225,10 @@ export interface operations {
     create_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8749,7 +9252,10 @@ export interface operations {
     createPresignedUrl: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8776,7 +9282,10 @@ export interface operations {
                 page?: number;
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8796,7 +9305,10 @@ export interface operations {
     create_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -8817,10 +9329,38 @@ export interface operations {
             };
         };
     };
+    resume: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
     proceed: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
             };
@@ -8842,7 +9382,10 @@ export interface operations {
     regenerateLineup: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
             };
@@ -8868,7 +9411,10 @@ export interface operations {
     regenerate: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
                 draftId: number;
@@ -8892,10 +9438,68 @@ export interface operations {
             };
         };
     };
+    regenerateAsset: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path: {
+                batchId: number;
+                draftId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminContentAssetRegenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentDraftDetail"];
+                };
+            };
+        };
+    };
+    startAssets: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
+            path: {
+                batchId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAdminContentBatchResponse"];
+                };
+            };
+        };
+    };
     approve: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
             };
@@ -8917,7 +9521,10 @@ export interface operations {
     endSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -8975,7 +9582,10 @@ export interface operations {
     update_4: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 popupId: number;
             };
@@ -9001,7 +9611,10 @@ export interface operations {
     updateLetter: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 letterId: number;
             };
@@ -9027,7 +9640,10 @@ export interface operations {
     changeStatus: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 ruleId: number;
             };
@@ -9053,7 +9669,10 @@ export interface operations {
     update_5: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 platform: "IOS" | "ANDROID";
             };
@@ -9079,7 +9698,10 @@ export interface operations {
     getInnerThought: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
                 messageId: number;
@@ -9129,7 +9751,10 @@ export interface operations {
     getLevelAssessment: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 sessionId: number;
             };
@@ -9178,7 +9803,10 @@ export interface operations {
     listScenarios: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9207,7 +9835,10 @@ export interface operations {
     getHistory: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 /**
                  * @description 조회할 시나리오 ID
@@ -9257,7 +9888,10 @@ export interface operations {
                  */
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9303,7 +9937,10 @@ export interface operations {
                  */
                 date?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9341,7 +9978,10 @@ export interface operations {
     get: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 reviewId: string;
             };
@@ -9385,7 +10025,10 @@ export interface operations {
                 size?: number;
                 recipientRole?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9407,7 +10050,10 @@ export interface operations {
             query: {
                 code: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9427,7 +10073,10 @@ export interface operations {
     me: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9447,7 +10096,10 @@ export interface operations {
     getActive: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9467,7 +10119,10 @@ export interface operations {
     getSubscription: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9496,7 +10151,10 @@ export interface operations {
     getSubscriptionEvents: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9525,7 +10183,10 @@ export interface operations {
     getCurrentStreak: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9565,7 +10226,10 @@ export interface operations {
                  */
                 month?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9603,7 +10267,10 @@ export interface operations {
     summary: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9626,7 +10293,10 @@ export interface operations {
                 cursor?: string;
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9649,7 +10319,10 @@ export interface operations {
                 cursor?: string;
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9672,7 +10345,10 @@ export interface operations {
                 cursor?: number;
                 limit?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9692,7 +10368,10 @@ export interface operations {
     detail: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 cycleId: number;
             };
@@ -9714,7 +10393,10 @@ export interface operations {
     completion: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 completionId: number;
             };
@@ -9736,7 +10418,10 @@ export interface operations {
     getUnreadCount: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9773,7 +10458,10 @@ export interface operations {
                  */
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9811,7 +10499,10 @@ export interface operations {
     getSentFeedback: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 feedbackId: number;
             };
@@ -9859,7 +10550,10 @@ export interface operations {
                  */
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -9897,7 +10591,10 @@ export interface operations {
     getReceivedLetter: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 letterId: number;
             };
@@ -9937,7 +10634,10 @@ export interface operations {
     getFeedbackAttachment: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 feedbackId: number;
                 attachmentId: number;
@@ -9979,7 +10679,10 @@ export interface operations {
     getTopics: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10008,7 +10711,10 @@ export interface operations {
     getSession: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 /**
                  * @description 조회할 프리톡 학습 세션 ID
@@ -10061,7 +10767,10 @@ export interface operations {
     getSummary: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 /**
                  * @description 조회할 프리톡 학습 세션 ID
@@ -10123,7 +10832,10 @@ export interface operations {
     getExpressions: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 scenarioId: number;
             };
@@ -10154,7 +10866,10 @@ export interface operations {
     getExtraPracticeExamples: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 expressionId: number;
             };
@@ -10194,7 +10909,10 @@ export interface operations {
     getOneExpressionToStartLearning: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 expressionId: number;
             };
@@ -10245,7 +10963,10 @@ export interface operations {
                  */
                 versionName: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10304,7 +11025,10 @@ export interface operations {
                 /** @description 사용자 상태. active와 함께 지정하면 AND로 적용 */
                 status?: "ACTIVE" | "WITHDRAWN" | "BANNED";
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10351,7 +11075,10 @@ export interface operations {
     detail_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 /**
                  * @description 사용자 프로필 ID
@@ -10404,7 +11131,10 @@ export interface operations {
     statistics: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10442,7 +11172,10 @@ export interface operations {
     products: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10462,7 +11195,10 @@ export interface operations {
     list_5: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10505,7 +11241,10 @@ export interface operations {
                 size?: number;
                 status?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10528,7 +11267,10 @@ export interface operations {
                 before?: number;
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10552,7 +11294,10 @@ export interface operations {
                 size?: number;
                 status?: string;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10572,7 +11317,10 @@ export interface operations {
     detail_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 campaignId: string;
             };
@@ -10594,7 +11342,10 @@ export interface operations {
     preview_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 campaignId: string;
             };
@@ -10627,7 +11378,10 @@ export interface operations {
                  */
                 size?: number;
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10674,7 +11428,10 @@ export interface operations {
     job: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 id: string;
             };
@@ -10705,7 +11462,10 @@ export interface operations {
                 size?: number;
                 sort?: "NEWEST" | "OLDEST";
             };
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10725,7 +11485,10 @@ export interface operations {
     getFeedback: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 feedbackId: number;
             };
@@ -10747,7 +11510,10 @@ export interface operations {
     getDirectLetter: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 letterId: number;
             };
@@ -10778,7 +11544,10 @@ export interface operations {
     coverage: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10798,7 +11567,10 @@ export interface operations {
     detail_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
             };
@@ -10820,7 +11592,10 @@ export interface operations {
     draftDetail: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 batchId: number;
                 draftId: number;
@@ -10843,7 +11618,10 @@ export interface operations {
     nextDay: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10863,7 +11641,10 @@ export interface operations {
     list_7: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10883,7 +11664,10 @@ export interface operations {
     getAccentLocales: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10912,7 +11696,10 @@ export interface operations {
     withdraw: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10932,7 +11719,10 @@ export interface operations {
     revoke: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 미인증 요청의 초기 언어. ko/ja와 지역 태그·가중치를 지원합니다. 미인증 응답 기본값은 ko이며, 가입 시 지원 언어가 없으면 최초 선택이 필요합니다. 인증된 요청은 이 헤더와 관계없이 저장된 사용자 언어를 사용합니다. 로그인·앱 시작에는 GET /api/v1/me/locale을 조회합니다. PUT /api/v1/me/locale은 사용자가 언어를 선택할 때만 호출합니다. 이미 준비된 비동기 작업과 재시도는 저장된 작업 언어를 유지합니다. */
+                "Accept-Language"?: string;
+            };
             path: {
                 userProfileId: number;
                 grantId: number;
