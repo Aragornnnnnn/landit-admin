@@ -152,3 +152,22 @@ export function PronunciationAssetsIcon(props: NavIconProps) {
     </svg>
   );
 }
+
+/** 콘텐츠 제작 — 채움형 문서 + 반짝이(AI 생성). 시나리오 테스트 플라스크와 구분되게 (Figma 아이콘 없음 — 셸 스타일로 그림) */
+export function ContentProductionIcon(props: NavIconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden {...props}>
+      <path
+        d="M5 2.5h6.5L15.5 6.5V16a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 16V4A1.5 1.5 0 0 1 5 2.5Z"
+        fill="#E8935A"
+      />
+      <path d="M11.5 2.5v4h4" fill="#FDF1E8" />
+      <rect x="6" y="9" width="7" height="1.4" rx="0.7" fill="#FFFFFF" />
+      <rect x="6" y="12" width="5" height="1.4" rx="0.7" fill="#FFFFFF" />
+      <path
+        d="M15.2 9.2l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6.6-1.5Z"
+        fill="#E07A3A"
+      />
+    </svg>
+  );
+}

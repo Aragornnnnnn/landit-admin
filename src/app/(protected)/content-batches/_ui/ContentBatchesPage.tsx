@@ -1,6 +1,6 @@
 'use client';
 
-// URL에 선택을 보관하며 제작 배치와 각 Day의 실제 서버 상태를 조회한다.
+// 1차 배치 상세 — 라인업 읽기·Day 선택·검수·승인을 한 화면에. LAN-811·812·813이 Figma 안으로 나누면 지운다. 배치는 라우트가 정하고 Day만 URL(draft)에 둔다
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/shared/ui/shadcn/button';
@@ -8,25 +8,20 @@ import { Button } from '@/shared/ui/shadcn/button';
 import { shouldPoll } from '../_model/content-state';
 import { readObject, readText, STATUS_LABELS } from '../_model/content-view';
 import {
-  useContentBatchesQuery,
   useContentBatchQuery,
   useContentDraftQuery,
 } from '../_model/useContentQuery';
 import { BatchActions } from './BatchActions';
 import { ContentDraftView } from './ContentDraftView';
-import { CreateContentBatch } from './CreateContentBatch';
 import { DraftActions } from './DraftActions';
 
 function positive(value: string | null): number | undefined {
   const number = Number(value);
   return Number.isSafeInteger(number) && number > 0 ? number : undefined;
 }
-export function ContentBatchesPage() {
+export function ContentBatchesPage({ batchId }: { batchId: number }) {
   const params = useSearchParams();
   const router = useRouter();
-  const page = positive(params.get('page')) ?? 0;
-  const list = useContentBatchesQuery(page);
-  const batchId = positive(params.get('batch')) ?? list.data?.items[0]?.batchId;
   const batch = useContentBatchQuery(batchId);
   const selected =
     batch.data?.days.find(
@@ -38,20 +33,16 @@ export function ContentBatchesPage() {
     shouldPoll(batch.data),
     selected?.status,
   );
-  function select(values: { page?: number; batch?: number; draft?: number }) {
+  function select(values: { draft?: number }) {
     const next = new URLSearchParams();
-    Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined) next.set(key, String(value));
+    if (values.draft !== undefined) next.set('draft', String(values.draft));
+    router.replace(`/content-batches/${batchId}?${next.toString()}`, {
+      scroll: false,
     });
-    router.replace(`/content-batches?${next.toString()}`, { scroll: false });
   }
-  const failure = list.error ?? batch.error ?? draft.error;
+  const failure = batch.error ?? draft.error;
   return (
     <div className="space-y-5 pb-10">
-      <CreateContentBatch onCreated={(id) => select({ page: 0, batch: id })} />
-      <p className="text-sm text-body">
-        제작 배치의 진행 상태와 Day별 질문·표현을 확인하세요.
-      </p>
       {failure && (
         <div
           role="alert"
@@ -61,8 +52,7 @@ export function ContentBatchesPage() {
           <Button
             variant="outline"
             onClick={() => {
-              void list.refetch();
-              if (batchId) void batch.refetch();
+              void batch.refetch();
               if (selected) void draft.refetch();
             }}
           >
@@ -70,54 +60,7 @@ export function ContentBatchesPage() {
           </Button>
         </div>
       )}
-      {list.isPending ? (
-        <p role="status">제작 목록을 불러오는 중이에요.</p>
-      ) : (
-        <>
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              aria-label="제작 배치"
-              className="min-w-0 rounded-lg border bg-card px-3 py-2"
-              value={batchId ?? ''}
-              onChange={(e) => select({ page, batch: Number(e.target.value) })}
-            >
-              {!list.data?.items.length && (
-                <option value="">제작 배치 없음</option>
-              )}
-              {batchId &&
-                !list.data?.items.some((b) => b.batchId === batchId) && (
-                  <option value={batchId}>배치 {batchId}</option>
-                )}
-              {list.data?.items.map((b) => (
-                <option key={b.batchId} value={b.batchId}>
-                  Day {b.startDay}~{b.endDay} · {STATUS_LABELS[b.status]}
-                </option>
-              ))}
-            </select>
-            <Button
-              variant="outline"
-              disabled={page === 0}
-              onClick={() => select({ page: page - 1 })}
-            >
-              이전
-            </Button>
-            <span className="text-sm">{page + 1}페이지</span>
-            <Button
-              variant="outline"
-              disabled={!list.data?.hasNext}
-              onClick={() => select({ page: page + 1 })}
-            >
-              다음
-            </Button>
-          </div>
-          {!list.data?.items.length && !batchId && (
-            <p className="rounded-xl bg-card p-8">아직 제작한 배치가 없어요.</p>
-          )}
-        </>
-      )}
-      {batch.isPending && batchId && (
-        <p role="status">배치를 불러오는 중이에요.</p>
-      )}
+      {batch.isPending && <p role="status">배치를 불러오는 중이에요.</p>}
       {batch.data && (
         <>
           <section className="space-y-3 rounded-xl border bg-card p-5">
@@ -157,9 +100,7 @@ export function ContentBatchesPage() {
                   variant={
                     selected?.draftId === day.draftId ? 'default' : 'outline'
                   }
-                  onClick={() =>
-                    select({ page, batch: batchId, draft: day.draftId })
-                  }
+                  onClick={() => select({ draft: day.draftId })}
                 >
                   Day {day.plannedDay} · {STATUS_LABELS[day.status]}
                 </Button>

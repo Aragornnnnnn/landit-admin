@@ -26,7 +26,11 @@ import {
   useSidebar,
 } from '@/shared/ui/shadcn/sidebar';
 
-import { isActiveNav, isDevelopServer, NAV_GROUPS } from '../_model/navigation';
+import {
+  isDevelopServer,
+  isNavItemActive,
+  NAV_GROUPS,
+} from '../_model/navigation';
 import { useAccountNickname } from '../_model/useAccountNickname';
 import { useLogout } from '../_model/useLogout';
 import { usePendingFeedbackCountQuery } from '../_model/usePendingFeedbackCountQuery';
@@ -87,11 +91,11 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
             <SidebarNavGroup
               key={`${group.label ?? index}:${pathname}`}
               label={group.label}
-              active={items.some((item) => isActiveNav(item.href, pathname))}
+              active={items.some((item) => isNavItemActive(item, pathname))}
             >
               <SidebarMenu className="gap-0.5">
                 {items.map((item) => {
-                  const active = isActiveNav(item.href, pathname);
+                  const active = isNavItemActive(item, pathname);
                   const badge =
                     item.badge === 'pendingFeedbacks' ? pendingCount.data : 0;
                   return (
