@@ -217,6 +217,6 @@ BE 계약은 `landit-be/docs/tasks/LAN-690/design.md` 5절. 모든 요청은 프
 - **라인업의 카테고리 이름** — 라인업 행은 `categoryDisplayOrder` 번호만 준다. 이름은 `GET admin/scenarios`의 `categories`로 번호→이름을 붙이는데 이 API는 develop 전용이라 운영에선 번호만 보인다. `next-day` 또는 배치 상세에 카테고리 목록(번호·이름)을 실어 주면 좋겠다. BE 요청.
 - `requestedBy`·`authorId`는 사용자 프로필 id — 화면은 `#id`. 이름이 필요하면 BE가 닉네임을 실어 줘야 한다.
 - 재시작 16분 기준(요청 제한 5분 × 3 + 60초)은 BE `ContentGenerationRecoveryService`의 heartbeat 기준과 같은 값이어야 한다 — BE가 바꾸면 `features/content/model`의 상수를 같이 바꾼다.
-- 2차(에셋)·3차(발행) 화면은 LAN-754 API 기준으로 별도 이슈. 승인 뒤는 "에셋 생성 대기" 배너까지.
+- 2차(에셋)·3차(발행) 화면은 LAN-754 API 기준으로 별도 이슈. 승인 뒤는 "에셋 생성 대기" 배너까지. 그 화면의 버튼 규칙 메모(2026-10-31 운영자): **에셋 재생성·교체 버튼은 ASSETS_REVIEW_READY뿐 아니라 ASSETS_READY에서도 활성, 발행 버튼은 ASSETS_READY에서만.**
 - 운영 ALB idle timeout 130초라 300초 AI 호출이 끊길 수 있다(landit-iac #64) — 끊기면 Day가 FAILED로 보이고 재시작으로 복구.
 - 비용 안내 문구(Day 1개 ≈ 7분 · 1.1달러, 재생성 약 2분 · 0.3달러)는 실측 평균(design.md 9-1절). 상한·운영 모드(자동 호출 / 초안 가져오기)는 미정.
