@@ -21,11 +21,15 @@ export interface DayRowCells {
   reviewed: boolean;
 }
 
-/** 초안을 아직 못 읽었으면 null — 표는 `…`를 그린다 */
+/**
+ * 초안을 아직 못 읽었으면 null — 표는 `…`를 그린다.
+ * 읽어 둔 초안의 상태가 배치 상세의 Day 상태와 다르면(재생성 뒤 아직 안 읽음) 낡은 수라 역시 null
+ */
 export function dayRowCells(
   draft: ContentDraft | undefined,
+  dayStatus: ContentDraft['status'],
 ): DayRowCells | null {
-  if (!draft) return null;
+  if (!draft || draft.status !== dayStatus) return null;
   const validation = readValidationReport(draft.validationResult);
   const review = readReviewDefects(draft.reviewResult);
   const findings = summarizeFindings(

@@ -52,6 +52,8 @@ const detail = (statuses: ContentDraftStatus[]): ContentBatchDetail => ({
   })),
 });
 
+const POLLED_AT = new Date('2026-10-22T10:30:00').getTime();
+
 function renderStage(data: ContentBatchDetail, fetchMock = vi.fn()) {
   fetchMock.mockImplementation(async (url: string) =>
     Response.json({
@@ -71,7 +73,7 @@ function renderStage(data: ContentBatchDetail, fetchMock = vi.fn()) {
   vi.stubGlobal('fetch', fetchMock);
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <DaysStage detail={data} />
+      <DaysStage detail={data} polledAt={POLLED_AT} />
     </QueryClientProvider>,
   );
   return fetchMock;
@@ -121,4 +123,14 @@ it('검수 대기 배치는 재시작이 잠긴다 — 실패했거나 멈춘 �
   renderStage(detail(['OK']));
 
   expect(screen.getByRole('button', { name: '재시작' })).toBeDisabled();
+});
+
+it('생성 중 배치의 마지막 갱신이 폴링 시각 기준 16분 이상 전이면 재시작이 켜진다', () => {
+  const stale = detail(['OK', 'GENERATING']);
+  stale.batch.status = 'GENERATING';
+  stale.batch.updatedAt = '2026-10-22T10:13:00';
+
+  renderStage(stale);
+
+  expect(screen.getByRole('button', { name: '재시작' })).toBeEnabled();
 });

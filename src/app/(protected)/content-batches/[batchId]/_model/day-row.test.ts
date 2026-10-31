@@ -16,7 +16,13 @@ const draft = (over: Partial<ContentDraft> = {}): ContentDraft => ({
 
 describe('dayRowCells', () => {
   it('초안을 아직 못 읽었으면 칸을 비워 둔다(…)', () => {
-    expect(dayRowCells(undefined)).toBeNull();
+    expect(dayRowCells(undefined, 'NEEDS_FIX')).toBeNull();
+  });
+
+  it('읽어 둔 초안의 상태가 Day 상태와 다르면(재생성 뒤 아직 안 읽음) 낡은 수라 비워 둔다', () => {
+    expect(
+      dayRowCells(draft({ status: 'NEEDS_FIX' }), 'REVIEW_READY'),
+    ).toBeNull();
   });
 
   it('검증기 FAIL·WARN, AI 결함 수, 열린·해결 FIX를 센다', () => {
@@ -53,6 +59,7 @@ describe('dayRowCells', () => {
           },
         ],
       }),
+      'NEEDS_FIX',
     );
 
     expect(cells).toEqual({
@@ -68,7 +75,7 @@ describe('dayRowCells', () => {
   });
 
   it('검증·검수 전이면 수는 0이고 아직 안 했음을 표시한다', () => {
-    expect(dayRowCells(draft())).toMatchObject({
+    expect(dayRowCells(draft(), 'NEEDS_FIX')).toMatchObject({
       fail: 0,
       defects: 0,
       validated: false,

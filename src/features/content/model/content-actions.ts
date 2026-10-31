@@ -58,11 +58,13 @@ export function canResume({ batch, days }: ContentBatchDetail, now: Date) {
   );
 }
 
-/** 검수 대기 배치의 모든 Day가 OK — 하나라도 다른 상태면 BE가 409를 낸다 */
+/** 검수 대기 배치의 모든 Day가 OK — 하나라도 다른 상태이거나 예약 Day 수보다 적으면(누락) BE가 409를 낸다 */
 export function canApprove(detail: ContentBatchDetail | undefined) {
   if (!detail || detail.batch.status !== 'REVIEW_READY') return false;
   return (
-    detail.days.length > 0 && detail.days.every((day) => day.status === 'OK')
+    detail.days.length > 0 &&
+    detail.days.length === detail.batch.dayCount &&
+    detail.days.every((day) => day.status === 'OK')
   );
 }
 

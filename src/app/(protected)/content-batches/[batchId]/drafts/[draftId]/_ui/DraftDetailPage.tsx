@@ -44,7 +44,15 @@ export function DraftDetailPage({
         message={
           notFound ? '이 배치에 없는 Day예요' : 'Day 초안을 불러오지 못했어요'
         }
-        onRetry={notFound ? undefined : () => draft.refetch()}
+        // 배치·초안 중 실패한 쪽만 다시 읽는다 — 초안만 다시 읽으면 배치 실패는 영영 안 풀린다
+        onRetry={
+          notFound
+            ? undefined
+            : () => {
+                if (draft.isError) draft.refetch();
+                if (batch.isError) batch.refetch();
+              }
+        }
       />
     );
   }

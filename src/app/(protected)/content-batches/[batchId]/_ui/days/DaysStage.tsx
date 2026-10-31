@@ -26,7 +26,13 @@ import { DaySummaryCard } from './DaySummaryCard';
 import { DayTable } from './DayTable';
 import { useBatchActions } from './useBatchActions';
 
-export function DaysStage({ detail }: { detail: ContentBatchDetail }) {
+interface DaysStageProps {
+  detail: ContentBatchDetail;
+  /** 배치를 마지막으로 읽은 시각(ms) — 재시작 16분 판정의 "지금". 렌더 시각을 쓰면 같은 응답이 올 때 안 바뀐다 */
+  polledAt: number;
+}
+
+export function DaysStage({ detail, polledAt }: DaysStageProps) {
   const { batch, days } = detail;
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -47,7 +53,7 @@ export function DaysStage({ detail }: { detail: ContentBatchDetail }) {
   const rows = days
     .map((day, index) => ({
       day,
-      cells: dayRowCells(drafts[index]?.data),
+      cells: dayRowCells(drafts[index]?.data, day.status),
       revisit: revisit.has(day.draftId),
     }))
     .filter((row) => matchesReviewFilter(filter, row.day.status, row.revisit));
@@ -57,7 +63,7 @@ export function DaysStage({ detail }: { detail: ContentBatchDetail }) {
       <DaySummaryCard
         batch={batch}
         summary={summarizeDays(days)}
-        canResume={canResume(batch) && !actions.pending}
+        canResume={canResume(detail, new Date(polledAt)) && !actions.pending}
         canApprove={canApprove(detail) && !actions.pending}
         onResume={() => actions.ask('resume')}
         onApprove={() => actions.ask('approve')}

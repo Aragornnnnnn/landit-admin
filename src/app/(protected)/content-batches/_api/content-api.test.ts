@@ -1,12 +1,7 @@
 // 관리자 프록시 경계에서 실제 제작 요청 계약과 오류 보존을 검증한다.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  canApprove,
-  canReview,
-  creationError,
-  shouldPoll,
-} from '../_model/content-state';
+import { canReview } from '../_model/content-state';
 import { runContentCommand, type ContentCommand } from './content-api';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -101,66 +96,9 @@ describe('콘텐츠 제작 계약', () => {
 });
 
 describe('제작 상태 경계', () => {
-  it.each([
-    [0, 0, 0, 0],
-    [31, 0, 0, 31],
-    [2, 0, 0, 1],
-    [1, -1, 0, 2],
-    [1.5, 0, 0, 1.5],
-  ])(
-    '제작 수나 배분이 잘못되면 요청하지 않는다',
-    (dayCount, chloe, marco, teddy) => {
-      expect(
-        creationError({ dayCount, characterRatio: { chloe, marco, teddy } }),
-      ).not.toBeNull();
-    },
-  );
-  it('정수 합이 일치하면 생성할 수 있다', () => {
-    expect(
-      creationError({
-        dayCount: 3,
-        characterRatio: { chloe: 1, marco: 1, teddy: 1 },
-      }),
-    ).toBeNull();
-  });
-  it('검수 배치에서 한 Day만 재생성 중이어도 상태를 계속 조회한다', () => {
-    expect(
-      shouldPoll({
-        batch: { status: 'REVIEW_READY' },
-        days: [{ status: 'GENERATING' }],
-      }),
-    ).toBe(true);
-  });
-  it('모든 Day가 끝난 검수 배치는 주기 조회를 멈춘다', () => {
-    expect(
-      shouldPoll({
-        batch: { status: 'REVIEW_READY' },
-        days: [{ status: 'OK' }],
-      }),
-    ).toBe(false);
-  });
+  // 접수 검증·폴링·승인 판정의 경계는 features/content/model의 batch-request·content-actions 테스트로 옮겼다
   it('전체 배치가 생성 중이면 완료된 Day를 검수할 수 있다', () => {
     expect(canReview('GENERATING', 'REVIEW_READY')).toBe(true);
     expect(canReview('APPROVED', 'OK')).toBe(false);
-  });
-  it('누락·미완료 Day가 있으면 배치 승인을 막는다', () => {
-    expect(
-      canApprove({
-        batch: { status: 'REVIEW_READY', dayCount: 2 },
-        days: [{ status: 'OK' }],
-      }),
-    ).toBe(false);
-    expect(
-      canApprove({
-        batch: { status: 'REVIEW_READY', dayCount: 2 },
-        days: [{ status: 'OK' }, { status: 'NEEDS_FIX' }],
-      }),
-    ).toBe(false);
-    expect(
-      canApprove({
-        batch: { status: 'REVIEW_READY', dayCount: 1 },
-        days: [{ status: 'OK' }],
-      }),
-    ).toBe(true);
   });
 });
