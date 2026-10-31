@@ -4,6 +4,7 @@ import { PanelsTopLeft } from 'lucide-react';
 
 import {
   AppVersionsIcon,
+  ContentProductionIcon,
   DashboardIcon,
   DirectLetterIcon,
   FeedbackIcon,
@@ -26,6 +27,10 @@ export interface NavItem {
   badge?: 'pendingFeedbacks';
   /** 하위 한 단계(상세) 화면의 제목 — 번호를 제목에 넣지 않는 화면만 적는다 */
   detailTitle?: string;
+  /** href 밖에 있지만 이 메뉴에 속하는 경로 — 제작 규칙(/content-rules)처럼 메뉴 없이 제목만 "콘텐츠 제작 / …"으로 읽히는 화면 */
+  alsoActive?: string[];
+  /** 하위 경로의 제목을 경로에서 직접 만든다 — detailTitle로 부족한 다단 화면(배치 #8 / Day 초안) */
+  subtitle?: (pathname: string) => string | undefined;
 }
 
 export interface NavGroup {
@@ -88,8 +93,10 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         href: '/content-batches',
-        label: '콘텐츠 제작·검수',
-        icon: ScenarioTestIcon,
+        label: '콘텐츠 제작',
+        icon: ContentProductionIcon,
+        alsoActive: ['/content-rules'],
+        subtitle: contentSubtitle,
       },
       {
         href: '/scenarios',
@@ -124,14 +131,24 @@ export function isActiveNav(href: string, pathname: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** 메뉴 항목이 활성인가 — href와 alsoActive 둘 다 본다 */
+export function isNavItemActive(item: NavItem, pathname: string): boolean {
+  return [item.href, ...(item.alsoActive ?? [])].some((href) =>
+    isActiveNav(href, pathname),
+  );
+}
+
 /** 상단바 제목 — 활성 메뉴의 라벨. 모르는 경로는 빈 문자열 (메뉴 href끼리 중첩되지 않으므로 첫 일치가 답이다) */
 export function pageTitleFor(pathname: string): string {
   const match = NAV_GROUPS.flatMap((g) => g.items).find((item) =>
-    isActiveNav(item.href, pathname),
+    isNavItemActive(item, pathname),
   );
   if (!match) return '';
   // 하위 화면은 "어디의 무엇"인지로 읽힌다 (Figma "공지·업데이트 / 새 편지")
-  const sub = SUB_TITLES[pathname] ?? detailTitleFor(match, pathname);
+  const sub =
+    SUB_TITLES[pathname] ??
+    match.subtitle?.(pathname) ??
+    detailTitleFor(match, pathname);
   return sub ? `${match.label} / ${sub}` : match.label;
 }
 
@@ -151,4 +168,12 @@ function detailTitleFor(item: NavItem, pathname: string): string | undefined {
 /** 현재 BE 호스트가 develop인지 — 시나리오 테스트 메뉴 노출 기준 */
 export function isDevelopServer(apiHost: string | undefined): boolean {
   return apiHost?.includes('develop') ?? false;
+}
+
+// 콘텐츠 제작 — 배치 번호는 짧은 정수라 제목에 넣는다. Day 번호는 URL의 draftId와 달라 "Day 초안"까지만 (Figma "콘텐츠 제작 › 배치 #8 › Day 301")
+function contentSubtitle(pathname: string): string | undefined {
+  if (pathname === '/content-rules') return '제작 규칙';
+  const match = /^\/content-batches\/(\d+)(\/drafts\/\d+)?$/.exec(pathname);
+  if (!match) return undefined;
+  return match[2] ? `배치 #${match[1]} / Day 초안` : `배치 #${match[1]}`;
 }
