@@ -20,11 +20,13 @@ function createQueryClient(): QueryClient {
       queries: {
         staleTime: 30_000,
         refetchOnWindowFocus: false,
-        // 401·403은 재시도해도 같다 — 세션·권한 문제는 client.ts가 처리한다
+        // 401·403·404는 재시도해도 같다 — 세션·권한 문제는 client.ts가, 없는 자원은 화면이 처리한다
         retry: (failureCount, error) => {
           if (
             error instanceof ApiError &&
-            (error.status === 401 || error.status === 403)
+            (error.status === 401 ||
+              error.status === 403 ||
+              error.status === 404)
           ) {
             return false;
           }

@@ -9,6 +9,8 @@ const COMMENT_MAX = 2000;
 interface LineupFooterProps {
   dirty: boolean;
   tableError: string | null;
+  /** 저장 요청이 서버에서 거절된 이유 — 다음 요청까지 남긴다 */
+  serverError: string | null;
   saveDisabled: boolean;
   comment: string;
   regenerateDisabled: boolean;
@@ -20,6 +22,7 @@ interface LineupFooterProps {
 export function LineupFooter({
   dirty,
   tableError,
+  serverError,
   saveDisabled,
   comment,
   regenerateDisabled,
@@ -32,13 +35,18 @@ export function LineupFooter({
       <section className="flex flex-col gap-3 rounded-[20px] bg-card px-6 py-5">
         <h3 className="text-[15px] font-bold text-strong">라인업 수정</h3>
         <p className="text-[13px] leading-[1.5] text-body">
-          행을 클릭해 제목·카테고리·난이도·캐릭터·선발화·줄거리를 고친다. 저장은
-          예약 Day 전부를 한 번에 보내며, 캐릭터별 수가 접수 비중과 다르거나
-          카테고리가 없으면 400. 새 카테고리는 이름으로 적는다.
+          행을 클릭해 제목·카테고리·난이도·캐릭터·선발화·줄거리를 고쳐요. 저장은
+          예약 Day 전부를 한 번에 보내요. 캐릭터별 수가 접수 비중과 다르거나
+          카테고리가 없으면 저장되지 않아요. 새 카테고리는 이름으로 적어요.
         </p>
         {tableError && (
           <p role="alert" className="text-[12px] text-destructive">
             {tableError}
+          </p>
+        )}
+        {serverError && (
+          <p role="alert" className="text-[12px] text-destructive">
+            {serverError}
           </p>
         )}
         <div className="mt-auto flex items-center gap-3">
@@ -60,7 +68,7 @@ export function LineupFooter({
           htmlFor="lineup-comment"
           className="text-[15px] font-bold text-strong"
         >
-          라인업 재생성 코멘트 (누적되어 다음 프롬프트에 들어간다)
+          라인업 재생성 코멘트 (누적되어 다음 프롬프트에 들어가요)
         </label>
         <Textarea
           id="lineup-comment"
@@ -73,7 +81,7 @@ export function LineupFooter({
         />
         <div className="mt-auto flex items-center justify-end gap-3">
           <span className="text-[12px] text-subtle">
-            재생성 중 실패하면 이 라인업이 그대로 남고 사유가 표시된다
+            재생성 중 실패하면 이 라인업이 그대로 남고 사유가 보여요
           </span>
           <Button
             variant="outline"

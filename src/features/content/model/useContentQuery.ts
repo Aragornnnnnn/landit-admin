@@ -65,7 +65,8 @@ export function useContentDraftQuery(
 
 /**
  * Day 표의 검증기·AI 검수·코멘트 열 — 배치 상세의 Day 요약엔 없어 초안을 하나씩 읽는다(Day ≤30).
- * 라인업 단계 Day는 아직 읽을 것이 없어 건너뛴다. BE가 요약 필드를 주면 이 훅을 지운다
+ * 라인업 단계·생성 중 Day는 아직 읽을 것이 없어 건너뛴다 — 생성이 끝나 켜지는 순간 TanStack이 새로 읽는다(이 쿼리엔 폴링이 없다).
+ * BE가 요약 필드를 주면 이 훅을 지운다
  */
 export function useContentDraftsQuery(
   batchId: number,
@@ -75,7 +76,7 @@ export function useContentDraftsQuery(
     queries: days.map((day) => ({
       queryKey: contentDraftKey(batchId, day.draftId),
       queryFn: () => fetchContentDraft(batchId, day.draftId),
-      enabled: day.status !== 'LINEUP',
+      enabled: day.status !== 'LINEUP' && day.status !== 'GENERATING',
       staleTime: CONTENT_POLL_MS,
     })),
   });

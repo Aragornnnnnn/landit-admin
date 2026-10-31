@@ -5,7 +5,7 @@ import { ratioAdvice, reservedDayRange } from './batch-draft';
 describe('ratioAdvice', () => {
   it('누적이 가장 많은 캐릭터를 짚고 나머지 비중을 올리라고 한다', () => {
     expect(ratioAdvice({ chloe: 80, marco: 74, teddy: 146 })).toBe(
-      '누적 분포 chloe 80 · marco 74 · teddy 146 — teddy가 많으니 chloe·marco 비중을 올리는 쪽을 권장',
+      '누적 분포 chloe 80 · marco 74 · teddy 146 — teddy가 많으니 chloe·marco 비중을 올리는 쪽을 권해요',
     );
   });
 

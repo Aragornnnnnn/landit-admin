@@ -28,7 +28,7 @@ export function reservedDayRange(
 }
 
 /**
- * "누적 분포 chloe 80 · marco 74 · teddy 146 — teddy가 많으니 chloe·marco 비중을 올리는 쪽을 권장".
+ * "누적 분포 chloe 80 · marco 74 · teddy 146 — teddy가 많으니 chloe·marco 비중을 올리는 쪽을 권해요".
  * 누적이 전부 같으면 분포만, 아직 못 받았으면 빈 문자열
  */
 export function ratioAdvice(
@@ -40,5 +40,5 @@ export function ratioAdvice(
   const most = CONTENT_CHARACTERS.filter((name) => (counts[name] ?? 0) === max);
   if (most.length === CONTENT_CHARACTERS.length) return distribution;
   const others = CONTENT_CHARACTERS.filter((name) => !most.includes(name));
-  return `${distribution} — ${most.join('·')}가 많으니 ${others.join('·')} 비중을 올리는 쪽을 권장`;
+  return `${distribution} — ${most.join('·')}가 많으니 ${others.join('·')} 비중을 올리는 쪽을 권해요`;
 }

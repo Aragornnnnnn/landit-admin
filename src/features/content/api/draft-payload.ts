@@ -1,6 +1,5 @@
 // Day 초안 payload의 모양과 읽기 — 스웨거가 unknown/string으로 찍는 JSON을 BE dto/draft·dto/validation 모양으로 좁힌다.
 // "없음(아직 전 단계)"과 "깨짐(형태가 다름)"을 가른다 — 깨진 값을 통과로 보이게 하지 않기 위해 (1차 결정 유지)
-import type { ContentReviewComment } from './content-batch';
 
 export const CONTENT_LEVELS = [
   'LEVEL_1',
@@ -209,5 +208,3 @@ export function expressionsOfLevel(
 ): DraftExpression[] {
   return expressions.filter((expression) => expression.levelGroup === level);
 }
-
-export type { ContentReviewComment };

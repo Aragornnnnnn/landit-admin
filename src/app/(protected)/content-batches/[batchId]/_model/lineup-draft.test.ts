@@ -55,7 +55,10 @@ describe('validateLineupRows', () => {
   ];
 
   it('전부 맞으면 행 오류도 표 오류도 없다', () => {
-    expect(validateLineupRows(valid, ratio)).toEqual({ rows: {}, table: null });
+    expect(validateLineupRows(valid, ratio, 2)).toEqual({
+      rows: {},
+      table: null,
+    });
   });
 
   it.each([
@@ -80,7 +83,7 @@ describe('validateLineupRows', () => {
   ])('%s 그 행에 오류를 단다', (_label, over, message) => {
     const rows = [lineupRow(301, over) as LineupDraftRow, valid[1]];
 
-    const result = validateLineupRows(rows, ratio);
+    const result = validateLineupRows(rows, ratio, 2);
 
     expect(result.rows[301]).toContain(message);
     expect(result.rows[302]).toBeUndefined();
@@ -89,8 +92,14 @@ describe('validateLineupRows', () => {
   it('캐릭터 수가 접수 비중과 다르면 표 전체 오류다', () => {
     const rows = [valid[0], { ...valid[1], characterId: 'chloe' }];
 
-    expect(validateLineupRows(rows, ratio).table).toBe(
+    expect(validateLineupRows(rows, ratio, 2).table).toBe(
       '캐릭터 수가 접수 비중(chloe 1 · marco 1 · teddy 0)과 달라요 — 지금 chloe 2 · marco 0 · teddy 0',
+    );
+  });
+
+  it('편집 행이 예약 Day 수보다 적으면(라인업이 없거나 깨진 Day) 표 오류로 저장을 막는다', () => {
+    expect(validateLineupRows([valid[0]], { chloe: 1 }, 2).table).toBe(
+      '라인업이 없거나 읽지 못한 Day가 있어 저장할 수 없어요 — 코멘트로 라인업을 다시 만들어 주세요',
     );
   });
 });

@@ -1,7 +1,8 @@
 'use client';
 
 // 라인업 확인 화면 — 요약 카드 · 라인업 표(행 클릭 편집) · 저장/재생성 코멘트 (Figma 4129:939).
-// 편집 초안은 여기 하나에 두고 표·푸터에 내려 준다. 서버가 새 라인업을 주면(updatedAt 변경) 부모가 key로 다시 마운트한다
+// 편집 초안은 여기 하나에 두고 표·푸터에 내려 준다. 코멘트 재생성으로 새 라인업이 오면(배치 updatedAt 변경) 부모가 key로 다시 마운트하고,
+// 저장은 배치를 건드리지 않아 updatedAt이 그대로라 응답으로 원본을 직접 다시 세운다
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -9,6 +10,7 @@ import type { ContentBatchDetail } from '@/features/content/api/content-batch';
 import { canEditLineup } from '@/features/content/model/content-actions';
 import { useContentBatchMutation } from '@/features/content/model/useContentMutation';
 import { scenarioQuery } from '@/features/scenario/model/scenario-query';
+import { failureMessage } from '@/shared/api/api-error';
 
 import {
   categoryOptionsOf,
@@ -28,7 +30,7 @@ import { ProceedDialog } from './ProceedDialog';
 export function LineupStage({ detail }: { detail: ContentBatchDetail }) {
   const { batch } = detail;
   const editable = canEditLineup(batch.status);
-  const [original] = useState(() => lineupRowsOf(detail.days));
+  const [original, setOriginal] = useState(() => lineupRowsOf(detail.days));
   const [rows, setRows] = useState<LineupDraftRow[]>(original);
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [comment, setComment] = useState('');
@@ -41,10 +43,19 @@ export function LineupStage({ detail }: { detail: ContentBatchDetail }) {
   const categories = categoryOptionsOf(catalog.data);
 
   const dirty = hasLineupChanges(original, rows);
-  const validation = validateLineupRows(rows, batch.characterRatio);
+  const validation = validateLineupRows(
+    rows,
+    batch.characterRatio,
+    detail.days.length,
+  );
   const invalid =
     Object.keys(validation.rows).length > 0 || validation.table !== null;
   const busy = mutation.isPending;
+  // 저장의 서버 오류(400 등)는 토스트에 더해 카드에 남긴다 — 어느 행이 문제인지 보며 고쳐야 한다
+  const saveError =
+    mutation.isError && mutation.variables?.type === 'lineup'
+      ? failureMessage(mutation.error, '라인업을 저장하지 못했어요')
+      : null;
 
   const updateRow = (day: number, next: LineupDraftRow) =>
     setRows((current) => current.map((row) => (row.day === day ? next : row)));
@@ -84,6 +95,7 @@ export function LineupStage({ detail }: { detail: ContentBatchDetail }) {
         <LineupFooter
           dirty={dirty}
           tableError={validation.table}
+          serverError={saveError}
           saveDisabled={!dirty || invalid || busy}
           comment={comment}
           regenerateDisabled={!comment.trim() || dirty || busy}
@@ -94,7 +106,14 @@ export function LineupStage({ detail }: { detail: ContentBatchDetail }) {
                 batchId: batch.batchId,
                 rows: toLineupRequest(rows),
               },
-              { onSuccess: () => setEditingDay(null) },
+              {
+                onSuccess: (saved) => {
+                  const next = lineupRowsOf(saved.days);
+                  setOriginal(next);
+                  setRows(next);
+                  setEditingDay(null);
+                },
+              },
             )
           }
           onChangeComment={setComment}
