@@ -10,3 +10,8 @@ export class ApiError extends Error {
     this.name = 'ApiError';
   }
 }
+
+/** 화면에 보일 실패 문구 — BE가 준 메시지까지만, 없으면 호출부의 기본 문구 (docs/security.md "입력·출력") */
+export function failureMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError && error.message ? error.message : fallback;
+}
