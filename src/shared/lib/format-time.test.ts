@@ -1,7 +1,11 @@
 // 시각 표기 검증 — 상대 시각의 구간 경계와 잘못된 값 폴백
 import { describe, expect, it } from 'vitest';
 
-import { formatDateTime, formatRelativeTime } from './format-time';
+import {
+  formatDateTime,
+  formatMonthDay,
+  formatRelativeTime,
+} from './format-time';
 
 describe('formatDateTime', () => {
   it('MM.DD HH:mm으로 적는다', () => {
@@ -10,6 +14,16 @@ describe('formatDateTime', () => {
 
   it('시각이 아니면 빈 문자열 — 목록이 깨지는 것보다 낫다', () => {
     expect(formatDateTime('없는날짜')).toBe('');
+  });
+});
+
+describe('formatMonthDay', () => {
+  it.each([
+    ['2026-10-23T09:00:00', '10.23'],
+    ['2026-08-05T00:00:00', '08.05'],
+    ['nope', ''],
+  ])('%s → "%s" — 월·일 모두 두 자리, 못 읽으면 빈 문자열', (iso, label) => {
+    expect(formatMonthDay(iso)).toBe(label);
   });
 });
 
