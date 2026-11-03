@@ -4,14 +4,14 @@ Figma — 화면: https://www.figma.com/design/7DPdamjAqv6akNN0aWjseq/Landit?nod
 라우트: /content-batches · /content-batches/[batchId] · /content-batches/[batchId]/drafts/[draftId] · /content-rules
 API: `/api/v1/admin/content-batches*` · `/api/v1/admin/content-rules*` (아래 데이터)
 BE: landit-be LAN-690·693·694·695·702 · `docs/tasks/LAN-690/design.md` 5절 · 실측 `quality-run-2026-10-18.md`
-이슈: LAN-753(이 문서) · LAN-809(API·모델) · LAN-810(배치 목록·접수) · LAN-811(라인업) · LAN-812(Day 목록·승인) · LAN-813(Day 상세) · LAN-814(제작 규칙)
+이슈: LAN-753(이 문서 + 배치 목록·접수) · LAN-809(API·모델) · LAN-810(라인업) · LAN-811(Day 목록·승인) · LAN-812(Day 상세) · LAN-813(제작 규칙)
 
 > 담당자가 Day 수와 캐릭터 비율만 넣으면 서버가 AI(생성 Claude Opus 5.5 · 검수 GPT-5.6)로 라인업 → Day마다 질문 9·표현 12·별점 5를 만들고, 규칙 검증기·기존 표현 중복 검사·독립 AI 검수를 거친다. 담당자는 **라인업 확인(1) → Day 검수·재생성(2) → 승인(3)** 세 번만 손을 댄다. 승인하면 표현 id가 예약되고 2차(이미지·음성)·3차(운영 DB 반영)로 넘어간다. 생성은 비동기라 목록·상세는 10초 폴링으로 상태를 갱신한다.
 
 ## 이력
 
 - 2026-10-25 `[LAN-695]` #103~#108 — Figma 확정 전에 한 페이지(`/content-batches?batch=&draft=`)로 만든 1차. 접수·라인업 읽기·코멘트 재생성·진행·OK/FIX·재생성·승인이 동작한다.
-- 2026-10-23 Figma 확정안이 나왔고, 2026-10-31 운영자 결정으로 **Figma 안으로 재구성한다**(LAN-753~814). 1차에서 살리는 것 — 되돌릴 수 없는 액션마다 확인창 + 비용 문구, 검수 결과의 "기록 없음 / 빈 배열(지적 없음) / 깨진 JSON" 구분, Day 상세 머리의 브리핑·대화 목표, 재생성 뒤 상태가 바뀌면 상세를 다시 읽는 처리, 기존 테스트.
+- 2026-10-23 Figma 확정안이 나왔고, 2026-10-31 운영자 결정으로 **Figma 안으로 재구성한다**(LAN-753·809~813). 1차에서 살리는 것 — 되돌릴 수 없는 액션마다 확인창 + 비용 문구, 검수 결과의 "기록 없음 / 빈 배열(지적 없음) / 깨진 JSON" 구분, Day 상세 머리의 브리핑·대화 목표, 재생성 뒤 상태가 바뀌면 상세를 다시 읽는 처리, 기존 테스트.
 - 주소는 1차의 `/content-batches`를 유지한다(릴리즈 v1.7.0에 이미 실림). Figma의 `/content/…`는 쓰지 않는다.
 
 ## 화면 변형
@@ -205,11 +205,11 @@ BE 계약은 `landit-be/docs/tasks/LAN-690/design.md` 5절. 모든 요청은 프
 ## 구현 배치 (후속 이슈 기준)
 
 - `features/content/` — `api/`(요청 함수 · 좁힌 타입 · payload 형태 검사) · `model/`(상태 라벨·점 · 가능 액션 판정 · 폴링 판정 · 검증기 요약 · scope 문자열 · 참조↔targetPath · 로컬 열람 기록 · 쿼리·뮤테이션 훅). 네 라우트가 같이 쓴다 (LAN-809)
-- `app/(protected)/content-batches/` — 목록 `_ui/`·`_model/`(필터 ↔ 쿼리스트링) + 접수 Dialog (LAN-810)
-- `app/(protected)/content-batches/[batchId]/` — `_ui/lineup/`(LAN-811) · `_ui/days/`(LAN-812) · `_model/`(라인업 초안 편집·검증, 검수 필터). page는 배치 상태로 둘 중 하나를 고른다
-- `app/(protected)/content-batches/[batchId]/drafts/[draftId]/` — `_ui/`(질문 3열 · 표현 · 별점 · 검증기 · AI 검수 · 담당자 검수 · 재생성) · `_model/`(코멘트 초안 · 참조 삽입/해제 · 하이라이트) (LAN-813)
-- `app/(protected)/content-rules/` — 목록 · 등록 폼(승격 Dialog와 공유) (LAN-814)
-- 1차 `content-batches/_api·_model·_ui`는 단계별로 지운다 — 목록·접수·배치 액션은 LAN-810~812에서, Day 상세가 쓰는 보기·검수 컴포넌트는 LAN-813에서. 기존 테스트는 옮겨서 살린다
+- `app/(protected)/content-batches/` — 목록 `_ui/`·`_model/`(필터 ↔ 쿼리스트링) + 접수 Dialog (LAN-753 — 목록 화면엔 별도 이슈 번호가 없다)
+- `app/(protected)/content-batches/[batchId]/` — `_ui/lineup/`(LAN-810) · `_ui/days/`(LAN-811) · `_model/`(라인업 초안 편집·검증, 검수 필터). page는 배치 상태로 둘 중 하나를 고른다
+- `app/(protected)/content-batches/[batchId]/drafts/[draftId]/` — `_ui/`(질문 3열 · 표현 · 별점 · 검증기 · AI 검수 · 담당자 검수 · 재생성) · `_model/`(코멘트 초안 · 참조 삽입/해제 · 하이라이트) (LAN-812)
+- `app/(protected)/content-rules/` — 목록 · 등록 폼(승격 Dialog와 공유) (LAN-813)
+- 1차 `content-batches/_api·_model·_ui`는 단계별로 지운다 — 목록·접수·배치 액션은 LAN-753·810·811에서, Day 상세가 쓰는 보기·검수 컴포넌트는 LAN-812에서. 기존 테스트는 옮겨서 살린다
 
 ## BE 확인 사항 / 열린 질문
 
