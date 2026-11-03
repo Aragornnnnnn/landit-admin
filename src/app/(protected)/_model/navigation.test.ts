@@ -36,6 +36,11 @@ describe('pageTitleFor', () => {
     ['/push-campaigns', '푸시 알림'],
     ['/push-campaigns/new', '푸시 알림 / 새 푸시'],
     ['/push-campaigns/3f2a-uuid', '푸시 알림 / 상세'],
+    // 배치 번호는 짧은 정수라 제목에 넣는다 (Figma "콘텐츠 제작 › 배치 #8")
+    ['/content-batches', '콘텐츠 제작'],
+    ['/content-batches/8', '콘텐츠 제작 / 배치 #8'],
+    ['/content-batches/8/drafts/301', '콘텐츠 제작 / 배치 #8 / Day 초안'],
+    ['/content-rules', '콘텐츠 제작 / 제작 규칙'],
     ['/unknown', ''],
   ])('%s → "%s"', (pathname, title) => {
     expect(pageTitleFor(pathname)).toBe(title);
