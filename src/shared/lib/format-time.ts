@@ -20,6 +20,13 @@ export function formatDateDot(iso: string): string {
   return `${date.getFullYear()}.${two(date.getMonth() + 1)}.${two(date.getDate())}`;
 }
 
+/** "10.23" — 데스크톱 표의 날짜 열(제작 규칙 등록일). 연도가 뜻을 갖지 않고 폭이 좁을 때 */
+export function formatMonthDay(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${two(date.getMonth() + 1)}.${two(date.getDate())}`;
+}
+
 /** "8.16" — 모바일에서 날짜만 적을 때. 월은 0을 채우지 않는다(프레임 기준) */
 export function formatShortDate(iso: string): string {
   const date = new Date(iso);
