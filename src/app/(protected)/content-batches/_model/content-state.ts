@@ -1,51 +1,10 @@
-// 백엔드 상태 전이와 생성 입력 조건을 화면의 행동 가능 여부로 변환한다.
-import type { Schema } from '@/shared/api/schema-patch';
+// 1차 Day 상세(검수·재생성)가 쓰는 규칙 — LAN-813에서 features/content/model의 content-actions·regeneration-scope로 대체하고 지운다.
+// 접수 검증·폴링·승인 판정은 features/content/model로 옮겨져 여기서 뺐다
 
-type BatchState = {
-  batch: { status: string; dayCount?: number };
-  days: { status: string }[];
-};
-export function creationError(
-  request: Schema<'AdminContentBatchCreateRequest'>,
-): string | null {
-  const count = request.dayCount ?? 0;
-  const amounts = ['chloe', 'marco', 'teddy'].map(
-    (key) =>
-      request.characterRatio[key as keyof typeof request.characterRatio] ?? 0,
-  );
-  if (!Number.isInteger(count) || count < 1 || count > 30)
-    return 'Day 수는 1~30 사이 정수로 입력해 주세요.';
-  if (
-    amounts.some((n) => !Number.isInteger(n) || n < 0) ||
-    amounts.reduce((a, b) => a + b, 0) !== count
-  )
-    return '캐릭터별 Day 수의 합을 제작 수와 맞춰 주세요.';
-  if ((request.note?.length ?? 0) > 2000)
-    return '요청 사항은 2,000자까지 입력해 주세요.';
-  return null;
-}
-export function shouldPoll(data: BatchState | undefined): boolean {
-  return (
-    !!data &&
-    (['REQUESTED', 'LINEUP_GENERATING', 'GENERATING'].includes(
-      data.batch.status,
-    ) ||
-      data.days.some((d) => d.status === 'GENERATING'))
-  );
-}
 export function canReview(batch: string, draft: string): boolean {
   return (
     ['GENERATING', 'REVIEW_READY'].includes(batch) &&
     ['REVIEW_READY', 'NEEDS_FIX', 'OK'].includes(draft)
-  );
-}
-export function canApprove(data: BatchState | undefined): boolean {
-  return (
-    !!data &&
-    data.batch.status === 'REVIEW_READY' &&
-    data.days.length > 0 &&
-    data.days.length === data.batch.dayCount &&
-    data.days.every((d) => d.status === 'OK')
   );
 }
 export const REGENERATION_SCOPES = [

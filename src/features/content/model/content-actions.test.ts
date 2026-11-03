@@ -108,6 +108,7 @@ describe('canApprove', () => {
     ['수정할 Day가 남았으면', batch(), [day('OK'), day('NEEDS_FIX', 2)]],
     ['배치가 아직 생성 중이면', batch({ status: 'GENERATING' }), ok],
     ['Day가 하나도 없으면', batch(), []],
+    ['예약 Day 수보다 Day가 적으면(누락)', batch(), [day('OK')]],
   ] as const)('%s 승인할 수 없다', (_name, target, days) => {
     expect(canApprove({ batch: target, days: [...days] })).toBe(false);
   });
