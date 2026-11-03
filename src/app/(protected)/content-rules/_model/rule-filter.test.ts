@@ -44,9 +44,12 @@ describe('readRuleFilter', () => {
     ['status=RETIRED', { scope: undefined, status: 'RETIRED' }],
     ['status=ALL&scope=COMMON', { scope: 'COMMON', status: 'ALL' }],
     ['scope=NOPE&status=nope', { scope: undefined, status: 'ACTIVE' }],
-  ])('"%s"를 읽으면 %o — 모르는 값은 기본값', (query, expected) => {
-    expect(readRuleFilter(params(query))).toEqual(expected);
-  });
+  ])(
+    '쿼리스트링 "%s"를 읽으면 필터가 된다 — 모르는 값은 기본값',
+    (query, expected) => {
+      expect(readRuleFilter(params(query))).toEqual(expected);
+    },
+  );
 });
 
 describe('writeRuleFilter', () => {
@@ -57,9 +60,12 @@ describe('writeRuleFilter', () => {
       'scope=QUESTION',
     ],
     [{ scope: undefined, status: 'ALL' as const }, 'status=ALL'],
-  ])('%o를 쓰면 "%s" — 기본값(상태 ACTIVE)은 적지 않는다', (filter, query) => {
-    expect(writeRuleFilter(filter)).toBe(query);
-  });
+  ])(
+    '필터를 쓰면 "%s"가 된다 — 기본값(상태 ACTIVE)은 적지 않는다',
+    (filter, query) => {
+      expect(writeRuleFilter(filter)).toBe(query);
+    },
+  );
 });
 
 describe('filterRules', () => {
@@ -93,24 +99,21 @@ describe('ruleSourceLabel', () => {
   it.each([
     [41, '코멘트 #41'],
     [null, '시드·직접'],
-  ])('sourceCommentId %s → "%s"', (id, label) => {
+  ])('승격 코멘트가 %s이면 출처를 "%s"로 적는다', (id, label) => {
     expect(ruleSourceLabel(rule('Q-1', 'QUESTION', 'ACTIVE', id))).toBe(label);
   });
 });
 
 describe('ruleEmptyLabel', () => {
   it.each([
+    ['이 scope에 규칙이 없어요', { scope: 'QUESTION', status: 'ACTIVE' }],
     [
-      { scope: 'QUESTION' as const, status: 'ACTIVE' as const },
-      '이 scope에 규칙이 없어요',
-    ],
-    [{ scope: undefined, status: 'RETIRED' as const }, '은퇴한 규칙이 없어요'],
-    [
-      { scope: undefined, status: 'ACTIVE' as const },
       '프롬프트에 들어가는 규칙이 없어요',
+      { scope: undefined, status: 'ACTIVE' },
     ],
-    [{ scope: undefined, status: 'ALL' as const }, '등록된 규칙이 없어요'],
-  ])('%o → "%s"', (filter, label) => {
+    ['은퇴한 규칙이 없어요', { scope: undefined, status: 'RETIRED' }],
+    ['등록된 규칙이 없어요', { scope: undefined, status: 'ALL' }],
+  ] as const)('조건에 맞는 규칙이 없으면 "%s"라고 말한다', (label, filter) => {
     expect(ruleEmptyLabel(filter)).toBe(label);
   });
 });

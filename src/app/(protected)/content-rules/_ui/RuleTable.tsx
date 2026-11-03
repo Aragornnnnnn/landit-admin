@@ -19,7 +19,7 @@ const CELL = {
 
 interface RuleTableProps {
   rules: ContentRule[];
-  /** 은퇴 요청 중 — 다른 행의 은퇴 버튼도 잠근다 */
+  /** 은퇴 요청 중 — 다른 행의 은퇴 버튼도 잠근다(등록 중엔 잠그지 않는다) */
   pending: boolean;
   onRetire: (rule: ContentRule) => void;
 }

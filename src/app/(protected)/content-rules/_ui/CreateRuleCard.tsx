@@ -10,7 +10,7 @@ import type {
 import { ContentRuleForm } from '@/features/content/ui/ContentRuleForm';
 
 interface CreateRuleCardProps {
-  /** 칩으로 고른 scope를 기본값으로 — 보고 있는 scope에 보태는 경우가 대부분 */
+  /** 폼을 (다시) 마운트할 때의 기본 scope — 보고 있는 칩. 쓰는 도중에 칩을 바꿔도 입력은 지키므로 그때는 따라가지 않는다 */
   defaultScope: ContentRuleScope;
   pending: boolean;
   onCreate: (body: ContentRuleRequest, done: () => void) => void;
@@ -21,14 +21,14 @@ export function CreateRuleCard({
   pending,
   onCreate,
 }: CreateRuleCardProps) {
-  // 등록에 성공할 때마다 폼을 새로 마운트해 비운다 — 폼은 자기 상태를 갖고 있다
+  // 등록에 성공할 때마다 폼을 새로 마운트해 비운다 — 폼은 자기 상태를 갖고 있다. key에 scope를 넣으면 칩을 누를 때 쓰던 문장이 날아간다
   const [generation, setGeneration] = useState(0);
 
   return (
     <section className="flex flex-col gap-4 rounded-[20px] bg-card px-6 py-5">
       <h2 className="text-[15px] font-bold text-strong">새 규칙 등록</h2>
       <ContentRuleForm
-        key={`${generation}:${defaultScope}`}
+        key={generation}
         initial={{ scope: defaultScope, ruleText: '' }}
         pending={pending}
         onSubmit={(body) =>

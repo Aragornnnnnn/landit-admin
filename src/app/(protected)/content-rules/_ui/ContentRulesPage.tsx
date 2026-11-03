@@ -8,6 +8,7 @@ import type { ContentRule } from '@/features/content/api/content-rule';
 import { useContentRuleMutation } from '@/features/content/model/useContentMutation';
 import { useContentRulesQuery } from '@/features/content/model/useContentRuleQuery';
 import { DesktopOnly } from '@/features/content/ui/DesktopOnly';
+import { ApiError } from '@/shared/api/api-error';
 import { ActionConfirmDialog } from '@/shared/ui/ActionConfirmDialog';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { InlineError } from '@/shared/ui/InlineError';
@@ -40,8 +41,12 @@ export function ContentRulesPage() {
   const searchParams = useSearchParams();
   const filter = readRuleFilter(searchParams);
   const rules = useContentRulesQuery();
-  const mutation = useContentRuleMutation();
-  const [retiring, setRetiring] = useState<ContentRule | null>(null);
+  // 등록과 은퇴를 따로 둔다 — 한 인스턴스에서 mutate를 겹쳐 부르면 앞 호출의 콜백(입력 비우기)이 버려진다
+  const create = useContentRuleMutation();
+  const retire = useContentRuleMutation();
+  // 확인창의 대상과 열림을 나눈다 — 닫히는 애니메이션 동안 제목이 "를 은퇴할까요?"로 비지 않게
+  const [target, setTarget] = useState<ContentRule | null>(null);
+  const [asking, setAsking] = useState(false);
 
   const change = (patch: Partial<RuleFilter>) => {
     const query = writeRuleFilter({ ...filter, ...patch });
@@ -50,7 +55,11 @@ export function ContentRulesPage() {
 
   const all = rules.data ?? [];
   const items = filterRules(all, filter);
-  const dismiss = () => setRetiring(null);
+  const dismiss = () => setAsking(false);
+  const ask = (rule: ContentRule) => {
+    setTarget(rule);
+    setAsking(true);
+  };
 
   return (
     <DesktopOnly>
@@ -102,32 +111,36 @@ export function ContentRulesPage() {
             title={ruleEmptyLabel(filter)}
           />
         ) : (
-          <RuleTable
-            rules={items}
-            pending={mutation.isPending}
-            onRetire={setRetiring}
-          />
+          <RuleTable rules={items} pending={retire.isPending} onRetire={ask} />
         )}
 
         <CreateRuleCard
           defaultScope={filter.scope ?? 'QUESTION'}
-          pending={mutation.isPending && mutation.variables?.type === 'create'}
+          pending={create.isPending}
           onCreate={(body, done) =>
-            mutation.mutate({ type: 'create', body }, { onSuccess: done })
+            create.mutate({ type: 'create', body }, { onSuccess: done })
           }
         />
 
-        {/* 대상이 바뀌어도 닫히는 애니메이션 동안 제목이 비지 않게 마지막 대상을 그대로 둔다 */}
+        {/* 409(이미 은퇴)는 공통 훅이 토스트 + 목록을 다시 읽으니 확인창도 닫는다. 다른 실패는 열어 둬 다시 시도할 수 있게 */}
         <ActionConfirmDialog
-          open={retiring !== null}
-          title={`${retiring?.ruleCode ?? ''}를 은퇴할까요?`}
-          pending={mutation.isPending && mutation.variables?.type === 'retire'}
+          open={asking}
+          title={`${target?.ruleCode ?? ''} 규칙을 은퇴할까요?`}
+          pending={retire.isPending}
           onCancel={dismiss}
           onConfirm={() => {
-            if (!retiring) return;
-            mutation.mutate(
-              { type: 'retire', ruleId: retiring.ruleId },
-              { onSuccess: dismiss },
+            if (!target) return;
+            retire.mutate(
+              { type: 'retire', ruleId: target.ruleId },
+              {
+                onSettled: (_, error) => {
+                  if (
+                    !error ||
+                    (error instanceof ApiError && error.status === 409)
+                  )
+                    dismiss();
+                },
+              },
             );
           }}
         >

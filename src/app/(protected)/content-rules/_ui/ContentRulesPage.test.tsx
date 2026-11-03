@@ -117,7 +117,7 @@ it('기본은 ACTIVE만 — 은퇴한 행은 숨기고 칩 수도 ACTIVE 안에�
   expect(screen.getByRole('tab', { name: 'LINEUP 0' })).toBeInTheDocument();
 });
 
-it('scope 칩을 누르면 쿼리스트링을 바꾼다 — 전체로 돌아가면 scope를 지운다', async () => {
+it('scope 칩을 누르면 쿼리스트링에 scope를 적는다', async () => {
   const user = userEvent.setup();
   renderPage();
   await screen.findByText('Q-30');
@@ -125,6 +125,17 @@ it('scope 칩을 누르면 쿼리스트링을 바꾼다 — 전체로 돌아가�
   await user.click(screen.getByRole('tab', { name: 'COMMON 1' }));
 
   expect(replace).toHaveBeenCalledWith('?scope=COMMON', { scroll: false });
+});
+
+it('전체 칩으로 돌아가면 쿼리스트링 없는 주소로 간다', async () => {
+  search = 'scope=COMMON';
+  const user = userEvent.setup();
+  renderPage();
+  await screen.findByText('C-01');
+
+  await user.click(screen.getByRole('tab', { name: '전체 3' }));
+
+  expect(replace).toHaveBeenCalledWith('/content-rules', { scroll: false });
 });
 
 it('?status=ALL이면 은퇴한 행도 보이고 그 행의 액션은 비어 있다', async () => {
@@ -135,6 +146,13 @@ it('?status=ALL이면 은퇴한 행도 보이고 그 행의 액션은 비어 있
 
   expect(within(row).getByText('RETIRED')).toBeInTheDocument();
   expect(within(row).queryByRole('button', { name: /은퇴/ })).toBeNull();
+});
+
+it('쿼리스트링의 scope 칩이 선택되고 그 수는 상태 필터 안에서 센다', async () => {
+  search = 'status=ALL&scope=QUESTION';
+  renderPage();
+  await screen.findByText('Q-07');
+
   expect(screen.getByRole('tab', { name: 'QUESTION 3' })).toHaveAttribute(
     'aria-selected',
     'true',
@@ -158,7 +176,7 @@ it('은퇴를 누르면 확인창이 열리고, 확인하면 PATCH {status: RETI
 
   await user.click(screen.getByRole('button', { name: 'Q-30 은퇴' }));
   const dialog = screen.getByRole('alertdialog', {
-    name: 'Q-30를 은퇴할까요?',
+    name: 'Q-30 규칙을 은퇴할까요?',
   });
   await user.click(within(dialog).getByRole('button', { name: '확인' }));
 
@@ -168,9 +186,9 @@ it('은퇴를 누르면 확인창이 열리고, 확인하면 PATCH {status: RETI
   expect(patch?.body).toEqual({ status: 'RETIRED' });
 });
 
-it('은퇴가 409로 실패하면 확인창을 열어 둔다', async () => {
+it('은퇴가 409(이미 은퇴)로 실패하면 확인창을 닫는다 — 목록은 공통 훅이 다시 읽는다', async () => {
   const user = userEvent.setup();
-  const requests = renderPage({ retireStatus: 409 });
+  renderPage({ retireStatus: 409 });
   await screen.findByText('Q-30');
 
   await user.click(screen.getByRole('button', { name: 'Q-30 은퇴' }));
@@ -180,8 +198,21 @@ it('은퇴가 409로 실패하면 확인창을 열어 둔다', async () => {
     }),
   );
 
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+});
+
+it('은퇴가 다른 오류로 실패하면 확인창을 열어 둬 다시 시도할 수 있다', async () => {
+  const user = userEvent.setup();
+  renderPage({ retireStatus: 500 });
+  await screen.findByText('Q-30');
+
+  await user.click(screen.getByRole('button', { name: 'Q-30 은퇴' }));
+  const dialog = screen.getByRole('alertdialog');
+  await user.click(within(dialog).getByRole('button', { name: '확인' }));
+
+  // 요청이 끝나 확인 버튼이 다시 켜진 뒤에도 열려 있어야 한다 — 보내는 중엔 어차피 열려 있다
   await waitFor(() =>
-    expect(requests.some((request) => request.method === 'PATCH')).toBe(true),
+    expect(within(dialog).getByRole('button', { name: '확인' })).toBeEnabled(),
   );
   expect(screen.getByRole('alertdialog')).toBeInTheDocument();
 });
