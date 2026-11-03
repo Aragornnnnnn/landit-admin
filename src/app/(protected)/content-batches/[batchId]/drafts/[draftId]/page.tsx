@@ -8,6 +8,11 @@ export default async function Page({
 }) {
   const { batchId, draftId } = await params;
   return (
-    <DraftDetailPage batchId={Number(batchId)} draftId={Number(draftId)} />
+    // Day가 바뀌면 새로 마운트한다 — 코멘트 초안·탭·하이라이트가 다른 Day로 넘어가지 않게
+    <DraftDetailPage
+      key={draftId}
+      batchId={Number(batchId)}
+      draftId={Number(draftId)}
+    />
   );
 }
