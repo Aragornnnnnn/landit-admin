@@ -13,10 +13,12 @@ import { Button } from '@/shared/ui/shadcn/button';
 
 export function HideFeedbackAction({
   feedbackId,
+  content,
   disabled,
   onHide,
 }: {
   feedbackId: number;
+  content?: string;
   disabled: boolean;
   onHide: () => void;
 }) {
@@ -52,7 +54,11 @@ export function HideFeedbackAction({
         onCancel={() => setOpen(false)}
         onConfirm={() => hide.mutate()}
       >
-        이 피드백이 어드민 목록과 상세에서 숨겨져요. 사용자 편지함은 그대로예요.
+        <p>
+          피드백 1건을 어드민 목록과 상세에서 숨겨요. 사용자 편지함은
+          그대로예요.
+        </p>
+        {content && <p className="line-clamp-3">{content}</p>}
       </ActionConfirmDialog>
     </>
   );

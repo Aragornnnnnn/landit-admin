@@ -33,10 +33,19 @@ import {
   type EditorStatus,
 } from '../_model/letter-editor-buttons';
 import { useLetterQuery } from '../_model/useLetterQuery';
-import { useNoticePushMutation } from '../_model/useNoticePushMutation';
 import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { statusAfter } from '../../_model/letter-actions';
+import {
+  canRequestNoticePush,
+  EMPTY_NOTICE_PUSH_SELECTION,
+  noticePushAudienceSummary,
+  toNoticePushAudience,
+} from '../../_model/notice-push-audience';
 import { useLetterActions } from '../../_model/useLetterActions';
+import {
+  useNoticePushMutation,
+  useNoticePushStateQuery,
+} from '../../_model/useNoticePushMutation';
 import { LetterActionDialog } from '../../_ui/LetterActionDialog';
 import { LetterAudienceFields } from './LetterAudienceFields';
 import { LetterContentEditor } from './LetterContentEditor';
@@ -81,7 +90,11 @@ function Editor({
   const [savedAt, setSavedAt] = useState<string>();
   const [leaving, setLeaving] = useState(false);
   const [sendPushOnPublish, setSendPushOnPublish] = useState(false);
+  const [pushSelection, setPushSelection] = useState(
+    EMPTY_NOTICE_PUSH_SELECTION,
+  );
   const [confirmingPush, setConfirmingPush] = useState(false);
+  const [requestedViaPublish, setRequestedViaPublish] = useState(false);
   // 새 편지는 첫 저장으로 번호를 받는다 — 그 뒤 저장은 PATCH다
   const [id, setId] = useState(letterId);
 
@@ -89,14 +102,25 @@ function Editor({
   const [status, setStatus] = useState<EditorStatus>(
     letter?.publicationStatus ?? 'NEW',
   );
+  const noticePushState = useNoticePushStateQuery(
+    status === 'PUBLISHED' && saved.type === 'NOTICE' ? id : undefined,
+  );
+  const alreadyRequested =
+    requestedViaPublish ||
+    push.data === true ||
+    (noticePushState.data?.requested === true &&
+      noticePushState.data.retryable === false);
+  const retryablePush =
+    !alreadyRequested && noticePushState.data?.retryable === true;
   const isNotice = draft.type === 'NOTICE';
-  const pushBlocked = draft.excludedAudiences.length > 0;
-  const publishWithPush = isNotice && !pushBlocked && sendPushOnPublish;
-  const actions = useLetterActions((action) => {
+  const publishWithPush = isNotice && sendPushOnPublish;
+  const pushAudience = toNoticePushAudience(pushSelection);
+  const pushAudienceSummary = noticePushAudienceSummary(pushAudience);
+  const actions = useLetterActions((action, pushRequested) => {
     setStatus((current) =>
       statusAfter(action, current === 'NEW' ? 'DRAFT' : current),
     );
-    if (action === 'publish' && id && publishWithPush) push.mutate(id);
+    if (pushRequested) setRequestedViaPublish(true);
   });
   const buttons = editorButtons(status);
   const dirty = !isSameDraft(draft, saved);
@@ -167,6 +191,9 @@ function Editor({
               !id ||
               dirty ||
               (!buttons.state.destructive && !canPublishDraft(draft)) ||
+              (buttons.state.action === 'publish' &&
+                publishWithPush &&
+                !canRequestNoticePush(pushSelection)) ||
               save.isPending ||
               actions.pending ||
               push.isPending
@@ -182,16 +209,19 @@ function Editor({
       <LetterAudienceFields draft={draft} onChange={setDraft} />
       {isNotice && status !== 'UNPUBLISHED' && (
         <NoticePushFields
-          blocked={pushBlocked}
           disabled={
             actions.pending ||
             save.isPending ||
             push.isPending ||
-            (status === 'PUBLISHED' && dirty)
+            (status === 'PUBLISHED' &&
+              (dirty || noticePushState.isPending || noticePushState.isError))
           }
           published={status === 'PUBLISHED'}
-          requested={push.isSuccess}
+          requested={alreadyRequested}
+          retryable={retryablePush}
           sendOnPublish={sendPushOnPublish}
+          selection={pushSelection}
+          onSelectionChange={setPushSelection}
           onSendOnPublishChange={setSendPushOnPublish}
           onRequest={() => setConfirmingPush(true)}
         />
@@ -211,20 +241,46 @@ function Editor({
         }
         pending={actions.pending}
         pushTitles={publishWithPush ? pushTitles : undefined}
+        pushAudience={publishWithPush ? pushAudienceSummary : undefined}
         onCancel={actions.cancel}
-        onConfirm={actions.confirm}
+        onConfirm={() =>
+          actions.confirm(publishWithPush ? pushAudience : undefined)
+        }
       />
       <ActionConfirmDialog
         open={confirmingPush}
-        title="공지 푸시를 보낼까요?"
+        title={
+          retryablePush
+            ? '이전 푸시를 다시 요청할까요?'
+            : '공지 푸시를 보낼까요?'
+        }
         pending={push.isPending}
         onCancel={() => setConfirmingPush(false)}
         onConfirm={() => {
           if (id)
-            push.mutate(id, { onSuccess: () => setConfirmingPush(false) });
+            push.mutate(
+              {
+                letterId: id,
+                audience: retryablePush ? undefined : pushAudience,
+              },
+              {
+                onSuccess: (requested) => {
+                  if (requested) setConfirmingPush(false);
+                },
+              },
+            );
         }}
       >
-        <p>공지를 볼 수 있는 사용자에게 편지함 링크를 보내요.</p>
+        {retryablePush ? (
+          <p>처음 확인한 대상에게 푸시를 다시 요청해요.</p>
+        ) : (
+          <>
+            <p>
+              선택한 대상 중 공지를 볼 수 있는 사용자에게 편지함 링크를 보내요.
+            </p>
+            <p>{pushAudienceSummary}</p>
+          </>
+        )}
         {pushTitles.map((title, index) => (
           <p key={index}>{title}</p>
         ))}

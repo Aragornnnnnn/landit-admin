@@ -22,14 +22,16 @@ export const SUBSCRIPTION_AUDIENCE_LABELS: Record<
 
 export function SubscriptionAudienceFields({
   selected,
+  legend = '구독 유형',
   onChange,
 }: {
   selected: SubscriptionAudience[];
+  legend?: string;
   onChange: (audiences: SubscriptionAudience[]) => void;
 }) {
   return (
     <fieldset className="flex flex-wrap gap-x-5 gap-y-3">
-      <legend className="mb-3 text-sm font-medium">구독 유형</legend>
+      <legend className="mb-3 text-sm font-medium">{legend}</legend>
       {Object.entries(SUBSCRIPTION_AUDIENCE_LABELS).map(([value, label]) => {
         const audience = value as SubscriptionAudience;
         return (

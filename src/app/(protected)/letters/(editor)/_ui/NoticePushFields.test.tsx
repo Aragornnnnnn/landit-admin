@@ -1,11 +1,18 @@
-// 공지 발행 전후와 구독 유형 숨김 설정에 따른 푸시 입력을 검증한다.
+// 공지 발행 전후와 복수 그룹을 선택하는 푸시 입력을 검증한다.
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import {
+  EMPTY_NOTICE_PUSH_SELECTION,
+  toNoticePushAudience,
+} from '../../_model/notice-push-audience';
 import { NoticePushFields } from './NoticePushFields';
 
 const options = {
-  blocked: false,
+  selection: EMPTY_NOTICE_PUSH_SELECTION,
+  onSelectionChange: vi.fn(),
   disabled: false,
   published: false,
   requested: false,
@@ -36,9 +43,40 @@ describe('NoticePushFields', () => {
     expect(options.onRequest).toHaveBeenCalledOnce();
   });
 
-  it('구독 유형을 숨긴 공지에서는 발송 버튼을 비활성화한다', () => {
-    render(<NoticePushFields {...options} published blocked />);
+  it('선택한 구독 유형을 여러 개 포함할 수 있다', () => {
+    const client = new QueryClient();
+    const onChange = vi.fn();
+    function Editor() {
+      const [selection, setSelection] = useState(EMPTY_NOTICE_PUSH_SELECTION);
+      return (
+        <NoticePushFields
+          {...options}
+          published
+          selection={selection}
+          onSelectionChange={(next) => {
+            setSelection(next);
+            onChange(toNoticePushAudience(next));
+          }}
+        />
+      );
+    }
+    render(
+      <QueryClientProvider client={client}>
+        <Editor />
+      </QueryClientProvider>,
+    );
 
+    fireEvent.click(screen.getByRole('button', { name: '선택한 사용자' }));
     expect(screen.getByRole('button', { name: '푸시 보내기' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('checkbox', { name: '월간' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '무료 체험' }));
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        audienceType: 'SELECTED',
+        includedAudiences: ['MONTHLY', 'TRIAL'],
+      }),
+    );
+    expect(screen.getByRole('button', { name: '푸시 보내기' })).toBeEnabled();
   });
 });

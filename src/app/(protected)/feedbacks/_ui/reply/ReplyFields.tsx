@@ -127,6 +127,7 @@ export function ReplyFields({
       {!draft.sent && feedback.status === 'PENDING' && feedback.feedbackId && (
         <HideFeedbackAction
           feedbackId={feedback.feedbackId}
+          content={feedback.content}
           disabled={draft.sending}
           onHide={onHide}
         />

@@ -5,22 +5,29 @@
 import { useState } from 'react';
 
 import { LETTER_CONFIRM, type LetterAction } from './letter-actions';
+import type { NoticePushAudience } from './notice-push-audience';
 import { useLetterActionMutation } from './useLetterActionMutation';
 
-export function useLetterActions(onDone?: (action: LetterAction) => void) {
+export function useLetterActions(
+  onDone?: (action: LetterAction, pushRequested: boolean) => void,
+) {
   const mutation = useLetterActionMutation();
   const [asked, setAsked] = useState<{
     letterId: number;
     action: LetterAction;
   } | null>(null);
 
-  const run = (letterId: number, action: LetterAction) =>
+  const run = (
+    letterId: number,
+    action: LetterAction,
+    sendPushOnPublish?: NoticePushAudience,
+  ) =>
     mutation.mutate(
-      { letterId, action },
+      { letterId, action, sendPushOnPublish },
       {
-        onSuccess: () => {
+        onSuccess: (pushRequested) => {
           setAsked(null);
-          onDone?.(action);
+          onDone?.(action, pushRequested);
         },
       },
     );
@@ -35,6 +42,7 @@ export function useLetterActions(onDone?: (action: LetterAction) => void) {
         : run(letterId, action),
     cancel: () => setAsked(null),
     // 실패해도 창을 닫지 않는다 — 토스트를 보고 다시 누를 수 있게
-    confirm: () => asked && run(asked.letterId, asked.action),
+    confirm: (sendPushOnPublish?: NoticePushAudience) =>
+      asked && run(asked.letterId, asked.action, sendPushOnPublish),
   };
 }
