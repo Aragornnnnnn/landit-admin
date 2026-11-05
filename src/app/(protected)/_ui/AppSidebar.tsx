@@ -18,9 +18,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -33,6 +30,7 @@ import { isActiveNav, isDevelopServer, NAV_GROUPS } from '../_model/navigation';
 import { useAccountNickname } from '../_model/useAccountNickname';
 import { useLogout } from '../_model/useLogout';
 import { usePendingFeedbackCountQuery } from '../_model/usePendingFeedbackCountQuery';
+import { SidebarNavGroup } from './SidebarNavGroup';
 
 interface AppSidebarProps {
   apiHost: string;
@@ -86,46 +84,43 @@ export function AppSidebar({ apiHost }: AppSidebarProps) {
           );
           if (items.length === 0) return null;
           return (
-            <SidebarGroup key={group.label ?? index} className="p-0">
-              {group.label && (
-                <SidebarGroupLabel className="h-auto px-3.5 pt-6 pb-2 text-[13px] font-medium text-subtle">
-                  {group.label}
-                </SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu className="gap-0.5">
-                  {items.map((item) => {
-                    const active = isActiveNav(item.href, pathname);
-                    const badge =
-                      item.badge === 'pendingFeedbacks' ? pendingCount.data : 0;
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={active}
-                          className="h-11 rounded-xl px-3.5 text-[15px] font-medium text-body data-[active=true]:bg-sidebar-accent data-[active=true]:text-strong"
+            <SidebarNavGroup
+              key={`${group.label ?? index}:${pathname}`}
+              label={group.label}
+              active={items.some((item) => isActiveNav(item.href, pathname))}
+            >
+              <SidebarMenu className="gap-0.5">
+                {items.map((item) => {
+                  const active = isActiveNav(item.href, pathname);
+                  const badge =
+                    item.badge === 'pendingFeedbacks' ? pendingCount.data : 0;
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        className="h-11 rounded-xl px-3.5 text-[15px] font-medium text-body data-[active=true]:bg-sidebar-accent data-[active=true]:text-strong"
+                      >
+                        <Link
+                          href={item.href}
+                          onClick={() => isMobile && setOpenMobile(false)}
                         >
-                          <Link
-                            href={item.href}
-                            onClick={() => isMobile && setOpenMobile(false)}
-                          >
-                            <item.icon className="size-5" aria-hidden />
-                            <span>{item.label}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                        {/* 배지는 hover·활성에서도 흰 글자 — shadcn 기본값이 진회색으로 바꿔 오렌지 배경과 뭉갠다.
+                          <item.icon className="size-5" aria-hidden />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      {/* 배지는 hover·활성에서도 흰 글자 — shadcn 기본값이 진회색으로 바꿔 오렌지 배경과 뭉갠다.
                             top도 기본값이 32px 버튼 기준(top 6px)이라 44px 버튼에선 위로 치우친다 — 세로 중앙으로 고정 */}
-                        {badge ? (
-                          <SidebarMenuBadge className="top-1/2! right-3.5 h-[17px] min-w-[27px] -translate-y-1/2 rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground!">
-                            {badge}
-                          </SidebarMenuBadge>
-                        ) : null}
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+                      {badge ? (
+                        <SidebarMenuBadge className="top-1/2! right-3.5 h-[17px] min-w-[27px] -translate-y-1/2 rounded-full bg-primary px-[7px] text-[11px] font-medium text-primary-foreground!">
+                          {badge}
+                        </SidebarMenuBadge>
+                      ) : null}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarNavGroup>
           );
         })}
       </SidebarContent>

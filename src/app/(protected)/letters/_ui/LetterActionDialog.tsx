@@ -17,12 +17,18 @@ interface LetterActionDialogProps {
   /** 물어볼 행동. 없으면 닫힌 상태 */
   action: LetterAction | null;
   pending: boolean;
+  languageLabel?: string;
+  pushTitles?: string[];
+  pushAudience?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export function LetterActionDialog({
   action,
+  languageLabel,
+  pushTitles,
+  pushAudience,
   pending,
   onCancel,
   onConfirm,
@@ -32,18 +38,36 @@ export function LetterActionDialog({
   return (
     <AlertDialog
       open={Boolean(copy)}
-      onOpenChange={(next) => !next && onCancel()}
+      onOpenChange={(next) => !next && !pending && onCancel()}
     >
       <AlertDialogContent className="w-[calc(100%-4rem)] gap-3.5 rounded-2xl p-6 sm:w-[400px]">
         <AlertDialogTitle className="text-[17px] font-bold text-foreground">
-          {copy?.title}
+          {action === 'publish' && pushTitles
+            ? '발행하고 푸시를 보낼까요?'
+            : copy?.title}
         </AlertDialogTitle>
         <AlertDialogDescription className="text-[14px] text-muted-foreground">
           {copy?.description}
+          {languageLabel && (
+            <span className="mt-2 block">공지 언어: {languageLabel}</span>
+          )}
+          {action === 'publish' && pushTitles && (
+            <span className="mt-2 block">
+              선택한 대상 중 공지를 볼 수 있는 사용자에게 편지함 링크를 보내요.
+              {pushAudience && <span className="block">{pushAudience}</span>}
+              {pushTitles.map((title, index) => (
+                <span className="block" key={index}>
+                  {title}
+                </span>
+              ))}
+            </span>
+          )}
         </AlertDialogDescription>
         {/* 프레임은 오른쪽 정렬 + 폭 자동 — 답장 확인 창(반반)과 다르다 */}
         <AlertDialogFooter className="mx-0 mb-0 flex-row justify-end gap-2 border-0 bg-transparent p-0 pt-1">
-          <AlertDialogCancel className="m-0">취소</AlertDialogCancel>
+          <AlertDialogCancel className="m-0" disabled={pending}>
+            취소
+          </AlertDialogCancel>
           <AlertDialogAction
             disabled={pending}
             // 숨기기는 사용자에게 보이는 것을 없애는 일이라 옅은 빨강 (프레임)

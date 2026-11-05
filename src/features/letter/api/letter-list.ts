@@ -1,9 +1,11 @@
 // 편지(공지·업데이트·답장) 목록 API — 경로·응답 타입·조회 함수. 편지 화면과 대시보드가 같이 쓴다
 import { api } from '@/shared/api/client';
-import type { Schema } from '@/shared/api/schema-patch';
+import type { components } from '@/shared/api/mailbox-schema';
 
-export type LetterListResponse = Schema<'AdminMailboxLetterListResponse'>;
-export type LetterItem = Schema<'AdminMailboxLetterResponse'>;
+export type LetterListResponse =
+  components['schemas']['AdminMailboxLetterListResponse'];
+export type LetterItem = components['schemas']['AdminMailboxLetterResponse'];
+export type LetterLocale = NonNullable<LetterItem['locale']>;
 export type LetterType = NonNullable<LetterItem['type']>;
 export type LetterStatus = NonNullable<LetterItem['publicationStatus']>;
 

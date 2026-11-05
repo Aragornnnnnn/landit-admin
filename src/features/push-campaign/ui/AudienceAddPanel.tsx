@@ -20,7 +20,7 @@ import { Textarea } from '@/shared/ui/shadcn/textarea';
 import {
   USER_PICK_PAGE_SIZE,
   useUserPickQuery,
-} from '../_model/useUserPickQuery';
+} from '../model/useUserPickQuery';
 
 export type AddTab = 'users' | 'paste' | 'sql' | 'exclude';
 

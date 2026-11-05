@@ -6,7 +6,10 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 import type { LetterItem } from '@/features/letter/api/letter-list';
-import { LETTER_TYPE_LABEL } from '@/features/letter/model/letter-label';
+import {
+  LETTER_TYPE_LABEL,
+  letterLanguageLabel,
+} from '@/features/letter/model/letter-label';
 import { formatShortDate } from '@/shared/lib/format-time';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
@@ -36,6 +39,9 @@ export function LetterCardList({ items }: { items: LetterItem[] }) {
             </span>
             <span className="text-[15px] font-medium text-strong">
               {item.title}
+              <span className="ml-2 text-xs font-normal text-subtle">
+                {letterLanguageLabel(item)}
+              </span>
             </span>
           </Link>
         </li>
