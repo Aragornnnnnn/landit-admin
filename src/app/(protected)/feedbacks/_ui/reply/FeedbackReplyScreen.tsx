@@ -58,7 +58,7 @@ export function FeedbackReplyScreen({
             feedback={feedback}
             draft={draft}
             variant="screen"
-            onComplete={onClose}
+            onHide={onClose}
           />
         </div>
 

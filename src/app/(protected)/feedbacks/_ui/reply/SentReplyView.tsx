@@ -23,9 +23,7 @@ export function SentReplyView({ feedback, onClose }: SentReplyViewProps) {
         showCloseButton={false}
         className="flex w-full flex-col gap-4 overflow-y-auto rounded-l-[20px] p-7 data-[side=right]:sm:max-w-[520px]"
       >
-        <SheetTitle className="sr-only">
-          {feedback.reply ? '보낸 답장' : '처리완료 피드백'}
-        </SheetTitle>
+        <SheetTitle className="sr-only">보낸 답장</SheetTitle>
 
         <FeedbackPersonHeader
           feedback={feedback}
@@ -50,10 +48,11 @@ export function SentReplyView({ feedback, onClose }: SentReplyViewProps) {
 }
 
 function SentReplyCard({ reply }: { reply: FeedbackDetail['reply'] }) {
+  // 답장 연결이 없는 건 — 옛 데이터거나 단건 조회가 없는 BE(운영 구버전) 폴백이다. 조용히 사실만 말한다
   if (!reply)
     return (
       <p className="rounded-[14px] bg-muted px-4 py-3 text-[13px] text-subtle">
-        보낸 답장이 없어요.
+        답장 내용을 불러오지 못했어요
       </p>
     );
 

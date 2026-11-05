@@ -1,6 +1,6 @@
 'use client';
 
-// 현재 피드백을 답장 없이 완료하는 버튼과 확인창을 제공한다.
+// 현재 피드백을 어드민에서 숨기는 버튼과 확인창을 제공한다.
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -11,27 +11,27 @@ import { reportError } from '@/shared/monitoring/report';
 import { ActionConfirmDialog } from '@/shared/ui/ActionConfirmDialog';
 import { Button } from '@/shared/ui/shadcn/button';
 
-export function CompleteFeedbackAction({
+export function HideFeedbackAction({
   feedbackId,
   disabled,
-  onComplete,
+  onHide,
 }: {
   feedbackId: number;
   disabled: boolean;
-  onComplete: () => void;
+  onHide: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const complete = useMutation({
-    mutationFn: () => api.post(`${FEEDBACKS_PATH}/${feedbackId}/complete`),
+  const hide = useMutation({
+    mutationFn: () => api.post(`${FEEDBACKS_PATH}/${feedbackId}/hide`),
     onSuccess: () => {
-      toast.success('피드백을 완료했어요.');
-      onComplete();
+      toast.success('어드민에서 피드백을 숨겼어요.');
+      onHide();
       void queryClient.invalidateQueries({ queryKey: ['feedbacks'] });
     },
     onError: (error) => {
       reportError(error);
-      toast.error('완료하지 못했어요. 다시 시도해 주세요.');
+      toast.error('숨기지 못했어요. 다시 시도해 주세요.');
     },
   });
 
@@ -40,19 +40,19 @@ export function CompleteFeedbackAction({
       <Button
         variant="secondary"
         className="self-start"
-        disabled={disabled || complete.isPending}
+        disabled={disabled || hide.isPending}
         onClick={() => setOpen(true)}
       >
-        답장 없이 완료
+        어드민에서 숨기기
       </Button>
       <ActionConfirmDialog
         open={open}
-        title="답장 없이 완료할까요?"
-        pending={complete.isPending}
+        title="어드민에서 피드백을 숨길까요?"
+        pending={hide.isPending}
         onCancel={() => setOpen(false)}
-        onConfirm={() => complete.mutate()}
+        onConfirm={() => hide.mutate()}
       >
-        이 피드백 한 건을 완료하고 처리중 목록에서 빼요.
+        이 피드백이 어드민 목록과 상세에서 숨겨져요. 사용자 편지함은 그대로예요.
       </ActionConfirmDialog>
     </>
   );

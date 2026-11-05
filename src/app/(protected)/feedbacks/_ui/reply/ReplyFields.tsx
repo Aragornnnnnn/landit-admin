@@ -34,8 +34,8 @@ import {
 } from '../../_model/reply/reply-templates';
 import type { FeedbackDetail } from '../../_model/reply/useFeedbackDetailQuery';
 import type { ReplyDraft } from '../../_model/reply/useReplyDraft';
-import { CompleteFeedbackAction } from './CompleteFeedbackAction';
 import { FeedbackAttachments } from './FeedbackAttachments';
+import { HideFeedbackAction } from './HideFeedbackAction';
 import { TemplateManagerDialog } from './TemplateManagerDialog';
 
 interface ReplyFieldsProps {
@@ -45,7 +45,7 @@ interface ReplyFieldsProps {
   variant: 'sheet' | 'screen';
   /** 헤더 오른쪽에 붙일 것 — 시트의 닫기 버튼 */
   trailing?: React.ReactNode;
-  onComplete: () => void;
+  onHide: () => void;
 }
 
 /** 누구에게 쓰는지 — 닉네임·이메일·사용자 상세 링크. 답장 폼과 보낸 답장 뷰가 같이 쓴다 */
@@ -110,7 +110,7 @@ export function ReplyFields({
   draft,
   variant,
   trailing,
-  onComplete,
+  onHide,
 }: ReplyFieldsProps) {
   const fieldClassName = cn(
     'rounded-xl px-4 py-3 text-[14px] shadow-none placeholder:text-subtle',
@@ -125,10 +125,10 @@ export function ReplyFields({
       <FeedbackOriginCard feedback={feedback} />
 
       {!draft.sent && feedback.status === 'PENDING' && feedback.feedbackId && (
-        <CompleteFeedbackAction
+        <HideFeedbackAction
           feedbackId={feedback.feedbackId}
           disabled={draft.sending}
-          onComplete={onComplete}
+          onHide={onHide}
         />
       )}
 
