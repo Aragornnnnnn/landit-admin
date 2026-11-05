@@ -5,8 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { FEEDBACKS_PATH } from '@/features/feedback/api/feedback-list';
-import { api } from '@/shared/api/client';
+import { hideFeedback } from '@/features/feedback/api/feedback-list';
 import { reportError } from '@/shared/monitoring/report';
 import { ActionConfirmDialog } from '@/shared/ui/ActionConfirmDialog';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -25,7 +24,7 @@ export function HideFeedbackAction({
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const hide = useMutation({
-    mutationFn: () => api.post(`${FEEDBACKS_PATH}/${feedbackId}/hide`),
+    mutationFn: () => hideFeedback(feedbackId),
     onSuccess: () => {
       toast.success('어드민에서 피드백을 숨겼어요.');
       onHide();
