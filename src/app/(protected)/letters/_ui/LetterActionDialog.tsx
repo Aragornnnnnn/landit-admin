@@ -18,6 +18,7 @@ interface LetterActionDialogProps {
   action: LetterAction | null;
   pending: boolean;
   languageLabel?: string;
+  pushTitles?: string[];
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -25,6 +26,7 @@ interface LetterActionDialogProps {
 export function LetterActionDialog({
   action,
   languageLabel,
+  pushTitles,
   pending,
   onCancel,
   onConfirm,
@@ -38,12 +40,24 @@ export function LetterActionDialog({
     >
       <AlertDialogContent className="w-[calc(100%-4rem)] gap-3.5 rounded-2xl p-6 sm:w-[400px]">
         <AlertDialogTitle className="text-[17px] font-bold text-foreground">
-          {copy?.title}
+          {action === 'publish' && pushTitles
+            ? '발행하고 푸시를 보낼까요?'
+            : copy?.title}
         </AlertDialogTitle>
         <AlertDialogDescription className="text-[14px] text-muted-foreground">
           {copy?.description}
           {languageLabel && (
             <span className="mt-2 block">공지 언어: {languageLabel}</span>
+          )}
+          {action === 'publish' && pushTitles && (
+            <span className="mt-2 block">
+              공지를 볼 수 있는 사용자에게 편지함 링크를 보내요.
+              {pushTitles.map((title, index) => (
+                <span className="block" key={index}>
+                  {title}
+                </span>
+              ))}
+            </span>
           )}
         </AlertDialogDescription>
         {/* 프레임은 오른쪽 정렬 + 폭 자동 — 답장 확인 창(반반)과 다르다 */}

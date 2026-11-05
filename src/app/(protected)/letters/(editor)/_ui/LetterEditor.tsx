@@ -13,6 +13,7 @@ import {
   LETTER_STATUS_DOT,
   LETTER_STATUS_LABEL,
 } from '@/features/letter/model/letter-label';
+import { ActionConfirmDialog } from '@/shared/ui/ActionConfirmDialog';
 import { InlineError } from '@/shared/ui/InlineError';
 import { LeaveEditorDialog } from '@/shared/ui/LeaveEditorDialog';
 import { ListSkeleton } from '@/shared/ui/ListSkeleton';
@@ -34,6 +35,7 @@ import {
   type EditorStatus,
 } from '../_model/letter-editor-buttons';
 import { useLetterQuery } from '../_model/useLetterQuery';
+import { useNoticePushMutation } from '../_model/useNoticePushMutation';
 import { useSaveLetterMutation } from '../_model/useSaveLetterMutation';
 import { statusAfter } from '../../_model/letter-actions';
 import { useLetterActions } from '../../_model/useLetterActions';
@@ -43,6 +45,7 @@ import { LetterBasicFields } from './LetterBasicFields';
 import { LetterBodyCard } from './LetterBodyCard';
 import { LetterPreview } from './LetterPreview';
 import { LetterTemplateRow } from './LetterTemplateRow';
+import { NoticePushFields } from './NoticePushFields';
 
 /** 편집이면 편지 번호, 새 편지면 없음 */
 export function LetterEditor({ letterId }: { letterId?: number }) {
@@ -75,6 +78,7 @@ function Editor({
 }) {
   const router = useRouter();
   const save = useSaveLetterMutation();
+  const push = useNoticePushMutation();
 
   const initial = letter ? toLetterDraft(letter) : EMPTY_LETTER_DRAFT;
   const [draft, setDraft] = useState<LetterDraft>(initial);
@@ -82,6 +86,8 @@ function Editor({
   const [savedAt, setSavedAt] = useState<string>();
   const [previewTranslation, setPreviewTranslation] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [sendPushOnPublish, setSendPushOnPublish] = useState(false);
+  const [confirmingPush, setConfirmingPush] = useState(false);
   // 새 편지는 첫 저장으로 번호를 받는다 — 그 뒤 저장은 PATCH다
   const [id, setId] = useState(letterId);
 
@@ -89,13 +95,20 @@ function Editor({
   const [status, setStatus] = useState<EditorStatus>(
     letter?.publicationStatus ?? 'NEW',
   );
-  const actions = useLetterActions((action) =>
+  const isNotice = draft.type === 'NOTICE';
+  const pushBlocked = draft.excludedAudiences.length > 0;
+  const publishWithPush = isNotice && !pushBlocked && sendPushOnPublish;
+  const actions = useLetterActions((action) => {
     setStatus((current) =>
       statusAfter(action, current === 'NEW' ? 'DRAFT' : current),
-    ),
-  );
+    );
+    if (action === 'publish' && id && publishWithPush) push.mutate(id);
+  });
   const buttons = editorButtons(status);
   const dirty = !isSameDraft(draft, saved);
+  const pushTitles = saved.includeTranslation
+    ? [saved.title, saved.translation.title]
+    : [saved.title];
 
   const runSave = (onDone?: (letterId: number) => void) => {
     if (!canPublishDraft(draft)) {
@@ -142,7 +155,12 @@ function Editor({
         <span className="ml-auto flex items-center gap-2">
           <Button
             variant="secondary"
-            disabled={!dirty || !canPublishDraft(draft) || save.isPending}
+            disabled={
+              !dirty ||
+              !canPublishDraft(draft) ||
+              save.isPending ||
+              push.isPending
+            }
             onClick={() => runSave()}
             className="h-10 px-4 text-[14px]"
           >
@@ -156,7 +174,8 @@ function Editor({
               dirty ||
               (!buttons.state.destructive && !canPublishDraft(draft)) ||
               save.isPending ||
-              actions.pending
+              actions.pending ||
+              push.isPending
             }
             onClick={() => id && actions.request(id, buttons.state.action)}
             className="h-10 px-4 text-[14px]"
@@ -216,6 +235,22 @@ function Editor({
             languageLabel={LETTER_LOCALE_LABEL[draft.locale]}
           />
           <LetterAudienceFields draft={draft} onChange={setDraft} />
+          {isNotice && status !== 'UNPUBLISHED' && (
+            <NoticePushFields
+              blocked={pushBlocked}
+              disabled={
+                actions.pending ||
+                save.isPending ||
+                push.isPending ||
+                (status === 'PUBLISHED' && dirty)
+              }
+              published={status === 'PUBLISHED'}
+              requested={push.isSuccess}
+              sendOnPublish={sendPushOnPublish}
+              onSendOnPublishChange={setSendPushOnPublish}
+              onRequest={() => setConfirmingPush(true)}
+            />
+          )}
           <LetterBodyCard
             label={`${LETTER_LOCALE_LABEL[draft.locale]} 본문`}
             body={draft.body}
@@ -294,9 +329,25 @@ function Editor({
             : LETTER_LOCALE_LABEL[draft.locale]
         }
         pending={actions.pending}
+        pushTitles={publishWithPush ? pushTitles : undefined}
         onCancel={actions.cancel}
         onConfirm={actions.confirm}
       />
+      <ActionConfirmDialog
+        open={confirmingPush}
+        title="공지 푸시를 보낼까요?"
+        pending={push.isPending}
+        onCancel={() => setConfirmingPush(false)}
+        onConfirm={() => {
+          if (id)
+            push.mutate(id, { onSuccess: () => setConfirmingPush(false) });
+        }}
+      >
+        <p>공지를 볼 수 있는 사용자에게 편지함 링크를 보내요.</p>
+        {pushTitles.map((title, index) => (
+          <p key={index}>{title}</p>
+        ))}
+      </ActionConfirmDialog>
       <LeaveEditorDialog
         open={leaving}
         pending={save.isPending}

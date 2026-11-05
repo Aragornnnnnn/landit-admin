@@ -23,6 +23,13 @@ API: GET admin/mailbox/letters · POST admin/mailbox/letters · PATCH admin/mail
 - [구현 화면](../images/screens/lan798-letters-editor.png), [기존 Figma 프레임](../images/screens/lan798-letters-editor.figma.png), [모바일 구현](../images/screens/lan798-letters-editor.mobile.png).
 - 기존 Figma 프레임에는 언어 선택·번역 입력이 없으므로 사용자 요청과 이 문서의 언어 규칙을 기준으로 확장했다.
 
+## 공지 푸시 (LAN-850)
+
+- 공지 초안에 `발행할 때 푸시 보내기` 체크박스를 둔다. 기본은 꺼져 있다. 발행 확인창에서 푸시 제목을 함께 확인한다. 발행 성공 후 `POST admin/push-campaigns/notice/{id}`로 즉시 발송을 요청한다.
+- 발행된 공지 편집기에서도 `푸시 보내기`로 같은 요청을 실행할 수 있다. 발행은 성공했지만 푸시 요청이 실패하면 편집기에서 재시도한다. 같은 공지와 언어는 기존 캠페인을 재사용한다.
+- 공지를 볼 수 있는 언어의 활성 푸시 대상에게 공지 제목과 편지함 상세 링크를 보낸다. 개별 숨김 사용자는 제외한다. 구독 유형 숨김을 선택한 공지에서는 푸시 옵션을 비활성화한다.
+- 기존 Figma 프레임에 없는 동작으로 기존 편집기 컴포넌트의 스타일을 사용한다. Figma 갱신 필요.
+
 ## 화면 변형
 
 | 프레임                                      | node         | 설명                                                                                                                                                         |
