@@ -38,7 +38,7 @@ describe('FeedbackReply', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('처리완료인데 답장 연결이 없으면 못 불러왔다고 알린다 — 옛 데이터·구버전 BE 방어', () => {
+  it('처리완료인데 답장이 없으면 보낸 답장이 없다고 표시한다', () => {
     render(
       <FeedbackReply
         feedback={{ ...completed, reply: null }}
@@ -46,9 +46,7 @@ describe('FeedbackReply', () => {
       />,
     );
 
-    expect(
-      screen.getByText('답장 내용을 불러오지 못했어요'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('보낸 답장이 없어요.')).toBeInTheDocument();
   });
 
   it('사용자가 사진을 첨부했으면 원문 아래에 썸네일을 보여준다', () => {

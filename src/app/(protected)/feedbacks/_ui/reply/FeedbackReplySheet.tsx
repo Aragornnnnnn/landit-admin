@@ -40,6 +40,7 @@ export function FeedbackReplySheet({
             feedback={feedback}
             draft={draft}
             variant="sheet"
+            onComplete={onClose}
             trailing={
               <button
                 type="button"
