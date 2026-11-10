@@ -1,5 +1,5 @@
 // 편지 타입·상태를 사람이 읽는 말로 (docs/screens/letters.md "정확한 카피"). 편지 화면과 대시보드가 같이 쓴다
-import type { LetterStatus, LetterType } from '../api/letter-list';
+import type { LetterItem, LetterStatus, LetterType } from '../api/letter-list';
 
 export const LETTER_TYPE_LABEL: Record<LetterType, string> = {
   NOTICE: '공지',
@@ -24,3 +24,16 @@ export const LETTER_STATUS_DOT: Record<
   PUBLISHED: 'done',
   UNPUBLISHED: undefined,
 };
+
+export const LETTER_LOCALE_LABEL = { ko: '한국어', ja: '일본어' } as const;
+
+/** 저장된 공지의 노출 언어를 목록과 확인창에 표시한다. */
+export function letterLanguageLabel(item: LetterItem) {
+  const locales = [
+    item.locale ?? 'ko',
+    ...(item.translations ?? []).map((content) => content.locale),
+  ];
+  return [...new Set(locales)]
+    .map((locale) => LETTER_LOCALE_LABEL[locale])
+    .join(' · ');
+}

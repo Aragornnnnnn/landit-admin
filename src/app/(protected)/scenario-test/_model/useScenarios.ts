@@ -5,6 +5,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { scenarioQuery } from '@/features/scenario/model/scenario-query';
 import { api } from '@/shared/api/client';
 import type { Schema } from '@/shared/api/schema-patch';
 import { reportError } from '@/shared/monitoring/report';
@@ -15,10 +16,7 @@ export type Scenario = Schema<'ScenarioResponse'>;
 const PATH = '/api/v1/admin/scenarios';
 
 export function useScenariosQuery() {
-  return useQuery({
-    queryKey: ['scenarios'] as const,
-    queryFn: () => api.get<Schema<'AdminScenarioListResponse'>>(PATH),
-  });
+  return useQuery(scenarioQuery);
 }
 
 /** 난이도는 BE가 자유 문자열로 준다 — 아는 값만 우리 말로 바꾸고 나머지는 그대로 보여 준다 */
