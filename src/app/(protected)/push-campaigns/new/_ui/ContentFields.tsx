@@ -75,7 +75,7 @@ export function ContentFields({ draft, errors, onChange }: ContentFieldsProps) {
           onChange={(event) =>
             onChange({ ...draft, deepLink: event.target.value })
           }
-          placeholder="/home 또는 https://…"
+          placeholder="/scenario 또는 https://…"
           aria-label="딥 링크"
           aria-invalid={Boolean(errors.deepLink)}
           className={cn(FIELD, 'font-mono text-[13px]')}
