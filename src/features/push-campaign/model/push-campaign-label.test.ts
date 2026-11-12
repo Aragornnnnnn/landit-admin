@@ -14,7 +14,7 @@ const campaign = (patch: Partial<PushCampaign> = {}): PushCampaign => ({
   id: 'c1',
   title: '제목',
   body: '본문',
-  deepLink: '/home',
+  deepLink: '/scenario',
   createdBy: 12,
   status: 'DRAFT',
   targetUserCount: 0,

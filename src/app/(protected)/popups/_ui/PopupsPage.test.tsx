@@ -20,7 +20,7 @@ const popup = {
   popupId: 1,
   title: '기존 팝업',
   imageUrl: 'https://cdn.example.com/a.png',
-  linkUrl: '/learn',
+  linkUrl: '/scenario',
   enabled: true,
   startsAt: '2026-10-22T00:00:00.123456Z',
   endsAt: '2026-10-29T00:00:00Z',

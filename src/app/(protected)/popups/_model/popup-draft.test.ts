@@ -15,7 +15,7 @@ const popup = {
   excludedUserIds: [12, 34],
   title: '안내',
   imageUrl: 'https://cdn.example.com/a.png',
-  linkUrl: '/learn',
+  linkUrl: '/scenario',
   enabled: true,
   startsAt: '2026-10-22T00:00:00.123456Z',
   endsAt: '2026-10-29T00:00:00Z',

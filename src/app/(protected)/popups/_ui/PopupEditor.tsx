@@ -135,7 +135,7 @@ export function PopupEditor({
               연결 링크 (선택)
               <Input
                 maxLength={2048}
-                placeholder="/learn 또는 https://…"
+                placeholder="/scenario 또는 https://…"
                 value={draft.linkUrl}
                 onChange={(e) =>
                   setDraft({ ...draft, linkUrl: e.target.value })
