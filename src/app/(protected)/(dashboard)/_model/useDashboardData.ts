@@ -22,7 +22,7 @@ export function useDashboardData(now: Date) {
     .slice(0, 10);
 
   const recent = useQuery({
-    queryKey: ['dashboard', 'recent-feedbacks'] as const,
+    queryKey: ['feedbacks', 'dashboard', 'recent'] as const,
     queryFn: () =>
       fetchFeedbackPage(
         new URLSearchParams({
@@ -35,7 +35,7 @@ export function useDashboardData(now: Date) {
 
   // 처리중은 기간과 무관하다 — 오래 기다린 건일수록 중요해서 따로 받는다
   const pending = useQuery({
-    queryKey: ['dashboard', 'pending-feedbacks'] as const,
+    queryKey: ['feedbacks', 'dashboard', 'pending'] as const,
     queryFn: () =>
       fetchFeedbackPage(
         new URLSearchParams({

@@ -13,3 +13,8 @@ export const FEEDBACKS_PATH = '/api/v1/admin/mailbox/feedbacks';
 export function fetchFeedbackPage(params: URLSearchParams) {
   return api.get<FeedbackListResponse>(`${FEEDBACKS_PATH}?${params}`);
 }
+
+/** 처리중인 피드백을 어드민에서 숨긴다. */
+export function hideFeedback(feedbackId: number) {
+  return api.post(`${FEEDBACKS_PATH}/${feedbackId}/hide`);
+}

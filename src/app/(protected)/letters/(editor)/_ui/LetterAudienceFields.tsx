@@ -139,8 +139,8 @@ export function LetterAudienceFields({
       )}
       <p className="text-xs text-subtle">
         {all.isLoadingMore ? '불러온 사용자 안에서 검색 중이에요. ' : ''}
-        선택하지 않으면 모든 사용자에게 보여요. 게시된 공지는 저장 즉시
-        반영돼요.
+        선택하지 않으면 작성된 언어를 사용하는 모든 사용자에게 보여요. 게시된
+        공지는 저장 즉시 반영돼요.
       </p>
     </section>
   );

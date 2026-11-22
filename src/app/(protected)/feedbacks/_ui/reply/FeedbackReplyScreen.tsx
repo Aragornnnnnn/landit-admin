@@ -54,7 +54,12 @@ export function FeedbackReplyScreen({
           <SheetTitle className="text-[28px] leading-tight font-bold text-foreground">
             답장하기
           </SheetTitle>
-          <ReplyFields feedback={feedback} draft={draft} variant="screen" />
+          <ReplyFields
+            feedback={feedback}
+            draft={draft}
+            variant="screen"
+            onHide={onClose}
+          />
         </div>
 
         <footer className="absolute inset-x-0 bottom-0 bg-card px-5 pt-4 pb-[30px] shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">

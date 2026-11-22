@@ -2,6 +2,7 @@
 
 // 모바일 목록 — 흰 그룹 카드 안에 행이 구분선으로 이어진다 (Figma 1050:9276).
 // 처리중 행에는 상태 칩이 없고 처리완료에만 붙는다 — 할 일이 기본이라 굳이 말하지 않는다
+import type { ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import type { FeedbackItem } from '@/features/feedback/api/feedback-list';
@@ -10,28 +11,42 @@ import {
   FEEDBACK_STATUS_LABEL,
   FEEDBACK_TYPE_LABEL,
 } from '@/features/feedback/model/feedback-label';
+import { cn } from '@/shared/lib/cn';
 import { formatRelativeTime } from '@/shared/lib/format-time';
 import { StatusChip } from '@/shared/ui/StatusChip';
 
 interface FeedbackCardListProps {
   items: FeedbackItem[];
   onSelect: (feedbackId: number) => void;
+  renderSelection?: (item: FeedbackItem) => ReactNode;
 }
 
-export function FeedbackCardList({ items, onSelect }: FeedbackCardListProps) {
+export function FeedbackCardList({
+  items,
+  onSelect,
+  renderSelection,
+}: FeedbackCardListProps) {
   return (
     <ul className="w-full overflow-hidden rounded-[18px] bg-card">
       {items.map((item, index) => (
         <li
           key={item.feedbackId}
-          className={index > 0 ? 'border-t border-hairline' : ''}
+          className={cn(
+            'flex items-start',
+            index > 0 && 'border-t border-hairline',
+          )}
         >
+          {renderSelection && (
+            <div className="w-8 shrink-0 pt-4 pl-4">
+              {renderSelection(item)}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => item.feedbackId && onSelect(item.feedbackId)}
-            className="flex w-full items-start gap-3 px-4 py-3.5 text-left"
+            className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3.5 text-left"
           >
-            <span className="flex flex-1 flex-col gap-1">
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="flex items-center gap-1.5">
                 <span className="text-[13px] font-medium text-chip-foreground">
                   {item.type ? FEEDBACK_TYPE_LABEL[item.type] : ''}
@@ -45,7 +60,7 @@ export function FeedbackCardList({ items, onSelect }: FeedbackCardListProps) {
                   {item.createdAt ? formatRelativeTime(item.createdAt) : ''}
                 </span>
               </span>
-              <span className="text-[15px] leading-relaxed text-strong">
+              <span className="text-[15px] leading-relaxed break-words text-strong">
                 {item.content}
               </span>
               <span className="text-[13px] text-subtle">{item.nickname}</span>

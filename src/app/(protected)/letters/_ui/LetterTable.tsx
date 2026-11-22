@@ -9,6 +9,7 @@ import {
   LETTER_STATUS_DOT,
   LETTER_STATUS_LABEL,
   LETTER_TYPE_LABEL,
+  letterLanguageLabel,
 } from '@/features/letter/model/letter-label';
 import { cn } from '@/shared/lib/cn';
 import { formatDateTime } from '@/shared/lib/format-time';
@@ -84,6 +85,9 @@ export function LetterTable({ items, onAction }: LetterTableProps) {
                       </span>
                     )}
                     <span className="truncate">{item.title}</span>
+                    <span className="shrink-0 text-xs text-subtle">
+                      {letterLanguageLabel(item)}
+                    </span>
                   </span>
                   <span
                     className={cn(CELL.status, 'flex items-center gap-[5px]')}

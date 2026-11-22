@@ -38,6 +38,7 @@ export function FeedbackListPage() {
   const page = feedbacks.data;
   const totalElements = page?.totalElements ?? 0;
   const items = page?.items ?? [];
+  const filterKey = writeFeedbackFilter(filter);
 
   // 열린 상세는 주소가 진실이다 — 새로고침·뒤로가기로 열고 닫힌다.
   // 단건 조회로 받아서 목록 필터·페이지에 없는 건(딥링크)도 열린다 (BE LAN-374)
@@ -65,6 +66,19 @@ export function FeedbackListPage() {
     router.replace(query ? `?${query}` : '/feedbacks', { scroll: false });
   };
 
+  const lastPage = Math.max(0, (page?.totalPages ?? 1) - 1);
+  const pageAfterListShrinks =
+    !openId && page && !feedbacks.isPlaceholderData && filter.page > lastPage
+      ? writeFeedbackFilter({ ...filter, page: lastPage })
+      : undefined;
+  useEffect(() => {
+    if (pageAfterListShrinks === undefined) return;
+    router.replace(
+      pageAfterListShrinks ? `?${pageAfterListShrinks}` : '/feedbacks',
+      { scroll: false },
+    );
+  }, [pageAfterListShrinks, router]);
+
   // 폴백조차 없으면(삭제된 건 등) 알리고 open만 걷어낸다 — 시트가 없으니 자리 오류를 그릴 곳이 없다
   const detailFailed = detail.isError && !fallbackFeedback;
   useEffect(() => {
@@ -90,10 +104,12 @@ export function FeedbackListPage() {
       />
 
       <FeedbackList
+        key={filterKey}
         filter={filter}
         items={items}
         isPending={feedbacks.isPending}
         isError={feedbacks.isError}
+        isPlaceholderData={feedbacks.isPlaceholderData}
         onRetry={() => feedbacks.refetch()}
         onResetFilter={reset}
         // 열림·닫힘을 주소에 남긴다 — 모바일 전체화면도 기기 뒤로가기로 닫힌다.

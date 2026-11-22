@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { newIdempotencyKey } from '@/features/push-campaign/api/push-campaign';
 import { useCreatePushCampaignMutation } from '@/features/push-campaign/model/usePushCampaignMutation';
+import { AudienceSection } from '@/features/push-campaign/ui/AudienceSection';
 import { LeaveEditorDialog } from '@/shared/ui/LeaveEditorDialog';
 import { Button } from '@/shared/ui/shadcn/button';
 import { StatusChip } from '@/shared/ui/StatusChip';
@@ -22,7 +23,6 @@ import {
   type DraftErrors,
 } from '../_model/campaign-draft';
 import { PushPreview } from '../../_ui/PushPreview';
-import { AudienceSection } from './AudienceSection';
 import { ContentFields } from './ContentFields';
 
 export function CampaignEditor({

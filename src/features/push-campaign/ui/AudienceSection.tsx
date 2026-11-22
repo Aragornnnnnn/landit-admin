@@ -2,7 +2,7 @@
 
 // 대상 카드 — 전체 / 선택 세그먼트, 예상 대상, 선택된 대상 목록, 대상 추가 패널 (Figma 2177:285).
 // 네 가지 출처를 한꺼번에 펼치는 대신 목록 + 한 번에 한 방법씩 여는 패널로 뒀다 — 운영자가 어디까지 골랐는지 한눈에 보이게
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import {
   audienceSources,
@@ -19,6 +19,8 @@ import { AudienceSourceList } from './AudienceSourceList';
 interface AudienceSectionProps {
   audience: AudienceDraft;
   error?: string;
+  selectedContent?: ReactNode;
+  estimateAtSend?: boolean;
   onChange: (audience: AudienceDraft) => void;
 }
 
@@ -45,6 +47,8 @@ const KIND_TAB: Record<AudienceSourceKind, AddTab> = {
 export function AudienceSection({
   audience,
   error,
+  selectedContent,
+  estimateAtSend = false,
   onChange,
 }: AudienceSectionProps) {
   const [tab, setTab] = useState<AddTab>('users');
@@ -80,7 +84,11 @@ export function AudienceSection({
             예상 대상
           </span>
           <span className="text-[26px] leading-[1.2] font-bold text-strong">
-            {estimate === null ? '전체' : `${formatCount(estimate)}명`}
+            {estimateAtSend
+              ? '발송 시 계산'
+              : estimate === null
+                ? '전체'
+                : `${formatCount(estimate)}명`}
           </span>
         </span>
         <span className="ml-auto text-[12px] text-subtle">
@@ -90,6 +98,7 @@ export function AudienceSection({
 
       {audience.type === 'SELECTED' && (
         <>
+          {selectedContent}
           <AudienceSourceList
             audience={audience}
             sources={audienceSources(audience)}
